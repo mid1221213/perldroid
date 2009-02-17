@@ -1,0 +1,16 @@
+#summary Introduction to the perldroid project
+#labels Featured
+
+= Introduction =
+
+The « perldroid » project aims to port the language Perl on Android, and especially for the HTC-Dream alias T-Mobile G1.
+
+= Details =
+
+The « PerlDroid » application will be able to download and install Perl script packages, along with Perl modules (core modules at minima) and to execute them.
+
+Details on how this will be done are not yet completely defined. This page will be updated and other pages will be created as the project matures.
+
+= Infos =
+
+For the moment I've put my experiments on the pages http://gtmp.org/publications:perl-on-android and http://gtmp.org/publications:perl-on-android-2 . Take a look at them if you are interested.
