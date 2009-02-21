@@ -1,7 +1,7 @@
 =================================
 Compiling libperl.so for Android:
 =================================
-v0.2 Tue Feb 17 18:58:06 CET 2009
+v0.3 Sat Feb 21 21:06:05 CET 2009
 =================================
 
 ---------------------------------
@@ -41,14 +41,26 @@ b. download the agcc script, set up android toolchain path
 2. building perl
 ---------------------------------
 
-a. first, patch perl with the android patches:
+a. download perl-5.10 from http://www.cpan.org/src/perl-5.10.0.tar.gz
+
+b. untar it into $PERLSOURCE (wherever you want)
+
+c. patch it with http://dbx.gtmp.org/android/perl-5.10.0.android.patch.gz
+
+d. patch perl with the android cross-compilation patches:
    in the Cross/ directory, type:
 	make -f Makefile.android patch
 
-b. then compile perl:
+e. to allow extensions to link with libperl.so, you have to create a 
+   symbolic link from $PERLSOURCE to /data/data/org.gtmp.perl/lib
+   yes, you must be root to do that :-(
+	sudo mkdir -p /data/data/org.gtmp.perl
+	sudo ln -s $PERLSOURCE /data/data/org.gtmp.perl/lib
+
+f. then compile perl:
    being sure the PATH environement variable contains the path to access to
-   agcc and the Android toolchain, in the Cross/ directory, type:
+   agcc *and* the Android toolchain, in the Cross/ directory, type:
 	make -f Makefile.android perl
 
-   all perl stuff will be installed in install_me_here/ subtree.
+   the needed perl stuff will be installed in install_me_here/ subtree.
 
