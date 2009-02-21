@@ -1,0 +1,21 @@
+--- ../ext/util/make_ext	2007-12-18 11:47:07.000000000 +0100
++++ make_ext.android	2009-02-15 13:27:41.000000000 +0100
+@@ -96,7 +96,7 @@
+ # 'dynamic', 'static', and 'static_pic' (the last one respects
+ # CCCDLFLAGS such as -fPIC -- see static_target in the main Makefile.SH)
+ case "$target" in
+-dynamic)    makeargs="LINKTYPE=dynamic";
++dynamic)    makeargs="LINKTYPE=dynamic PERL_ARCHIVE=$HOME/perl-5.10.0/libperl.so";
+ 	    target=all
+ 	    ;;
+ static)     makeargs="LINKTYPE=static CCCDLFLAGS="
+@@ -126,7 +126,8 @@
+ esac
+ 
+ if test ! -f $makefile ; then
+-	test -f Makefile.PL && $run ../$depth/miniperl -I../$depth/lib Makefile.PL INSTALLDIRS=perl INSTALLMAN3DIR=none PERL_CORE=1 $passthru
++#	test -f Makefile.PL && $run ../$depth/miniperl -I../$depth/lib Makefile.PL INSTALLDIRS=perl INSTALLMAN3DIR=none PERL_CORE=1 $passthru
++	test -f Makefile.PL && $run ../$depth/miniperl -I../$depth/fake_config_library -MConfig Makefile.PL INSTALLDIRS=perl INSTALLMAN3DIR=none PERL_CORE=1 $passthru CC=agcc LD=agcc PERLRUN="/usr/bin/perl -I../$depth/fake_config_library -MConfig" FULLPERLRUN="/usr/bin/perl -I../$depth/fake_config_library -MConfig" NOECHO= MKPATH="mkdir -p" PERL="/usr/bin/perl -I/usr/lib/perl/5.10.0" ABSPERLRUN="/usr/bin/perl -I/usr/lib/perl/5.10.0"
+ fi
+ if test ! -f $makefile ; then
+ 	echo "Warning: No Makefile!"

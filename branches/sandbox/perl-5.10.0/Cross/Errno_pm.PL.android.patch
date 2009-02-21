@@ -1,0 +1,15 @@
+--- ../ext/Errno/Errno_pm.PL	2007-12-18 11:47:07.000000000 +0100
++++ Errno_pm.PL.android	2009-02-15 00:25:41.000000000 +0100
+@@ -147,8 +147,10 @@
+ 	     ) {
+ 	# Some Linuxes have weird errno.hs which generate
+ 	# no #file or #line directives
+-	my $linux_errno_h = -e '/usr/include/errno.h' ?
+-	    '/usr/include/errno.h' : '/usr/local/include/errno.h';
++#	my $linux_errno_h = -e '/usr/include/errno.h' ?
++#	    '/usr/include/errno.h' : '/usr/local/include/errno.h';
++	my $linux_errno_h = -e "$ENV{HOME}/mydroid/bionic/libc/include/errno.h" ?
++	    "$ENV{HOME}/mydroid/bionic/libc/include/errno.h" : '/usr/local/include/errno.h';
+ 	$file{$linux_errno_h} = 1;
+     } elsif ($^O eq 'MacOS') {
+ 	# note that we are only getting the GUSI errno's here ...
