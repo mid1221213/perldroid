@@ -1,4 +1,4 @@
-#summary memo that allow to finger member's current work
+#summary Memo that allow to finger member's current work (please feed)
 
 = Introduction =
 
@@ -11,4 +11,3 @@ Ben:
   * make a shared sandbox: see the `sandbox` svn branch.
   * find the _oldest_ android revision that compile flawlessly.
   * make a Cross/ that allow perl-5.10.0 to compile on that old android revision.
-  *
