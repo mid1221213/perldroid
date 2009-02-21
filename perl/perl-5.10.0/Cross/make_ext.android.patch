@@ -5,7 +5,7 @@
  # CCCDLFLAGS such as -fPIC -- see static_target in the main Makefile.SH)
  case "$target" in
 -dynamic)    makeargs="LINKTYPE=dynamic";
-+dynamic)    makeargs="LINKTYPE=dynamic PERL_ARCHIVE=$HOME/perl-5.10.0/libperl.so";
++dynamic)    makeargs="LINKTYPE=dynamic PERL_ARCHIVE=/data/data/org.gtmp.perl/lib/libperl.so";
  	    target=all
  	    ;;
  static)     makeargs="LINKTYPE=static CCCDLFLAGS="
