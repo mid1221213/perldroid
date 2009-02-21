@@ -1,0 +1,14 @@
+#summary memo that allow to finger member's current work
+
+= Introduction =
+
+This .plan lists the things members are working on.
+
+
+= Details =
+
+Ben:
+  * make a shared sandbox: see the `sandbox` svn branch.
+  * find the _oldest_ android revision that compile flawlessly.
+  * make a Cross/ that allow perl-5.10.0 to compile on that old android revision.
+  *
