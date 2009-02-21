@@ -6,4 +6,4 @@ The term « PerlDroid » is the name that the application will have on the [http
 
 = Details =
 
-This name was chosen simply by concatenating the word Perl and Android and eluding the beginning of the word Android. It is simple and easy to remember. If you have lost the URL of this project, search for « perl » and « android » on Google Code Search, as they are tags of this project.
+This name was chosen simply by concatenating the word [Perl] and [Android] and eluding the beginning of the word Android. It is simple and easy to remember. If you have lost the URL of this project, search for « perl » and « android » on Google Code Search, as they are tags of this project.
