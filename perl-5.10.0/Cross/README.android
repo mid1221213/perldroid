@@ -1,0 +1,54 @@
+=================================
+Compiling libperl.so for Android:
+=================================
+v0.2 Tue Feb 17 18:58:06 CET 2009
+=================================
+
+---------------------------------
+1. pre-requisites
+---------------------------------
+
+a. have a working android repo tree in $HOME/mydroid
+
+-. get the 'repo' script, available at:
+   http://android.git.kernel.org/repo
+   Put it in executable mode into $HOME/bin/ then set
+   your PATH environment variable to have $HOME/bin first.
+
+-. clone the android repository in $HOME/mydroid:
+	mkdir $HOME/mydroid
+	cd $HOME/mydroid
+	repo init -u git://android.git.kernel.org/platform/manifest.git
+	repo sync
+
+-. ensure you *do not* have any Android-related path in your PATH environment
+   variable, then type:
+	make
+
+b. download the agcc script, set up android toolchain path
+
+-. agcc is a script that wrap the cc, ld (...) commands to the prebuilt android
+   cross-compiler. Download it and make it executable. it is available at:
+   http://plausible.org/andy/agcc
+   Put it in executable into $HOME/bin/
+
+-. insert into your PATH environment variable the following path:
+	  $HOME/mydroid/prebuilt/linux-x86/toolchain/arm-eabi-4.3.1/bin
+   agcc needs it: this is the path of the prebuilt android toolchain.
+
+
+---------------------------------
+2. building perl
+---------------------------------
+
+a. first, patch perl with the android patches:
+   in the Cross/ directory, type:
+	make -f Makefile.android patch
+
+b. then compile perl:
+   being sure the PATH environement variable contains the path to access to
+   agcc and the Android toolchain, in the Cross/ directory, type:
+	make -f Makefile.android perl
+
+   all perl stuff will be installed in install_me_here/ subtree.
+
