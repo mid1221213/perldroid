@@ -69,7 +69,6 @@ perl:
 	@echo toolchain: $(CC), $(CXX), $(LD), $(STRIP), $(AR), $(RANLIB)
 	@echo Optimizations: $(FULL_OPTIMIZATION)
 
-#	$(TOPDIR)/generate_config_sh_mid config.sh-$(SYS) > $(TOPDIR)/../config.sh
 	cp -f config.sh-arm-eabi ../config.sh
 	cp -f uudmap.h.android ../uudmap.h
 	cd $(TOPDIR)/.. ; ./Configure -S ; make depend ; make ; make more
