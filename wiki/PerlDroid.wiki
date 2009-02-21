@@ -2,7 +2,7 @@
 
 = Introduction =
 
-The term « PerlDroid » is the name that the application will have on the Android platform.
+The term « PerlDroid » is the name that the application will have on the [http://code.google.com/intl/fr/android/ Android platform].
 
 = Details =
 
