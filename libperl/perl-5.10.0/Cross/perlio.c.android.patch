@@ -1,0 +1,11 @@
+--- ../perlio.c	2007-12-18 11:47:08.000000000 +0100
++++ perlio.c.android	2009-02-14 18:41:18.000000000 +0100
+@@ -1746,6 +1746,8 @@
+      Perl_PerlIO_or_Base_void(f, Clearerr, clearerr, (aTHX_ f));
+ }
+ 
++void clearerr(FILE *f){};
++
+ void
+ Perl_PerlIO_setlinebuf(pTHX_ PerlIO *f)
+ {
