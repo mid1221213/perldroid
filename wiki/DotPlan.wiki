@@ -15,5 +15,7 @@ This .plan lists the things members are working on.
 == Mid ==
   * Proofs of concepts / tests on real G1 phone
   * Java code to download and install core-modules in /sdcard *Update:* NOT POSSIBLE to mmap from /sdcard :-(
-  * Core modules will be optional. Make a perl program to package them
+  * Core modules will be optional. Make a perl program to package them *Update:* Done
+  * Java code to download and install core-modules in /data/data/org.gtmp.perl/lib
+
   
