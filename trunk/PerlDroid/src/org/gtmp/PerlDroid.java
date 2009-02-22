@@ -4,7 +4,7 @@ import android.os.Debug;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.ScrollView;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
 import java.io.File;
@@ -19,10 +19,13 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import java.net.URISyntaxException;
 import java.lang.String;
+import android.os.Handler;
+import android.os.Message;
 
 public class PerlDroid extends Activity
 {
     TextView pStatus;
+    ScrollView pStatusSV;
     String version = "5.10.0";
     String URLPrefix = "http://dbx.gtmp.org/android/perl-core-modules-" + version;
     String coreModules[] = {
@@ -84,6 +87,15 @@ public class PerlDroid extends Activity
     public void Log(String string)
     {
 	pStatus.setText(pStatus.getText() + "\n" + string);
+
+	Handler handler = new Handler();
+	Runnable AdjustScrollRunnable = new Runnable() {
+		public void run() {
+		    pStatusSV.scrollBy(0, pStatus.getLineHeight());
+		}
+	    };
+
+	handler.post(AdjustScrollRunnable);
     }
 
     /** Called when the activity is first created. */
@@ -91,9 +103,11 @@ public class PerlDroid extends Activity
         public void onCreate(Bundle savedInstanceState)
     {
 	super.onCreate(savedInstanceState);
+
 	android.util.Log.v("PerlDroid", "Acting...");
 	setContentView(R.layout.main);
 	
+	pStatusSV = (ScrollView) findViewById(R.id.StatusTextSV);
 	pStatus = (TextView) findViewById(R.id.StatusText);
 	pStatus.setVerticalScrollBarEnabled(true);
 	
@@ -111,14 +125,34 @@ public class PerlDroid extends Activity
 
     protected void downloadCoreModules()
     {
-	for (String file : coreModules) {
-	    downloadCoreModule(file);
-	}
+	final Handler handler = new Handler() {
+		@Override public void handleMessage(Message msg)
+		{
+		    Log((java.lang.String) msg.obj);
+		}
+	    };
+	
+	Thread mBackground = new Thread(new Runnable()
+	    {
+		public void run()
+		{
+		    for (String file : coreModules) {
+			Message myMsg = handler.obtainMessage();
+			myMsg.obj = "Getting " + file + "...";
+			handler.sendMessage(myMsg);
+			downloadCoreModule(file);
+		    }
+		    Message myMsg = handler.obtainMessage();
+		    myMsg.obj = "Done";
+		    handler.sendMessage(myMsg);
+		}
+	    });
+
+	mBackground.start();
     }
 
     protected void downloadCoreModule(String module)
     {
-	Log("Getting " + module);
 	InputStream in = getUrlData(URLPrefix + "/" + module + ".zip");
 	unZip(in);
     }
