@@ -8,9 +8,11 @@ This .plan lists the things members are working on.
 = Details =
 
 == Ben ==
-  * make a shared sandbox: see the `sandbox` svn branch.
-  * find the _oldest_ android revision that compile flawlessly. *Update:* Given the few available branches on http://android.git.kernel.org/ the _oldest_ android that compile is more recent than the android which is on the HTC G1, so it is impossible to build a bionic libc that, in terms of C API, matches exactly the one on the HTC phone. :-(
-  * make a Cross/ that allow perl-5.10.0 to compile on that old android revision. *Update:* currently, libperl.so only compiles on a too recent bionic libc. nasty things must be done to allow then to use it on the phone. :-(
+  * make a shared sandbox: see the `sandbox` svn branch. *(done)*
+  * find the _oldest_ android revision that compile flawlessly. *Update:* Given the few available branches on http://android.git.kernel.org/ the _oldest_ android that compile is more recent than the android which is on the HTC G1, so it is impossible to build a bionic libc that, in terms of C API, matches exactly the one on the HTC phone. :-( *(won't do)*
+  * make a Cross/ that allow perl-5.10.0 to compile on that old android revision. *Update:* currently, [LibPerl libperl.so] only compiles on a too recent bionic libc. workarounds must be done to allow then to use it on the phone. :-( *(won't do)*
+  * put a Cross/ that work with the latest android in trunk *(done)*
+  * applause Mid's 5+4=9 first PerlDroid application that *actually work on the phone*!
 
 == Mid ==
   * Proofs of concepts / tests on real G1 phone
