@@ -2,7 +2,7 @@
 
 = Introduction =
 
-To build libperl.so is the first step before anything about using Perl on android.
+To build libperl.so is the first step before anything about using Perl on Android.
 
 
 = Details =
