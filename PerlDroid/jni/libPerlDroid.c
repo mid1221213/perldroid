@@ -1,4 +1,4 @@
-#include "JNIHelp.h"
+#include <JNIHelp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <EXTERN.h>               /* from the Perl distribution     */
