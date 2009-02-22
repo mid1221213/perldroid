@@ -2,7 +2,6 @@
 
 use strict;
 use Archive::Zip qw/:ERROR_CODES :CONSTANTS/;;
-use File::Find;
 use Module::CoreList;
 use File::Basename;
 
@@ -19,7 +18,7 @@ die "$target already exists, erase it before..." if -e $target;
 our ($core_dir, $gldir, %mod_files);
 foreach my $core_mod (@core_mods) {
     $core_dir = $core_mod;
-    $core_dir =~ s,::,/,g;
+    $core_dir =~ s/::/\//g;
     my $mod_files_h = {};
     foreach my $ldir ('', @ldirs) {
 	my $f_dir = $ldir ? "$ldir/" : '';
@@ -36,7 +35,7 @@ foreach my $core_mod (sort { length($b) <=> length($a) } keys %mod_files) {
 	next if $core_mod eq $core_mod_2 || length($core_mod_2) > length($core_mod);
 	my $core_prefix_2 = $core_mod_2;
 	if ($core_mod =~ /^$core_prefix_2/) {
-	    $core_prefix_2 =~ s,::,/,g;
+	    $core_prefix_2 =~ s/::/\//g;
 	    delete $mod_files{$core_mod_2}{$_} for grep { /$core_prefix_2\// } keys %{$mod_files{$core_mod_2}}
 	}
     }
