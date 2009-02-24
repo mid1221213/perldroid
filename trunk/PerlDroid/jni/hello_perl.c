@@ -86,7 +86,7 @@ main(int argc_lc, char **argv_lc, char **env_lc)
   if (open_libperl_so()) {
     puts("library open");
     sprintf(ebuf, "$a = %d + %d", 5, 4);
-    puts("sprintf fail");
+    puts("sprintf done");
     
     my_Perl_sys_init(&argc, (char ***) &argv);
     puts("sys_init OK");
