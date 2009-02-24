@@ -27,7 +27,7 @@ void (*my_boot_DynaLoader)(pTHX_ CV* cv);
 
 int open_libperl_so(void)
 {
-  lp_h = dlopen("/sdcard/org.gtmp.perl/lib/libperl.so", RTLD_LAZY);
+  lp_h = dlopen("/data/data/org.gtmp.perl/lib/libperl.so", RTLD_LAZY);
   printf("lp_h=%d\n", lp_h);
   
   if (lp_h) {
