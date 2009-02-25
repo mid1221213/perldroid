@@ -58,7 +58,7 @@ sub AUTOLOAD {
   ref($self) or croak "$self is not an object";
 
   # See below for XS_method logic
-  XS_method($self, @_);
+  return XS_method($self, $AUTOLOAD, @_);
 }
 }}}
 
@@ -71,7 +71,7 @@ XS_constructor(class, args...)
   # call class constructor with args
   # return the object
 
-XS_method(obj, args):
+XS_method(obj, $AUTOLOAD, args):
 
   # get obj type
   # call obj.$AUTOLOAD(args)
