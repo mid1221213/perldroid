@@ -54,15 +54,15 @@ sub HttpResponse::new
 
 # for methods
 sub HttpResponse::AUTOLOAD {
-  return PerlDroid::AUTOLOAD(@_)
+  return PerlDroid::autoload($AUTOLOAD, @_)
 }
 
-sub PerlDroid::AUTOLOAD {
-  my $self = shift;
+sub PerlDroid::autoload {
+  my ($method, $self, @rest) = @_;
   ref($self) or croak "$self is not an object";
 
   # See below for XS_method logic
-  return XS_method($self, $AUTOLOAD, @_);
+  return XS_method(@_);
 }
 }}}
 
@@ -75,8 +75,8 @@ XS_constructor(class, args...)
   # call class constructor with args
   # return the object
 
-XS_method(obj, $AUTOLOAD, args):
+XS_method($autoload, $obj, @args):
 
   # get obj type
-  # call obj.$AUTOLOAD(args)
+  # call $obj->$autoload(args)
   # return result
