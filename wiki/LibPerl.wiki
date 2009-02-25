@@ -1,4 +1,5 @@
 #summary Some info on libperl.so
+#labels Featured
 
 = Introduction =
 
