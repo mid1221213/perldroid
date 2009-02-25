@@ -1,0 +1,78 @@
+#summary Some ideas about how to import a class in Perl
+#labels Featured,Phase-Design
+
+= How do I "use" a Java class? =
+
+== Sample in Java ==
+
+Sample: how to to this, in "MyClass.java":
+
+{{{
+import org.apache.http.HttpResponse;
+public class MyClass
+{
+  public HttpResponse instanceOfHttpResponse;
+  public void MyClass
+  {
+    instanceOfHttpResponse = new HttpResponse(args...);
+  }
+}
+}}}
+
+in Perl?
+
+== Sample in Perl ==
+
+Answer, in MyClass.pm:
+
+{{{
+package MyClass.pm;
+use PerlDroid;
+
+sub new
+{
+  my $instanceOfHttpResponse = HttpResponse->new(args...);
+}
+}}}
+
+That's it! No need to "use" any other module than PerlDroid.
+
+== Idea ==
+
+The idea is that PerlDroid.pm will populate all namespaces at loading with stubs for class loading and method invoking.
+
+In this case, it is like this:
+
+{{{
+# Constructor
+sub HttpResponse::new
+{
+  shift;
+  # See below for the XS constructor logic
+  return XS_constructor('org/apache/http/HttpResponse', @_);
+}
+
+# for methods
+sub AUTOLOAD {
+  my $self = shift;
+  ref($self) or croak "$self is not an object";
+
+  # See below for XS_method logic
+  XS_method($self, @_);
+}
+}}}
+
+== Logic behind XS functions ==
+
+XS_constructor(class, args...)
+
+  # findclass(class) unless already loaded
+  # instantiate an object
+  # call class constructor with args
+  # return the object
+
+XS_method(obj, args):
+
+  # get obj type
+  # call obj.$AUTOLOAD(args)
+  # return result
