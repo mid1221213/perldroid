@@ -48,7 +48,9 @@ foreach my $core_mod (sort keys %mod_files) {
     print "Skipping $core_mod\n", next unless keys %{$mod_files{$core_mod}};
     print "Zipping $core_mod:";
     my $zip = Archive::Zip->new();
-    foreach my $file (keys %{$mod_files{$core_mod}}) {
+    my @core_files = keys %{$mod_files{$core_mod}};
+    push @core_files, 'arm-linux-multi/Config_heavy.pl' if $core_mod eq 'Config'; # Special case
+    foreach my $file (@core_files) {
 	print " $file";
 	-f $file or die "$file does not exist";
 	$zip->addFile($file) or die;
