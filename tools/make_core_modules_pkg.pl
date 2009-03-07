@@ -3,7 +3,7 @@
 use strict;
 use Archive::Zip qw/:ERROR_CODES :CONSTANTS/;;
 use Module::CoreList;
-use File::Basename;
+use Cwd;
 
 my @core_mods = keys %{$Module::CoreList::version{5.01}};
 my @ldirs = qw,auto arm-linux-multi arm-linux-multi/auto,;
@@ -11,7 +11,7 @@ my @ldirs = qw,auto arm-linux-multi arm-linux-multi/auto,;
 my $mods_dir;
 $mods_dir = shift and -d $mods_dir or usage();
 usage() if @ARGV;
-my $target = dirname($0) . "/target";
+my $target = getcwd . "/target";
 
 die "$target already exists, erase it before..." if -e $target;
 
