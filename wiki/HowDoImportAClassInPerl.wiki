@@ -39,9 +39,11 @@ That's it!
 
 == Idea ==
 
-The original idea was that PerlDroid.pm would populate all namespaces at loading with stubs for class loading and method invoking. But because of possible name clash, you'll have to use the PerlDroid package that correspond to the Java package it will import the classes you want.
+The original idea was that PerlDroid.pm would populate all namespaces at loading with stubs for class loading and method invoking. But because of possible name clash, you'll have to use the PerlDroid package that correspond to the Java package and it will import the classes you want.
 
 In this case, it is like this:
+
+In `.../PerlDroid/org/apache/http.pm`:
 
 {{{
 package PerlDroid::org::apache::http;
@@ -52,16 +54,13 @@ our @EXPORT = qw($HttpResponse, ...);
 use PerlDroid::org::apache::http::HttpResponse;
 use PerlDroid::org::apache::http::...;
 
-our $HttpResponse = PerlDroid::org::apache::http::HttpResponse->_make_obj;
+our $HttpResponse = bless {}, 'PerlDroid::org::apache::http::HttpResponse';
+}}}
 
-# In another file:
+And in `.../PerlDroid/org/apache/http/HttpResponse.pm`:
+
+{{{
 package PerlDroid::org::apache::http::HttpResponse;
-
-# Object for convenience call
-sub _make_obj
-{
-  return bless {}, shift;
-}
 
 # Constructor
 sub new
@@ -77,7 +76,7 @@ sub AUTOLOAD {
 }
 }}}
 
-Actually `_make_obj` and the constructor can also be treated with AUTOLOAD.
+Actually the constructor can also be treated with AUTOLOAD.
 
 == Logic behind XS functions ==
 
