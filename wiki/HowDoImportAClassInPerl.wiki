@@ -27,25 +27,44 @@ Answer, in MyClass.pm:
 
 {{{
 package MyClass.pm;
-use PerlDroid;
+use PerlDroid::org::apache::http;
 
 sub new
 {
-  my $instanceOfHttpResponse = HttpResponse->new(args...);
+  my $instanceOfHttpResponse = $HttpResponse->new(args...); # Note the '$' sign
 }
 }}}
 
-That's it! No need to "use" any other module than PerlDroid.
+That's it!
 
 == Idea ==
 
-The idea is that PerlDroid.pm will populate all namespaces at loading with stubs for class loading and method invoking.
+The original idea was that PerlDroid.pm would populate all namespaces at loading with stubs for class loading and method invoking. But because of possible name clash, you'll have to use the PerlDroid package that correspond to the Java package it will import the classes you want.
 
 In this case, it is like this:
 
 {{{
+package PerlDroid::org::apache::http;
+require Exporter;
+our @ISA = qw(...);
+our @EXPORT = qw($HttpResponse, ...);
+
+use PerlDroid::org::apache::http::HttpResponse;
+use PerlDroid::org::apache::http::...;
+
+our $HttpResponse = PerlDroid::org::apache::http::HttpResponse->_make_obj;
+
+# In another file:
+package PerlDroid::org::apache::http::HttpResponse;
+
+# Object for convenience call
+sub _make_obj
+{
+  return bless {}, shift;
+}
+
 # Constructor
-sub HttpResponse::new
+sub new
 {
   shift;
   # See below for the XS constructor logic
@@ -53,18 +72,12 @@ sub HttpResponse::new
 }
 
 # for methods
-sub HttpResponse::AUTOLOAD {
-  return PerlDroid::autoload($AUTOLOAD, @_)
-}
-
-sub PerlDroid::autoload {
-  my ($method, $self, @rest) = @_;
-  ref($self) or croak "$self is not an object";
-
-  # See below for XS_method logic
-  return XS_method(@_);
+sub AUTOLOAD {
+  return XS_method($AUTOLOAD, @_)
 }
 }}}
+
+Actually `_make_obj` and the constructor can also be treated with AUTOLOAD.
 
 == Logic behind XS functions ==
 
