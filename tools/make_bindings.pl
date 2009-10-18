@@ -103,12 +103,14 @@ sub package_
 	my @exports;
 
 	foreach my $class (@pkg_classes) {
+	    my $oclass = $class;
 	    $class =~ s/\./_/g;
+	    $oclass =~ s/\./::/g;
 	    push @exports, $class;
 	    $make_obj .= "our \$$class = bless {\n";
 
-	    foreach my $meth (keys %{$class_methods{"${pkg_name}::$class"}}) {
-		$make_obj .= "  '$meth' => [ qw{" . join(' ', @{$class_methods{"${pkg_name}::$class"}{$meth}}) . "} ],\n";
+	    foreach my $meth (keys %{$class_methods{"${pkg_name}::$oclass"}}) {
+		$make_obj .= "  '$meth' => [ qw{" . join(' ', @{$class_methods{"${pkg_name}::$oclass"}{$meth}}) . "} ],\n";
 	    }
 
 	    $make_obj .= "}, '${pkg_name}::$class';\n";
