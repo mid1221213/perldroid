@@ -106,7 +106,7 @@ sub package_
 	    my $oclass = $class;
 	    $class =~ s/\./_/g;
 	    $oclass =~ s/\./::/g;
-	    push @exports, $class;
+	    push @exports, "\$$class";
 	    $make_obj .= "our \$$class = bless {\n";
 
 	    foreach my $meth (keys %{$class_methods{"${pkg_name}::$oclass"}}) {
