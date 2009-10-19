@@ -26,7 +26,8 @@ static IV (*my_Perl_sv_2iv_flags)(pTHX_ SV*, I32);
 #define Perl_get_sv my_Perl_get_sv
 #define Perl_sv_2iv_flags my_Perl_sv_2iv_flags
 
-int open_libperl_so(void)
+int
+open_libperl_so(void)
 {
   lp_h = dlopen("/data/data/org.gtmp.perl/lib/libperl.so", RTLD_LAZY);
   
@@ -48,9 +49,42 @@ int open_libperl_so(void)
   return 1;
 }
 
-void close_libperl_so(void)
+void
+close_libperl_so(void)
 {
   dlclose(lp_h);
+}
+
+jobject
+do_dialog(JNIEnv *env, jclass cls, jobject this, jobject pm, jobject nm) {
+  jclass adbClass = (*env)->FindClass(env, "android/app/AlertDialog$Builder");
+  jmethodID adbConstructor, spbID, snbID, smsgID, crtID;
+  jobject adb;
+
+  if(!adbClass) {
+    return NULL;
+  }
+
+  adbConstructor = (*env)->GetMethodID(env, adbClass, "<init>", "(Landroid/content/Context;)V");
+  if(!adbConstructor) {
+    return NULL;
+  }
+
+  adb = (*env)->NewObject(env, adbClass, adbConstructor, this);
+  if(!adb) {
+    return NULL;
+  }
+  
+  smsgID = (*env)->GetMethodID(env, adbClass, "setMessage", "(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;");
+  spbID  = (*env)->GetMethodID(env, adbClass, "setPositiveButton", "(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;");
+  snbID  = (*env)->GetMethodID(env, adbClass, "setNegativeButton", "(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;");
+  crtID  = (*env)->GetMethodID(env, adbClass, "create", "()Landroid/app/AlertDialog;");
+
+  (*env)->CallObjectMethod(env, adb, smsgID, (*env)->NewStringUTF(env, "Salut ma poule !"));
+  (*env)->CallObjectMethod(env, adb, spbID,  (*env)->NewStringUTF(env, "Ok"), pm);
+  (*env)->CallObjectMethod(env, adb, snbID,  (*env)->NewStringUTF(env, "Dégage"), nm);
+
+  return (*env)->CallObjectMethod(env, adb, crtID);
 }
 
 static jint
@@ -69,6 +103,7 @@ run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
     my_perl_construct( my_perl );
     
     my_perl_parse(my_perl, NULL, 3, argv, NULL);
+
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
     my_perl_run(my_perl);
     
@@ -89,6 +124,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
   JNINativeMethod my_methods[] = {
     { "run_perl", "(II)I", (void *) run_perl },
+    { "nativeOnCreateDialog", "(Lorg/gtmp/perl/PerlDroid;Landroid/content/DialogInterface$OnClickListener;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog;", (void *) do_dialog },
   };
   
   jint result = -1;
