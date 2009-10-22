@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
 import java.lang.String;
 import android.os.Handler;
 import android.os.Message;
+import android.app.Dialog;
+import android.content.DialogInterface;
 
 public class PerlDroid extends Activity
 {
@@ -68,9 +70,11 @@ public class PerlDroid extends Activity
 	"version",
 	"warnings",
 	"XSLoader",
+	"PerlDroid",
     };
 
     public static native int run_perl(int a, int b);
+    public static native android.app.AlertDialog nativeOnCreateDialog(PerlDroid th, DialogInterface.OnClickListener pl, DialogInterface.OnClickListener nl);
 
     static
     {
@@ -121,6 +125,24 @@ public class PerlDroid extends Activity
 	    Log("Downloading mandatory core modules");
 	    downloadCoreModules();
 	}
+
+	//	showDialog(0);
+    }
+
+    protected Dialog onCreateDialog(int id) {
+	DialogInterface.OnClickListener pl = new DialogInterface.OnClickListener() {
+	    public void onClick(DialogInterface dialog, int id) {
+		dialog.cancel();
+	    }
+	};
+
+	DialogInterface.OnClickListener nl = new DialogInterface.OnClickListener() {
+	    public void onClick(DialogInterface dialog, int id) {
+		PerlDroid.this.finish();
+	    }
+	};
+
+	return nativeOnCreateDialog(this, pl, nl);
     }
 
     protected void downloadCoreModules()
@@ -197,7 +219,8 @@ public class PerlDroid extends Activity
 	    zin.close();
 	} catch (IOException ex) {
 	    String msg = ex.getMessage();
-	    Log("Can't unzip (msg: " + msg + ")");
+	    ex.printStackTrace();
+	    android.util.Log.v("PerlDroid", "Can't unzip (msg: " + msg + ")");
 	}
     }
 
