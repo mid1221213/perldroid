@@ -21,4 +21,4 @@ PerlDroid.c: PerlDroid.xs Makefile
 	xsubpp -prototypes -output PerlDroid.c PerlDroid.xs
 
 clean:
-	rm -f hello_perl libPerlDroid.o libPerlDroid.so
+	rm -f hello_perl libPerlDroid.o libPerlDroid.so PerlDroid.so PerlDroid.so

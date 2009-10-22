@@ -96,7 +96,7 @@ run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
   char *argv[] = { "org.gtmp.perl", "-e", "0" };
 
   if (open_libperl_so()) {
-    sprintf(ebuf, "$a = %d + %d", a, b);
+    sprintf(ebuf, "use PerlDroid;$a = %d + %d", a, b);
     
     my_Perl_sys_init(&argc, (char ***) &argv);
     my_perl = my_perl_alloc();

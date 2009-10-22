@@ -26,8 +26,10 @@ if ($pass == 2) {
     mkdir "$target/PerlDroid";
 
     open(OUTPM, ">$target/PerlDroid.pm");
-    print OUTPM "package PerlDroid;\n\n# Constructor\n\nsub new\n{\n  return XS_constructor(ref(shift), \@_);\n}\n\n# for methods\nsub AUTOLOAD {\n  return XS_method(\$AUTOLOAD, \@_)\n}\n";
+    print OUTPM "package PerlDroid;\nrequire DynaLoader;\n\n# Constructor\nsub new\n{\n  return XS_constructor(ref(shift), \@_);\n}\n\n# for methods\nsub AUTOLOAD {\n  return XS_method(\$AUTOLOAD, \@_)\n}\n\nbootstrap PerlDroid;\n1;";
     close(OUTPM);
+
+    open(OUTPROXY, ">proxy_classes.list");
 }
 
 our $pkg_name;
@@ -38,6 +40,7 @@ our $class_name;
 our $meth_name;
 our @pkg_classes;
 our %class_methods;
+our %seen_proxy;
 our $retval;
 our @params;
 our $java2jni = {
@@ -67,6 +70,8 @@ if ($pass == 1) {
     open(OUTJ2J, ">java2jni.pl");
     print OUTJ2J Dumper($java2jni);
     close(OUTJ2J);
+} else {
+    close(OUTPROXY);
 }
 
 sub package
@@ -164,6 +169,8 @@ sub method
     $retval = cjava2jni($attrs{'return'}) if $pass == 2;
     $meth_name = $attrs{name};
     @params = ();
+
+    print OUTPROXY "$class_name\n" if $pass == 2 && !$seen_proxy{$class_name}++ && $meth_name =~ /^on.+/;
 }
 
 sub interface

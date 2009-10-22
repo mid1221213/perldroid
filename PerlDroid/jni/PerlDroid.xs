@@ -48,7 +48,6 @@ XS_constructor(hp, ...)
 					else
 						sig[cur++] = pclass[j];
 			} else {
-				SvGETMAGIC(parami);
 				if (SvIOKp(parami)) {
 					sig[cur++] = 'I';
 				} else if (SvNOKp(parami)) {
@@ -56,15 +55,16 @@ XS_constructor(hp, ...)
 				} else if (SvPOKp(parami)) {
 					SvPV(parami, len);
 					if (len == 1)
-						sig[cur++] = 'B';
+						sig[cur++] = 'C';
 					else
-						sig[cur++] = 'I';
+						sig[cur++] = 'S';
 				} else {
-					croak("Type not recgonized param #%d", i);
+					croak("Type not recognized param #%d", i);
 				}
 			}
 		}
 	sig[cur++] = ')';
+	sig[cur++] = 'V';
 	sig[cur] = '\0';
 	
 	for (i = 0; i <= av_len((AV*)SvRV(*app)); i++) {
@@ -72,6 +72,7 @@ XS_constructor(hp, ...)
 		proto_str = SvPV_nolen(*proto);
 		if (comp_sig(sig, proto_str)) {
 			fsig = 1;
+			break;
 		}
 	}
 
