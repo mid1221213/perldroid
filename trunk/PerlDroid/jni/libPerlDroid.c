@@ -22,9 +22,12 @@ static void (*my_Perl_sys_term)(void);
 static void (*my_perl_free)(pTHXx);
 static SV* (*my_Perl_get_sv)(pTHX_ const char *, I32);
 static IV (*my_Perl_sv_2iv_flags)(pTHX_ SV*, I32);
+CV* (*my_Perl_newXS)(pTHX_ const char*, XSUBADDR_t, const char*);
+void (*my_boot_DynaLoader)(pTHX_ CV* cv);
 
 #define Perl_get_sv my_Perl_get_sv
 #define Perl_sv_2iv_flags my_Perl_sv_2iv_flags
+#define Perl_newXS  my_Perl_newXS
 
 int
 open_libperl_so(void)
@@ -43,6 +46,8 @@ open_libperl_so(void)
     my_Perl_sys_term     = dlsym(lp_h, "Perl_sys_term");
     my_Perl_get_sv       = dlsym(lp_h, "Perl_get_sv");
     my_Perl_sv_2iv_flags = dlsym(lp_h, "Perl_sv_2iv_flags");
+    my_Perl_newXS        = dlsym(lp_h, "Perl_newXS");
+    my_boot_DynaLoader   = dlsym(lp_h, "boot_DynaLoader");
   } else
     return 0;
 
@@ -87,6 +92,14 @@ do_dialog(JNIEnv *env, jclass cls, jobject this, jobject pm, jobject nm) {
   return (*env)->CallObjectMethod(env, adb, crtID);
 }
 
+EXTERN_C void
+xs_init(pTHX)
+{
+  char *file = __FILE__;
+  /* DynaLoader is a special case */
+  newXS("DynaLoader::boot_DynaLoader", my_boot_DynaLoader, file);
+}
+
 static jint
 run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
 {
@@ -102,7 +115,7 @@ run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
     my_perl = my_perl_alloc();
     my_perl_construct( my_perl );
     
-    my_perl_parse(my_perl, NULL, 3, argv, NULL);
+    my_perl_parse(my_perl, xs_init, 3, argv, NULL);
 
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
     my_perl_run(my_perl);

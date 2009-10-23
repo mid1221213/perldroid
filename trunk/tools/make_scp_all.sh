@@ -10,11 +10,11 @@ rm -rf target_* PerlDroid.zip
 ./make_bindings.pl ~/mydroid/out/target/common/obj/PACKAGING/public_api.xml
 
 cd target_droid
-mkdir -p arm-linux-multi/auto
+mkdir -p arm-linux-multi/auto/PerlDroid
 cd ../../PerlDroid/jni/
 make
 cd -
-cp ../../PerlDroid/jni/PerlDroid.so arm-linux-multi/auto/libPerlDroid.so
+cp ../../PerlDroid/jni/PerlDroid.so arm-linux-multi/auto/PerlDroid/
 find . -name "*.*" | zip ../target_core/PerlDroid.zip -@
 
 cd ../target_core

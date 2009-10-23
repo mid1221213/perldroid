@@ -1,5 +1,7 @@
 package org.gtmp.perl;
 
+// setprop log.redirect-stdio true
+
 import android.os.Debug;
 import android.app.Activity;
 import android.os.Bundle;
@@ -41,6 +43,8 @@ public class PerlDroid extends Activity
 	"bigrat",
 	"blib",
 	"bytes",
+	"Carp",
+	"Carp::Heavy",
 	"charnames",
 	"Config",
 	"constant",
@@ -117,11 +121,7 @@ public class PerlDroid extends Activity
 	
 	findViewById(R.id.LinearLayout).setVerticalScrollBarEnabled(true);
 
-	int ret = run_perl(5, 4);
-
-	Log("Result of 5+4: " + ret);
-
-	if (ret == 9 && !coreAlreadyLoaded()) {
+	if (!coreAlreadyLoaded()) {
 	    Log("Downloading mandatory core modules");
 	    downloadCoreModules();
 	}
@@ -151,6 +151,10 @@ public class PerlDroid extends Activity
 		@Override public void handleMessage(Message msg)
 		{
 		    Log((java.lang.String) msg.obj);
+		    if (msg.obj == "Done") {
+			int ret = run_perl(5, 4);
+			Log("Result of 5+4: " + ret);
+		    }
 		}
 	    };
 	

@@ -26,7 +26,7 @@ if ($pass == 2) {
     mkdir "$target/PerlDroid";
 
     open(OUTPM, ">$target/PerlDroid.pm");
-    print OUTPM "package PerlDroid;\nrequire DynaLoader;\n\n# Constructor\nsub new\n{\n  return XS_constructor(ref(shift), \@_);\n}\n\n# for methods\nsub AUTOLOAD {\n  return XS_method(\$AUTOLOAD, \@_)\n}\n\nbootstrap PerlDroid;\n1;";
+    print OUTPM "package PerlDroid;\nrequire DynaLoader;\n\@ISA = qw/DynaLoader/;\n\n# Constructor\nsub new\n{\n  return XS_constructor(ref(shift), \@_);\n}\n\n# for methods\nsub AUTOLOAD {\n  return XS_method(\$AUTOLOAD, \@_)\n}\n\nbootstrap PerlDroid;\n1;";
     close(OUTPM);
 
     open(OUTPROXY, ">proxy_classes.list");
