@@ -8,6 +8,7 @@
 #define CLASSNAME "org/gtmp/perl/PerlDroid"
 
 static PerlInterpreter *my_perl;  /***    The Perl interpreter    ***/
+JNIEnv *my_jnienv;
 
 static void *lp_h;
 
@@ -106,6 +107,7 @@ xs_init(pTHX)
 static jint
 run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
 {
+  my_jnienv = env;
   jint ret = -1;
   int argc = 3;
   char ebuf[255];
