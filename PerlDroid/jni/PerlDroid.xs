@@ -2,9 +2,62 @@
 #include <perl.h>
 #include <XSUB.h>
 #include <jni.h>
+#include <string.h>
 
-int comp_sig(char sig[], char *test_sig)
+static int get_type(char **s, char *sb)
 {
+	switch(**s) {
+		case 'L':
+				while ((*(sb++) = *((*s)++) != ';'))
+					;
+				break;
+		case ')':
+				(*s)++;
+				*(sb++) = '\0';
+				return 1;
+				break;
+		default:
+				*(sb++) = *((*s)++);
+				break;
+	}
+
+	*(sb++) = '\0';
+	return **s == '\0' || **s == ')';
+}
+
+static int comp_sig(char *sig, char *test_sig)
+{
+	char *s1, *s2;
+	char sb1[128], sb2[128];
+	int lo, in_param = 1;
+
+	if (*sig != '(' || *test_sig != '(')
+		croak("bad signatures: %s <=> %s", sig, test_sig);
+
+	printf("Comparing %s and %s\n", sig, test_sig);
+
+	for (s1 = sig + 1, s2 = test_sig + 1; *s1 && *s2;) {
+		int ep1 = 0, ep2 = 0;
+		ep1 = get_type(&s1, sb1);
+		ep2 = get_type(&s2, sb2);
+
+		if (strcmp(sb1, sb2)) {
+			printf("%s != %s\n", sb1, sb2);
+			return 0;
+		}
+		printf("%s == %s\n", sb1, sb2);
+
+		if (ep1 || ep2) {
+			if (ep1 && ep2) {
+				if (in_param)
+					in_param = 0;
+				else
+					return 1;
+			} else
+				return 0;
+		}
+	}
+
 	return 0;
 }
 
@@ -67,7 +120,7 @@ XS_constructor(hp, ...)
 	sig[cur++] = 'V';
 	sig[cur] = '\0';
 	
-	for (i = 0; i <= av_len((AV*)SvRV(*app)); i++) {
+	for (i = 0; i < av_len((AV*)SvRV(*app)); i++) {
 		proto = av_fetch((AV*)SvRV(*app), i, 0);
 		proto_str = SvPV_nolen(*proto);
 		if (comp_sig(sig, proto_str)) {
@@ -78,6 +131,8 @@ XS_constructor(hp, ...)
 
 	if (!fsig)
 		croak("Signature not found");
+
+	ret = newSViv(0);
 
 	RETVAL = ret;
    OUTPUT:
