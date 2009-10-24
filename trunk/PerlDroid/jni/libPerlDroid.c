@@ -116,7 +116,8 @@ run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
   SV *svret;
 
   if (open_libperl_so()) {
-    sprintf(ebuf, "$| = 1;use PerlDroid;use PerlDroid::org::json; my $tst = $JSONException->new('c'); print \"\\$tst=$tst\\n\"; $a = %d + %d; print \"\\$a=$a\\n\";$a", a, b);
+    //    sprintf(ebuf, "$| = 1;use PerlDroid;use PerlDroid::org::json; my $tst = $JSONException->new('c'); print \"\\$tst=$tst\\n\"; $a = %d + %d; print \"\\$a=$a\\n\";$a", a, b);
+    sprintf(ebuf, "$| = 1;use PerlDroid;use PerlDroid::org::json; my $tst = $JSONObject->new($JSONTokener->new('{}')); print \"\\$tst=$tst\\n\"; $a = %d + %d; print \"\\$a=$a\\n\";$a", a, b);
 
     my_Perl_sys_init(&argc, (char ***) &argv);
     my_perl = my_perl_alloc();
