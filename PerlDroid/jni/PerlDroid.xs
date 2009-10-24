@@ -19,6 +19,7 @@ char *nat2cls[] = {
 };
 
 typedef struct {
+	char *class;
 	SV *sigs;
 	jobject jobj;
 } PerlDroid;
@@ -27,7 +28,6 @@ static int perl_obj_to_java_class(char *perl_obj, char *java_class)
 {
 	char c;
 	char *java_class_orig = java_class;
-	perl_obj += 11; /* strlen("PerlDroid::") */
 
 	while (c = *(perl_obj++)) {
 		switch(c) {
@@ -76,8 +76,8 @@ static int comp_types(char *t1, char *t2)
 	char *f1 = NULL, *f2 = NULL, c;
 	jclass jc1, jc2;
 
-	if (!*t1 || *t1 == 'V' || !*t1 || *t1 == 'V')
-		if ((!*t1 || *t1 == 'V') && (!*t1 || *t1 == 'V'))
+	if (!*t1 || *t1 == 'V' || !*t2 || *t2 == 'V')
+		if ((!*t1 || *t1 == 'V') && (!*t2 || *t2 == 'V'))
 			return 1;
 		else
 			return 0;
@@ -150,11 +150,9 @@ PerlDroid *
 XS_constructor(hp, ...)
 	HV* hp;
    PREINIT:
-	HV* rh;
 	SV** proto;
 	char *proto_str;
 	int i;
-	int j;
 	int cur = 0;
 	int fsig = 0;
 	char* CLASS;
@@ -169,6 +167,8 @@ XS_constructor(hp, ...)
 	jobject jniObject;
 	jvalue params[128];
 	PerlDroid *ret;
+	IV tmp_param;
+	PerlDroid *pd_param;
    CODE:
 	CLASS = HvNAME(SvSTASH(hp));
 	app = hv_fetch(hp, "<init>", 6, 0);
@@ -178,9 +178,13 @@ XS_constructor(hp, ...)
 		for (i = 1; i < items; i++) {
 			parami = ST(i);
 			if (SvROK(parami) && SvTYPE(SvRV(parami)) == SVt_PVMG) {
-				pclass = HvNAME(SvSTASH(SvRV(parami)));
-				cur += perl_obj_to_java_class(pclass, sig + cur);
-				/* FIXME: affect to params */
+				tmp_param = SvIV((SV*)SvRV(parami));
+				pd_param = INT2PTR(PerlDroid *, tmp_param);
+				pclass = pd_param->class;
+				sig[cur++] = 'L';
+				cur += perl_obj_to_java_class(pclass + 11, sig + cur);
+				sig[cur++] = ';';
+				params[i - 1].l = (jobject) pd_param->jobj;
 			} else {
 				if (SvIOKp(parami)) {
 					sig[cur++] = 'I';
@@ -217,7 +221,108 @@ XS_constructor(hp, ...)
 	if (!fsig)
 		croak("Signature not found");
 
-	perl_obj_to_java_class(CLASS, jclazz);
+	perl_obj_to_java_class(CLASS + 11, jclazz);
+
+	jniClass = (*my_jnienv)->FindClass(my_jnienv, jclazz);
+
+	if(!jniClass) {
+		croak("Can't find class %s", jclazz);
+	}
+
+	jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", proto_str);
+	if(!jniConstructorID) {
+		croak("Can't find constructor for class %s", jclazz);
+	}
+
+	jniObject = (*my_jnienv)->NewObjectA(my_jnienv, jniClass, jniConstructorID, params);
+	if(!jniObject) {
+		croak("Can't instantiate class %s", jclazz);
+	}
+
+	ret = (PerlDroid *)safemalloc(sizeof(PerlDroid));
+	ret->sigs  = newSVsv((SV*)ST(0));
+	ret->jobj  = jniObject;
+	ret->class = strdup(CLASS);
+	RETVAL = ret;
+
+   OUTPUT:
+	RETVAL
+
+PerlDroid *
+XS_method(autoload, obj, ...)
+	char *autoload;
+	PerlDroid *obj;
+   PREINIT:
+	SV** proto;
+	char *proto_str;
+	int i;
+	int cur = 0;
+	int fsig = 0;
+	char* CLASS;
+	SV** app;
+	char sig[1024];
+	char* pclass;
+	STRLEN len;
+	SV* parami;
+	char jclazz[128];
+	jclass jniClass;
+	jmethodID jniConstructorID;
+	jobject jniObject;
+	jvalue params[128];
+	PerlDroid *ret;
+	IV tmp_param;
+	PerlDroid *pd_param;
+   CODE:
+	/*CLASS = HvNAME(SvSTASH(hp));
+	app = hv_fetch(hp, autoload, strlen(autoload), 0);*/
+	sig[cur++] = '(';
+
+	if (items > 2) /* we have arguments */
+		for (i = 2; i < items; i++) {
+			parami = ST(i);
+			if (SvROK(parami) && SvTYPE(SvRV(parami)) == SVt_PVMG) {
+				tmp_param = SvIV((SV*)SvRV(parami));
+				pd_param = INT2PTR(PerlDroid *,tmp_param);
+				pclass = pd_param->class;
+				cur += perl_obj_to_java_class(pclass, sig + cur);
+				params[i - 1].l = (jobject) pd_param->jobj;
+			} else {
+				if (SvIOKp(parami)) {
+					sig[cur++] = 'I';
+					params[i - 1].i = (jint) SvIV(parami);
+				} else if (SvNOKp(parami)) {
+					sig[cur++] = 'D';
+					params[i - 1].d = (jdouble) SvNV(parami);
+				} else if (SvPOKp(parami)) {
+					SvPV(parami, len);
+					if (len == 1)
+						sig[cur++] = 'C';
+					else
+						sig[cur++] = 's';
+					params[i - 1].l = (jobject) (*my_jnienv)->NewStringUTF(my_jnienv, SvPV_nolen(parami));
+				} else {
+					croak("Type not recognized param #%d", i);
+				}
+			}
+		}
+	sig[cur++] = ')';
+	sig[cur++] = 'V';
+	sig[cur] = '\0';
+	
+	for (i = 0; i <= av_len((AV*)SvRV(*app)); i++) {
+		proto = av_fetch((AV*)SvRV(*app), i, 0);
+		proto_str = SvPV_nolen(*proto);
+		warn("comp_sig %s, %s", sig, proto_str);
+		if (comp_sig(sig, proto_str)) {
+			fsig = 1;
+			break;
+		}
+	}
+
+	if (!fsig)
+		croak("Signature not found");
+
+	perl_obj_to_java_class(CLASS + 11, jclazz);
 
 	jniClass = (*my_jnienv)->FindClass(my_jnienv, jclazz);
 
@@ -239,9 +344,10 @@ XS_constructor(hp, ...)
 	ret->sigs = newSVsv((SV*)ST(0));
 	ret->jobj = jniObject;
 	RETVAL = ret;
-
    OUTPUT:
 	RETVAL
+
+
 
 MODULE = PerlDroid  PACKAGE = PerlDroidPtr
 
@@ -250,4 +356,5 @@ DESTROY(perldroid)
 	PerlDroid *perldroid;
 	CODE:
 		SvREFCNT_dec(perldroid->sigs);
+		safefree(perldroid->class);
 		safefree(perldroid);
