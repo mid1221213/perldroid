@@ -9,7 +9,7 @@ extern JNIEnv *my_jnienv;
 char *nat2cls[] = {
 	"Zjava/lang/Boolean",
 	"Bjava/lang/Byte",
-	"Cjava/lang/Char",
+	"Cjava/lang/Character",
 	"Sjava/lang/Short",
 	"Ijava/lang/Int",
 	"Jjava/lang/Long",
@@ -67,7 +67,7 @@ static int get_type(char **s, char *sb)
 
 static int comp_types(char *t1, char *t2)
 {
-	int lo;
+	int lo, ok;
 	char *f1 = NULL, *f2 = NULL, c;
 	jclass jc1, jc2;
 
@@ -96,7 +96,15 @@ static int comp_types(char *t1, char *t2)
 
 	jc1 = (*my_jnienv)->FindClass(my_jnienv, f1);
 	jc2 = (*my_jnienv)->FindClass(my_jnienv, f2);
-	return (*my_jnienv)->IsAssignableFrom(my_jnienv, jc2, jc1);
+
+	ok = (*my_jnienv)->IsAssignableFrom(my_jnienv, jc1, jc2);
+
+	if (!ok && *t1 == 'C') {
+		jc1 = (*my_jnienv)->FindClass(my_jnienv, "java/lang/String");
+		ok = (*my_jnienv)->IsAssignableFrom(my_jnienv, jc1, jc2);
+	}
+
+	return ok;
 }
 
 static int comp_sig(char *sig, char *test_sig)
