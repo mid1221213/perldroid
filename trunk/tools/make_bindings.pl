@@ -26,7 +26,7 @@ if ($pass == 2) {
     mkdir "$target/PerlDroid";
 
     open(OUTPM, ">$target/PerlDroid.pm");
-    print OUTPM "package PerlDroid;\nrequire DynaLoader;\n\@ISA = qw/DynaLoader/;\n\n# Constructor\nsub new\n{\n  return XS_constructor(ref(shift), \@_);\n}\n\n# for methods\nsub AUTOLOAD {\n  return XS_method(\$AUTOLOAD, \@_)\n}\n\nbootstrap PerlDroid;\n1;";
+    print OUTPM "package PerlDroid;\nrequire DynaLoader;\n\@ISA = qw/DynaLoader/;\n\n# Constructor\nsub new\n{\n  return XS_constructor(\@_);\n}\n\n# for methods\nsub AUTOLOAD {\n  return XS_method(\$AUTOLOAD, \@_)\n}\n\nbootstrap PerlDroid;\n1;";
     close(OUTPM);
 
     open(OUTPROXY, ">proxy_classes.list");
@@ -43,6 +43,8 @@ our %class_methods;
 our %seen_proxy;
 our $retval;
 our @params;
+our $uses;
+our %used;
 our $java2jni = {
     ''        => '',
     'void'    => 'V',
@@ -127,10 +129,10 @@ sub package_
 	print OUT_PKG "package $pkg_name;\nrequire Exporter;\nour \@ISA = ('Exporter');\nour \@EXPORT = qw($exports);\n\n";
 
  	foreach my $class (@pkg_classes) {
- 	    print OUT_PKG "local *${pkg_name}::${class}::new = \\&PerlDroid::new;\nlocal *${pkg_name}::${class}::AUTOLOAD = \\&PerlDroid::AUTOLOAD;\n";
+ 	    print OUT_PKG "*${pkg_name}::${class}::new = \\&PerlDroid::new;\n*${pkg_name}::${class}::AUTOLOAD = \\&PerlDroid::AUTOLOAD;\n";
  	}
 
-	print OUT_PKG "\n$make_obj\n1;\n";
+	print OUT_PKG "\n$uses\n$make_obj\n1;\n";
 
 	close(OUT_PKG);
     }
@@ -150,6 +152,9 @@ sub class
 
     $name =~ s/\$/::/g;
     $class_name = "${pkg_name}::$name";
+
+    $uses = '';
+    %used = ();
 }
 
 sub constructor
@@ -166,9 +171,17 @@ sub method
 {
     my ($expat, $element, %attrs) = @_;
 
-    $retval = cjava2jni($attrs{'return'}) if $pass == 2;
+    $retval = cjava2jni($attrs{'return'}) || 'V' if $pass == 2;
     $meth_name = $attrs{name};
     @params = ();
+
+    if ($pass == 2 && $retval =~ /^\[*L(.*);$/) {
+	my $to_use = $1;
+	$to_use =~ s/\/[^\/]+$//g;
+	$to_use =~ s/\//::/g;
+	$to_use = "PerlDroid::$to_use";
+	$uses .= "use $to_use;\n" unless $used{$to_use}++ || $to_use eq $pkg_name;
+    }
 
     print OUTPROXY "$class_name\n" if $pass == 2 && !$seen_proxy{$class_name}++ && $meth_name =~ /^on.+/;
 }
