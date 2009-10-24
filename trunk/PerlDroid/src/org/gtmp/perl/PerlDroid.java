@@ -52,6 +52,7 @@ public class PerlDroid extends Activity
 	"DynaLoader",
 	"encoding",
 	"Exporter",
+	"Exporter::Heavy",
 	"feature",
 	"fields",
 	"if",
