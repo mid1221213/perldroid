@@ -22,11 +22,13 @@ static void (*my_Perl_sys_term)(void);
 static void (*my_perl_free)(pTHXx);
 static SV* (*my_Perl_get_sv)(pTHX_ const char *, I32);
 static IV (*my_Perl_sv_2iv_flags)(pTHX_ SV*, I32);
+static SV* (*my_Perl_sv_2mortal)(pTHX_ SV* sv);
 CV* (*my_Perl_newXS)(pTHX_ const char*, XSUBADDR_t, const char*);
 void (*my_boot_DynaLoader)(pTHX_ CV* cv);
 
 #define Perl_get_sv my_Perl_get_sv
 #define Perl_sv_2iv_flags my_Perl_sv_2iv_flags
+#define Perl_sv_2mortal my_Perl_sv_2mortal
 #define Perl_newXS  my_Perl_newXS
 
 int
@@ -46,6 +48,7 @@ open_libperl_so(void)
     my_Perl_sys_term     = dlsym(lp_h, "Perl_sys_term");
     my_Perl_get_sv       = dlsym(lp_h, "Perl_get_sv");
     my_Perl_sv_2iv_flags = dlsym(lp_h, "Perl_sv_2iv_flags");
+    my_Perl_sv_2mortal   = dlsym(lp_h, "Perl_sv_2mortal");
     my_Perl_newXS        = dlsym(lp_h, "Perl_newXS");
     my_boot_DynaLoader   = dlsym(lp_h, "boot_DynaLoader");
   } else
@@ -124,10 +127,10 @@ run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
     my_perl_run(my_perl);
     
     svret = my_Perl_eval_pv(my_perl, ebuf, TRUE);
-    ret = SvIV(svret);
+    ret = SvIV(sv_2mortal(svret));
     
     PL_perl_destruct_level = 1;
-    my_perl_destruct(my_perl);
+    //my_perl_destruct(my_perl); FIXME: why does it takes all memory???
     my_perl_free(my_perl);
     my_Perl_sys_term();
 
