@@ -11,8 +11,8 @@ libPerlDroid.so: libPerlDroid.o libperl.so Makefile
 libPerlDroid.o:  libPerlDroid.c Makefile
 	agcc -c libPerlDroid.c  -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -I${HOME}/perl-5.10.0/install_me_here/usr/lib/perl/5.10.0/arm-linux-multi/CORE/ -I${HOME}/mydroid/dalvik/libnativehelper/include/nativehelper/
 
-PerlDroid.so: PerlDroid.o Makefile libperl.so
-	agcc -shared -o PerlDroid.so PerlDroid.o ${HOME}/mydroid/out/target/product/generic/obj/SHARED_LIBRARIES/libnativehelper_intermediates/JNIHelp.o -L. -ldl -lcutils -lperl
+PerlDroid.so: PerlDroid.o Makefile libperl.so libPerlDroid.so
+	agcc -shared -o PerlDroid.so PerlDroid.o ${HOME}/mydroid/out/target/product/generic/obj/SHARED_LIBRARIES/libnativehelper_intermediates/JNIHelp.o -L. -ldl -lcutils -lperl -lPerlDroid
 
 PerlDroid.o: PerlDroid.c Makefile
 	agcc -c PerlDroid.c  -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -I${HOME}/perl-5.10.0/install_me_here/usr/lib/perl/5.10.0/arm-linux-multi/CORE/ -I${HOME}/mydroid/dalvik/libnativehelper/include/nativehelper/

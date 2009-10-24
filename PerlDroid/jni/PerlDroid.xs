@@ -4,6 +4,31 @@
 #include <jni.h>
 #include <string.h>
 
+extern JNIEnv *my_jnienv;
+
+static void perl_obj_to_java_class(char *perl_obj, char *java_class)
+{
+	char c;
+	perl_obj += 11; /* strlen("PerlDroid::") */
+
+	while (c = *(perl_obj++)) {
+		switch(c) {
+			case ':':
+					*(java_class++) = '/';
+					perl_obj++;
+					break;
+			case '_':
+					*(java_class++) = '$';
+					break;
+			default:
+					*(java_class++) = c;
+					break;
+		}
+	}
+
+	*java_class = '\0';
+}
+
 static int get_type(char **s, char *sb)
 {
 	switch(**s) {
@@ -81,8 +106,12 @@ XS_constructor(hp, ...)
 	char* pclass;
 	STRLEN len;
 	SV* parami;
+	char jclazz[128];
+	jclass jniClass;
+	jmethodID jniConstructorID;
+	jobject jniObject;
    CODE:
-	class = HvNAME(SvSTASH(SvRV(hp)));
+	class = HvNAME(SvSTASH(hp));
 	app = hv_fetch(hp, "<init>", 6, 0);
 	sig[cur++] = '(';
 
@@ -100,6 +129,7 @@ XS_constructor(hp, ...)
 						sig[cur++] = '$';
 					else
 						sig[cur++] = pclass[j];
+				sig[cur++] = ';';
 			} else {
 				if (SvIOKp(parami)) {
 					sig[cur++] = 'I';
@@ -131,6 +161,24 @@ XS_constructor(hp, ...)
 
 	if (!fsig)
 		croak("Signature not found");
+
+	perl_obj_to_java_class(class, jclazz);
+
+	jniClass = (*my_jnienv)->FindClass(my_jnienv, jclazz);
+
+	if(!jniClass) {
+		croak("Can't find class %s", jclazz);
+	}
+
+	jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", proto_str);
+	if(!jniConstructorID) {
+		croak("Can't find constructor for class %s", jclazz);
+	}
+
+	jniObject = (*my_jnienv)->NewObject(my_jnienv, jniClass, jniConstructorID);
+	if(!jniObject) {
+		croak("Can't instantiate class %s", jclazz);
+	}
 
 	ret = newSViv(0);
 
