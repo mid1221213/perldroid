@@ -124,13 +124,13 @@ sub package_
 	my $exports = join(' ', @exports);
 
 	open(OUT_PKG, ">$target/$pkg_fname.pm") or die "Can't open $target/$pkg_fname.pm: $!";
-	print OUT_PKG "package $pkg_name;\nrequire Exporter;\nour \@ISA = ('Exporter');\nour \@EXPORT = qw($exports);\n{\n    no strict 'refs';\n";
+	print OUT_PKG "package $pkg_name;\nrequire Exporter;\nour \@ISA = ('Exporter');\nour \@EXPORT = qw($exports);\n\n";
 
-	foreach my $class (@pkg_classes) {
-	    print OUT_PKG "    *{${pkg_name}::${class}::new} = \&PerlDroid::new;\n    *{${pkg_name}::${class}::AUTOLOAD} = \&PerlDroid::AUTOLOAD;\n";
-	}
+ 	foreach my $class (@pkg_classes) {
+ 	    print OUT_PKG "local *${pkg_name}::${class}::new = \\&PerlDroid::new;\nlocal *${pkg_name}::${class}::AUTOLOAD = \\&PerlDroid::AUTOLOAD;\n";
+ 	}
 
-	print OUT_PKG "}\n$make_obj\n";
+	print OUT_PKG "\n$make_obj\n1;\n";
 
 	close(OUT_PKG);
     }

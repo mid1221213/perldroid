@@ -107,22 +107,26 @@ run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
   int argc = 3;
   char ebuf[255];
   char *argv[] = { "org.gtmp.perl", "-e", "0" };
+  FILE *file;
+  SV *svret;
 
   if (open_libperl_so()) {
-    sprintf(ebuf, "use PerlDroid;$a = %d + %d", a, b);
-    
+    sprintf(ebuf, "use PerlDroid;use PerlDroid::org::json; $a = %d + %d; print \"\\$a=$a\\n\";$a", a, b);
+
     my_Perl_sys_init(&argc, (char ***) &argv);
     my_perl = my_perl_alloc();
-    my_perl_construct( my_perl );
+    PL_perl_destruct_level = 1;
+    my_perl_construct(my_perl);
     
     my_perl_parse(my_perl, xs_init, 3, argv, NULL);
 
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
     my_perl_run(my_perl);
     
-    my_Perl_eval_pv(my_perl, ebuf, TRUE);
-    ret = SvIV(get_sv("a", FALSE));
+    svret = my_Perl_eval_pv(my_perl, ebuf, TRUE);
+    ret = SvIV(svret);
     
+    PL_perl_destruct_level = 1;
     my_perl_destruct(my_perl);
     my_perl_free(my_perl);
     my_Perl_sys_term();
