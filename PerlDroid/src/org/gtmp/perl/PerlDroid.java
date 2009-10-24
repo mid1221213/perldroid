@@ -199,7 +199,7 @@ public class PerlDroid extends Activity
 	    ZipEntry entry;
 	    while ((entry = zin.getNextEntry()) != null) {
 	    
-		String outFilename = entry.getName();;
+		String outFilename = entry.getName();
 
 		// Compute the file's directory and create it if needed
 		File basedirectory = getFileStreamPath(version);
