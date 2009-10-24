@@ -18,6 +18,11 @@ char *nat2cls[] = {
 	"sjava/lang/String"
 };
 
+typedef struct {
+	SV *sigs;
+	jobject jobj;
+} PerlDroid;
+
 static int perl_obj_to_java_class(char *perl_obj, char *java_class)
 {
 	char c;
@@ -141,19 +146,18 @@ static int comp_sig(char *sig, char *test_sig)
 
 MODULE = PerlDroid  PACKAGE = PerlDroid
 
-SV*
+PerlDroid *
 XS_constructor(hp, ...)
 	HV* hp;
    PREINIT:
 	HV* rh;
 	SV** proto;
 	char *proto_str;
-	SV* ret;
 	int i;
 	int j;
 	int cur = 0;
 	int fsig = 0;
-	char* class;
+	char* CLASS;
 	SV** app;
 	char sig[1024];
 	char* pclass;
@@ -164,8 +168,9 @@ XS_constructor(hp, ...)
 	jmethodID jniConstructorID;
 	jobject jniObject;
 	jvalue params[128];
+	PerlDroid *ret;
    CODE:
-	class = HvNAME(SvSTASH(hp));
+	CLASS = HvNAME(SvSTASH(hp));
 	app = hv_fetch(hp, "<init>", 6, 0);
 	sig[cur++] = '(';
 
@@ -212,7 +217,7 @@ XS_constructor(hp, ...)
 	if (!fsig)
 		croak("Signature not found");
 
-	perl_obj_to_java_class(class, jclazz);
+	perl_obj_to_java_class(CLASS, jclazz);
 
 	jniClass = (*my_jnienv)->FindClass(my_jnienv, jclazz);
 
@@ -230,8 +235,19 @@ XS_constructor(hp, ...)
 		croak("Can't instantiate class %s", jclazz);
 	}
 
-	ret = newSViv(0);
-
+	ret = (PerlDroid *)safemalloc(sizeof(PerlDroid));
+	ret->sigs = newSVsv((SV*)ST(0));
+	ret->jobj = jniObject;
 	RETVAL = ret;
+
    OUTPUT:
 	RETVAL
+
+MODULE = PerlDroid  PACKAGE = PerlDroidPtr
+
+void
+DESTROY(perldroid)
+	PerlDroid *perldroid;
+	CODE:
+		SvREFCNT_dec(perldroid->sigs);
+		safefree(perldroid);
