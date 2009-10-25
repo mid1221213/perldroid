@@ -11,7 +11,7 @@ char *nat2cls[] = {
 	"Bjava/lang/Byte",
 	"Cjava/lang/Character",
 	"Sjava/lang/Short",
-	"Ijava/lang/Int",
+	"Ijava/lang/Integer",
 	"Jjava/lang/Long",
 	"Fjava/lang/Float",
 	"Djava/lang/Double",
@@ -49,16 +49,45 @@ static int perl_obj_to_java_class(char *perl_obj, char *java_class)
 	return java_class - java_class_orig;
 }
 
+static void java_class_to_perl_obj(char *java_class, char *perl_obj)
+{
+	char c;
+
+	strcpy(perl_obj, "PerlDroid::");
+	perl_obj += 11;
+
+	while (c = *(java_class++)) {
+		switch(c) {
+			case '/':
+					*(perl_obj++) = ':';
+					*(perl_obj++) = ':';
+					break;
+			case '$':
+					*(perl_obj++) = '_';
+					break;
+			case 'L':
+			case ';':
+					break;
+			default:
+					*(perl_obj++) = c;
+					break;
+		}
+	}
+
+	*perl_obj = '\0';
+}
+
 static int get_type(char **s, char *sb)
 {
 	switch(**s) {
+		case '\0':
+				break;
 		case 'L':
 				while ((*(sb++) = *((*s)++)) != ';')
 					;
 				break;
 		case ')':
-				(*s)++;
-				*(sb++) = '\0';
+				*sb = '\0';
 				return 1;
 				break;
 		default:
@@ -66,7 +95,7 @@ static int get_type(char **s, char *sb)
 				break;
 	}
 
-	*(sb++) = '\0';
+	*sb = '\0';
 	return **s == '\0' || **s == ')';
 }
 
@@ -112,11 +141,11 @@ static int comp_types(char *t1, char *t2)
 	return ok;
 }
 
-static int comp_sig(char *sig, char *test_sig)
+static char *comp_sig(char *sig, char *test_sig)
 {
-	char *s1, *s2;
+	char *s1, *s2, *rets;
 	char sb1[128], sb2[128];
-	int lo, in_param = 1;
+	int lo;
 
 	if (*sig != '(' || *test_sig != '(')
 		croak("bad signatures: %s <=> %s", sig, test_sig);
@@ -132,10 +161,10 @@ static int comp_sig(char *sig, char *test_sig)
 
 		if (ep1 || ep2) {
 			if (ep1 && ep2) {
-				if (in_param)
-					in_param = 0;
-				else
-					return 1;
+				s2++;
+				ep2 = get_type(&s2, sb2);
+				rets = strdup(sb2);
+				return rets;
 			} else
 				return 0;
 		}
@@ -154,7 +183,7 @@ XS_constructor(hp, ...)
 	char *proto_str;
 	int i;
 	int cur = 0;
-	int fsig = 0;
+	char *ret_type;
 	char* CLASS;
 	SV** app;
 	char sig[1024];
@@ -194,11 +223,15 @@ XS_constructor(hp, ...)
 					params[i - 1].d = (jdouble) SvNV(parami);
 				} else if (SvPOKp(parami)) {
 					SvPV(parami, len);
-					if (len == 1)
+					/*if (len == 1) {
+						char *str;
 						sig[cur++] = 'C';
-					else
+						str = SvPV_nolen(parami);
+						params[i - 1].c = str[0];
+					} else {*/
 						sig[cur++] = 's';
-					params[i - 1].l = (jobject) (*my_jnienv)->NewStringUTF(my_jnienv, SvPV_nolen(parami));
+						params[i - 1].l = (jobject) (*my_jnienv)->NewStringUTF(my_jnienv, SvPV_nolen(parami));
+					/*}*/
 				} else {
 					croak("Type not recognized param #%d", i);
 				}
@@ -212,30 +245,28 @@ XS_constructor(hp, ...)
 		proto = av_fetch((AV*)SvRV(*app), i, 0);
 		proto_str = SvPV_nolen(*proto);
 		warn("comp_sig %s, %s", sig, proto_str);
-		if (comp_sig(sig, proto_str)) {
-			fsig = 1;
+		if (ret_type = comp_sig(sig, proto_str))
 			break;
-		}
 	}
 
-	if (!fsig)
+	if (!ret_type)
 		croak("Signature not found");
 
 	perl_obj_to_java_class(CLASS + 11, jclazz);
 
 	jniClass = (*my_jnienv)->FindClass(my_jnienv, jclazz);
 
-	if(!jniClass) {
+	if (!jniClass) {
 		croak("Can't find class %s", jclazz);
 	}
 
 	jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", proto_str);
-	if(!jniConstructorID) {
+	if (!jniConstructorID) {
 		croak("Can't find constructor for class %s", jclazz);
 	}
 
 	jniObject = (*my_jnienv)->NewObjectA(my_jnienv, jniClass, jniConstructorID, params);
-	if(!jniObject) {
+	if (!jniObject) {
 		croak("Can't instantiate class %s", jclazz);
 	}
 
@@ -243,63 +274,74 @@ XS_constructor(hp, ...)
 	ret->sigs  = newSVsv((SV*)ST(0));
 	ret->jobj  = jniObject;
 	ret->class = strdup(CLASS);
+	free(ret_type);
+
 	RETVAL = ret;
 
    OUTPUT:
 	RETVAL
 
 PerlDroid *
-XS_method(autoload, obj, ...)
-	char *autoload;
+XS_method(method, obj, ...)
+	char *method;
 	PerlDroid *obj;
    PREINIT:
 	SV** proto;
 	char *proto_str;
 	int i;
 	int cur = 0;
-	int fsig = 0;
+	char *ret_type;
 	char* CLASS;
 	SV** app;
 	char sig[1024];
 	char* pclass;
 	STRLEN len;
 	SV* parami;
-	char jclazz[128];
+	char clazz[128];
 	jclass jniClass;
-	jmethodID jniConstructorID;
+	jmethodID jniMethodID;
 	jobject jniObject;
 	jvalue params[128];
 	PerlDroid *ret;
 	IV tmp_param;
 	PerlDroid *pd_param;
+	HV *hp;
+	SV *psigs;
    CODE:
-	/*CLASS = HvNAME(SvSTASH(hp));
-	app = hv_fetch(hp, autoload, strlen(autoload), 0);*/
+	hp = (HV*)SvRV(obj->sigs);
+	CLASS = obj->class;
+	app = hv_fetch(hp, method, strlen(method), 0);
 	sig[cur++] = '(';
 
-	if (items > 2) /* we have arguments */
+	if (items > 2)
 		for (i = 2; i < items; i++) {
 			parami = ST(i);
 			if (SvROK(parami) && SvTYPE(SvRV(parami)) == SVt_PVMG) {
 				tmp_param = SvIV((SV*)SvRV(parami));
-				pd_param = INT2PTR(PerlDroid *,tmp_param);
+				pd_param = INT2PTR(PerlDroid *, tmp_param);
 				pclass = pd_param->class;
-				cur += perl_obj_to_java_class(pclass, sig + cur);
-				params[i - 1].l = (jobject) pd_param->jobj;
+				sig[cur++] = 'L';
+				cur += perl_obj_to_java_class(pclass + 11, sig + cur);
+				sig[cur++] = ';';
+				params[i - 2].l = (jobject) pd_param->jobj;
 			} else {
 				if (SvIOKp(parami)) {
 					sig[cur++] = 'I';
-					params[i - 1].i = (jint) SvIV(parami);
+					params[i - 2].i = (jint) SvIV(parami);
 				} else if (SvNOKp(parami)) {
 					sig[cur++] = 'D';
-					params[i - 1].d = (jdouble) SvNV(parami);
+					params[i - 2].d = (jdouble) SvNV(parami);
 				} else if (SvPOKp(parami)) {
 					SvPV(parami, len);
-					if (len == 1)
+					/*if (len == 1) {
+						char *str;
 						sig[cur++] = 'C';
-					else
+						str = SvPV_nolen(parami);
+						params[i - 2].c = str[0];
+					} else {*/
 						sig[cur++] = 's';
-					params[i - 1].l = (jobject) (*my_jnienv)->NewStringUTF(my_jnienv, SvPV_nolen(parami));
+						params[i - 2].l = (jobject) (*my_jnienv)->NewStringUTF(my_jnienv, SvPV_nolen(parami));
+					/*}*/
 				} else {
 					croak("Type not recognized param #%d", i);
 				}
@@ -313,41 +355,42 @@ XS_method(autoload, obj, ...)
 		proto = av_fetch((AV*)SvRV(*app), i, 0);
 		proto_str = SvPV_nolen(*proto);
 		warn("comp_sig %s, %s", sig, proto_str);
-		if (comp_sig(sig, proto_str)) {
-			fsig = 1;
+		if (ret_type = comp_sig(sig, proto_str))
 			break;
-		}
 	}
 
-	if (!fsig)
+	if (!ret_type)
 		croak("Signature not found");
 
-	perl_obj_to_java_class(CLASS + 11, jclazz);
-
-	jniClass = (*my_jnienv)->FindClass(my_jnienv, jclazz);
-
-	if(!jniClass) {
-		croak("Can't find class %s", jclazz);
+	perl_obj_to_java_class(CLASS + 11, clazz);
+	jniClass = (*my_jnienv)->FindClass(my_jnienv, clazz);
+	if (!jniClass) {
+		croak("Can't find class %s", clazz);
 	}
 
-	jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", proto_str);
-	if(!jniConstructorID) {
-		croak("Can't find constructor for class %s", jclazz);
+	jniMethodID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, method, proto_str);
+	if (!jniMethodID) {
+		croak("Can't find method %s for class %s", method, clazz);
 	}
 
-	jniObject = (*my_jnienv)->NewObjectA(my_jnienv, jniClass, jniConstructorID, params);
-	if(!jniObject) {
-		croak("Can't instantiate class %s", jclazz);
+	jniObject = (*my_jnienv)->CallObjectMethodA(my_jnienv, obj->jobj, jniMethodID, params);
+	if (!jniObject) {
+		croak("Can't call method %s", method);
 	}
 
 	ret = (PerlDroid *)safemalloc(sizeof(PerlDroid));
-	ret->sigs = newSVsv((SV*)ST(0));
-	ret->jobj = jniObject;
+	java_class_to_perl_obj(ret_type, clazz);
+	ret->jobj  = jniObject;
+	psigs = get_sv(clazz, FALSE);
+	ret->sigs = newSVsv(psigs);
+	ret->class = strdup(clazz);
+
+	free(ret_type);
+	warn("method %s returning a %s", method, clazz);
+
 	RETVAL = ret;
    OUTPUT:
 	RETVAL
-
-
 
 MODULE = PerlDroid  PACKAGE = PerlDroidPtr
 
@@ -356,5 +399,5 @@ DESTROY(perldroid)
 	PerlDroid *perldroid;
 	CODE:
 		SvREFCNT_dec(perldroid->sigs);
-		safefree(perldroid->class);
+		free(perldroid->class);
 		safefree(perldroid);

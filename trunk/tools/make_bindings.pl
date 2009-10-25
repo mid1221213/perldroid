@@ -26,7 +26,9 @@ if ($pass == 2) {
     mkdir "$target/PerlDroid";
 
     open(OUTPM, ">$target/PerlDroid.pm");
-    print OUTPM "package PerlDroid;\nrequire DynaLoader;\n\@ISA = qw/DynaLoader/;\n\n# Constructor\nsub new\n{\n  return XS_constructor(\@_);\n}\n\n# for methods\nsub AUTOLOAD {\n  return XS_method(\$AUTOLOAD, \@_)\n}\n\nbootstrap PerlDroid;\n1;";
+#    print OUTPM "package PerlDroid;\nrequire DynaLoader;\n\@ISA = qw/DynaLoader/;\n\n# Constructor\nsub new\n{\n  return XS_constructor(\@_);\n}\n\n# for methods\nsub AUTOLOAD {\n  return XS_method(\$AUTOLOAD, \@_)\n}\n\nbootstrap PerlDroid;\n1;\n\n";
+    print OUTPM "package PerlDroid;\nrequire DynaLoader;\n\@ISA = qw/DynaLoader/;\n\n# Constructor\nsub new\n{\n  return XS_constructor(\@_);\n}\n\nbootstrap PerlDroid;\n1;\n\n";
+    print OUTPM "package PerlDroidPtr;\n\n# for methods\nsub AUTOLOAD {\n  my \$name = \$AUTOLOAD;  \$name =~ s/.*:://;\n  warn \"AUTOLOAD: \$name\";\n  return if \$name eq 'DESTROY';\n  return &PerlDroid::XS_method(\$name, \@_)\n}\n\n1;";
     close(OUTPM);
 
     open(OUTPROXY, ">proxy_classes.list");
@@ -128,9 +130,9 @@ sub package_
 	open(OUT_PKG, ">$target/$pkg_fname.pm") or die "Can't open $target/$pkg_fname.pm: $!";
 	print OUT_PKG "package $pkg_name;\nrequire Exporter;\nour \@ISA = ('Exporter');\nour \@EXPORT = qw($exports);\n\n";
 
- 	foreach my $class (@pkg_classes) {
- 	    print OUT_PKG "*${pkg_name}::${class}::new = \\&PerlDroid::new;\n*${pkg_name}::${class}::AUTOLOAD = \\&PerlDroid::AUTOLOAD;\n";
- 	}
+  	foreach my $class (@pkg_classes) {
+  	    print OUT_PKG "*${pkg_name}::${class}::new = \\&PerlDroid::new;\n*${pkg_name}::${class}Ptr::AUTOLOAD = \\&PerlDroid::AUTOLOAD;\n";
+  	}
 
 	print OUT_PKG "\n$uses\n$make_obj\n1;\n";
 
