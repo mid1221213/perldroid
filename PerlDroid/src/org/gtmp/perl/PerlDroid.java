@@ -80,6 +80,7 @@ public class PerlDroid extends Activity
 
     public static native int run_perl(int a, int b);
     public static native android.app.AlertDialog nativeOnCreateDialog(PerlDroid th, DialogInterface.OnClickListener pl, DialogInterface.OnClickListener nl);
+    public static native int perlShowDialog(PerlDroid th, DialogInterface.OnClickListener pl, DialogInterface.OnClickListener nl);
 
     static
     {
@@ -126,24 +127,6 @@ public class PerlDroid extends Activity
 	    Log("Downloading mandatory core modules");
 	    downloadCoreModules();
 	}
-
-	//	showDialog(0);
-    }
-
-    protected Dialog onCreateDialog(int id) {
-	DialogInterface.OnClickListener pl = new DialogInterface.OnClickListener() {
-	    public void onClick(DialogInterface dialog, int id) {
-		dialog.cancel();
-	    }
-	};
-
-	DialogInterface.OnClickListener nl = new DialogInterface.OnClickListener() {
-	    public void onClick(DialogInterface dialog, int id) {
-		PerlDroid.this.finish();
-	    }
-	};
-
-	return nativeOnCreateDialog(this, pl, nl);
     }
 
     protected void downloadCoreModules()
@@ -153,8 +136,21 @@ public class PerlDroid extends Activity
 		{
 		    Log((java.lang.String) msg.obj);
 		    if (msg.obj == "Done") {
-			int ret = run_perl(5, 4);
-			Log("Result of 5+4: " + ret);
+			DialogInterface.OnClickListener pl = new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+				    dialog.cancel();
+				}
+			    };
+			
+			DialogInterface.OnClickListener nl = new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+				    PerlDroid.this.finish();
+				}
+			    };
+			
+			perlShowDialog(PerlDroid.this, pl, nl);
+			//int ret = run_perl(5, 4);
+			//Log("Result of 5+4: " + ret);
 		    }
 		}
 	    };
