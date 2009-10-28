@@ -222,8 +222,8 @@ XS_constructor(hp, ...)
 					sig[cur++] = 'D';
 					params[i - 1].d = (jdouble) SvNV(parami);
 				} else if (SvPOKp(parami)) {
-					SvPV(parami, len);
-					/*if (len == 1) {
+					/*SvPV(parami, len);
+					if (len == 1) {
 						char *str;
 						sig[cur++] = 'C';
 						str = SvPV_nolen(parami);
@@ -339,8 +339,8 @@ XS_method(method, obj, ...)
 					sig[cur++] = 'D';
 					params[i - 2].d = (jdouble) SvNV(parami);
 				} else if (SvPOKp(parami)) {
-					SvPV(parami, len);
-					/*if (len == 1) {
+					/*SvPV(parami, len);
+					if (len == 1) {
 						char *str;
 						sig[cur++] = 'C';
 						str = SvPV_nolen(parami);
