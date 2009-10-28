@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.widget.*;
 
 public class PerlDroid extends Activity
 {
@@ -81,6 +82,7 @@ public class PerlDroid extends Activity
     public static native int run_perl(int a, int b);
     public static native android.app.AlertDialog nativeOnCreateDialog(PerlDroid th, DialogInterface.OnClickListener pl, DialogInterface.OnClickListener nl);
     public static native int perlShowDialog(PerlDroid th, DialogInterface.OnClickListener pl, DialogInterface.OnClickListener nl);
+    public static native Object perl_callback(Object obj, String m, Object[] args);
 
     static
     {
@@ -122,11 +124,17 @@ public class PerlDroid extends Activity
 	pStatus.setVerticalScrollBarEnabled(true);
 	
 	findViewById(R.id.LinearLayout).setVerticalScrollBarEnabled(true);
+	
+	int ret = run_perl(5, 4);
+	Log("Result of 5+4: " + ret);
 
-	if (!coreAlreadyLoaded()) {
-	    Log("Downloading mandatory core modules");
-	    downloadCoreModules();
-	}
+	Object[] objj = {"toto", true, new RadioGroup.LayoutParams(2, 2) };
+	Object oret = perl_callback(new Object(), "yes", objj);
+    
+// 	if (!coreAlreadyLoaded()) {
+// 	    Log("Downloading mandatory core modules");
+// 	    downloadCoreModules();
+// 	}
     }
 
     protected void downloadCoreModules()

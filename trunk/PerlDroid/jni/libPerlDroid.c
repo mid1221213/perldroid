@@ -8,7 +8,6 @@
 #define CLASSNAME "org/gtmp/perl/PerlDroid"
 
 static PerlInterpreter *my_perl;  /***    The Perl interpreter    ***/
-JNIEnv *my_jnienv;
 
 static void *lp_h;
 
@@ -27,8 +26,24 @@ static SV* (*my_Perl_sv_2mortal)(pTHX_ SV* sv);
 static Malloc_t	(*my_Perl_safesysmalloc)(MEM_SIZE nbytes);
 static SV *(*my_Perl_newSVsv)(pTHX_ SV* old);
 static SV *(*my_Perl_sv_setref_pv)(pTHX_ SV* rv, const char* classname, void* pv);
-CV* (*my_Perl_newXS)(pTHX_ const char*, XSUBADDR_t, const char*);
-void (*my_boot_DynaLoader)(pTHX_ CV* cv);
+static int (*my_Perl_call_sv)(pTHX_ SV* sv, I32 flags);
+static CV* (*my_Perl_newXS)(pTHX_ const char*, XSUBADDR_t, const char*);
+static CV* (*my_Perl_get_cv)(pTHX_ const char* name, I32 flags);
+
+static void (*my_Perl_push_scope)(pTHX);
+static void (*my_Perl_save_int)(pTHX_ int* intp);
+static void (*my_Perl_markstack_grow)(pTHX);
+static SV** (*my_Perl_stack_grow)(pTHX_ SV** sp, SV** p, int n);
+static SV* (*my_Perl_newSViv)(pTHX_ IV i);
+static SV* (*my_Perl_newSVnv)(pTHX_ NV n);
+static SV* (*my_Perl_newSVpv)(pTHX_ const char* s, STRLEN len);
+static SV* (*my_Perl_sv_newmortal)(pTHX);
+static NV (*my_Perl_sv_2nv)(pTHX_ SV* sv);
+static char* (*my_Perl_sv_2pv_flags)(pTHX_ SV* sv, STRLEN* lp, I32 flags);
+static void (*my_Perl_free_tmps)(pTHX);
+static void (*my_Perl_pop_scope)(pTHX);
+
+static void (*my_boot_DynaLoader)(pTHX_ CV* cv);
 
 #define Perl_get_sv my_Perl_get_sv
 #define Perl_sv_2iv_flags my_Perl_sv_2iv_flags
@@ -36,7 +51,28 @@ void (*my_boot_DynaLoader)(pTHX_ CV* cv);
 #define Perl_newXS  my_Perl_newXS
 #define Perl_safesysmalloc my_Perl_safesysmalloc
 #define Perl_newSVsv my_Perl_newSVsv
+#define Perl_call_sv my_Perl_call_sv
 #define Perl_sv_setref_pv my_Perl_sv_setref_pv
+#define Perl_get_cv my_Perl_get_cv
+#define Perl_push_scope my_Perl_push_scope
+#define Perl_save_int my_Perl_save_int
+#define Perl_markstack_grow my_Perl_markstack_grow
+#define Perl_stack_grow my_Perl_stack_grow
+#define Perl_newSViv my_Perl_newSViv
+#define Perl_newSVnv my_Perl_newSVnv
+#define Perl_newSVpv my_Perl_newSVpv
+#define Perl_sv_newmortal my_Perl_sv_newmortal
+#define Perl_sv_2nv my_Perl_sv_2nv
+#define Perl_sv_2pv_flags my_Perl_sv_2pv_flags
+#define Perl_free_tmps my_Perl_free_tmps
+#define Perl_pop_scope my_Perl_pop_scope
+
+JNIEnv *my_jnienv;
+typedef struct {
+	char *class;
+	SV *sigs;
+	jobject jobj;
+} PerlDroid;
 
 int
 open_libperl_so(void)
@@ -44,23 +80,37 @@ open_libperl_so(void)
   lp_h = dlopen("/data/data/org.gtmp.perl/lib/libperl.so", RTLD_LAZY);
   
   if (lp_h) {
-    my_Perl_sys_init      = dlsym(lp_h, "Perl_sys_init");
-    my_perl_alloc         = dlsym(lp_h, "perl_alloc");
-    my_perl_construct     = dlsym(lp_h, "perl_construct");
-    my_perl_destruct      = dlsym(lp_h, "perl_destruct");
-    my_perl_parse         = dlsym(lp_h, "perl_parse");
-    my_perl_run           = dlsym(lp_h, "perl_run");
-    my_Perl_eval_pv       = dlsym(lp_h, "Perl_eval_pv");
-    my_perl_free          = dlsym(lp_h, "perl_free");
-    my_Perl_sys_term      = dlsym(lp_h, "Perl_sys_term");
-    my_Perl_get_sv        = dlsym(lp_h, "Perl_get_sv");
-    my_Perl_sv_2iv_flags  = dlsym(lp_h, "Perl_sv_2iv_flags");
-    my_Perl_sv_2mortal    = dlsym(lp_h, "Perl_sv_2mortal");
-    my_Perl_newXS         = dlsym(lp_h, "Perl_newXS");
-    my_Perl_safesysmalloc = dlsym(lp_h, "Perl_safesysmalloc");
-    my_Perl_newSVsv       = dlsym(lp_h, "Perl_newSVsv");
-    my_Perl_sv_setref_pv  = dlsym(lp_h, "Perl_sv_setref_pv");
-    my_boot_DynaLoader    = dlsym(lp_h, "boot_DynaLoader");
+    my_Perl_sys_init       = dlsym(lp_h, "Perl_sys_init");
+    my_perl_alloc          = dlsym(lp_h, "perl_alloc");
+    my_perl_construct      = dlsym(lp_h, "perl_construct");
+    my_perl_destruct       = dlsym(lp_h, "perl_destruct");
+    my_perl_parse          = dlsym(lp_h, "perl_parse");
+    my_perl_run            = dlsym(lp_h, "perl_run");
+    my_Perl_eval_pv        = dlsym(lp_h, "Perl_eval_pv");
+    my_perl_free           = dlsym(lp_h, "perl_free");
+    my_Perl_sys_term       = dlsym(lp_h, "Perl_sys_term");
+    my_Perl_get_sv         = dlsym(lp_h, "Perl_get_sv");
+    my_Perl_sv_2iv_flags   = dlsym(lp_h, "Perl_sv_2iv_flags");
+    my_Perl_sv_2mortal     = dlsym(lp_h, "Perl_sv_2mortal");
+    my_Perl_newXS          = dlsym(lp_h, "Perl_newXS");
+    my_Perl_safesysmalloc  = dlsym(lp_h, "Perl_safesysmalloc");
+    my_Perl_newSVsv        = dlsym(lp_h, "Perl_newSVsv");
+    my_Perl_call_sv        = dlsym(lp_h, "Perl_call_sv");
+    my_Perl_sv_setref_pv   = dlsym(lp_h, "Perl_sv_setref_pv");
+    my_Perl_get_cv         = dlsym(lp_h, "Perl_get_cv");
+    my_Perl_push_scope     = dlsym(lp_h, "Perl_push_scope");
+    my_Perl_save_int       = dlsym(lp_h, "Perl_save_int");
+    my_Perl_markstack_grow = dlsym(lp_h, "Perl_markstack_grow");
+    my_Perl_stack_grow     = dlsym(lp_h, "Perl_stack_grow");
+    my_Perl_newSViv        = dlsym(lp_h, "Perl_newSViv");
+    my_Perl_newSVnv        = dlsym(lp_h, "Perl_newSVnv");
+    my_Perl_newSVpv        = dlsym(lp_h, "Perl_newSVpv");
+    my_Perl_sv_newmortal   = dlsym(lp_h, "Perl_sv_newmortal");
+    my_Perl_sv_2nv         = dlsym(lp_h, "Perl_sv_2nv");
+    my_Perl_sv_2pv_flags   = dlsym(lp_h, "Perl_sv_2pv_flags");
+    my_Perl_free_tmps      = dlsym(lp_h, "Perl_free_tmps");
+    my_Perl_pop_scope      = dlsym(lp_h, "Perl_pop_scope");
+    my_boot_DynaLoader     = dlsym(lp_h, "boot_DynaLoader");
   } else
     return 0;
 
@@ -112,12 +162,6 @@ xs_init(pTHX)
   /* DynaLoader is a special case */
   newXS("DynaLoader::boot_DynaLoader", my_boot_DynaLoader, file);
 }
-
-typedef struct {
-	char *class;
-	SV *sigs;
-	jobject jobj;
-} PerlDroid;
 
 jint
 do_dialog_perl(JNIEnv *env, jclass cls, jobject this, jobject pm, jobject nm) {
@@ -215,7 +259,8 @@ run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
 
   if (open_libperl_so()) {
     //    sprintf(ebuf, "$| = 1;use PerlDroid;use PerlDroid::org::json; my $tst = $JSONException->new('c'); print \"\\$tst=$tst\\n\"; $a = %d + %d; print \"\\$a=$a\\n\";$a", a, b);
-    sprintf(ebuf, "$| = 1;use PerlDroid;use PerlDroid::org::json; my $tst = $JSONObject->new($JSONTokener->new('{}')); print \"\\$tst=$tst\\n\"; $a = %d + %d; print \"\\$a=$a\\n\";$a", a, b);
+/*     sprintf(ebuf, "$| = 1;use PerlDroid;use PerlDroid::org::json; my $tst = $JSONObject->new($JSONTokener->new('{}')); print \"\\$tst=$tst\\n\"; $a = %d + %d; print \"\\$a=$a\\n\";$a", a, b); */
+    sprintf(ebuf, "$| = 1;sub yes { my ($arg1, $arg2, $arg3) = @_; print \"arg1=$arg1, arg2=$arg2, arg3=$arg3\\n\";} $a = %d + %d; print \"\\$a=$a\\n\";$a", a, b);
 
     my_Perl_sys_init(&argc, (char ***) &argv);
     my_perl = my_perl_alloc();
@@ -230,15 +275,208 @@ run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
     svret = my_Perl_eval_pv(my_perl, ebuf, TRUE);
     ret = SvIV(sv_2mortal(svret));
     
-    PL_perl_destruct_level = 1;
-    my_perl_destruct(my_perl);
-    my_perl_free(my_perl);
-    my_Perl_sys_term();
+/*     PL_perl_destruct_level = 1; */
+/*     my_perl_destruct(my_perl); */
+/*     my_perl_free(my_perl); */
+/*     my_Perl_sys_term(); */
 
-    close_libperl_so();
+/*     close_libperl_so(); */
   }
 
   return ret;
+}
+
+static void
+java_class_to_perl_obj(char *java_class, char *perl_obj)
+{
+  char c;
+  
+  strcpy(perl_obj, "PerlDroid::");
+  perl_obj += 11;
+  
+  while (c = *(java_class++)) {
+    switch(c) {
+    case '/':
+      *(perl_obj++) = ':';
+      *(perl_obj++) = ':';
+      break;
+    case '$':
+      *(perl_obj++) = '_';
+      break;
+    case 'L':
+    case ';':
+      break;
+    default:
+      *(perl_obj++) = c;
+      break;
+    }
+  }
+  
+  *perl_obj = '\0';
+}
+
+static jobject
+perl_run_callback(jobject obj, jstring m, jobjectArray args)
+{
+  dSP;
+  int count;
+  SV *ret;
+  IV tmp_param;
+  PerlDroid *pd_param;
+  jobject tmp_obj, tmp_obj2, ret_obj;
+  const char *method;
+  CV *sub;
+  jclass jniClass, jniObjClass, jniClassClass, jniIntClass, jniDblClass;
+  jmethodID jniConstructorID, jniMethodID;
+  const char *className;
+  jsize args_len;
+  char arg_type[128], parg_type[128];
+  int lo;
+  int arg_int;
+  double arg_double;
+  const char *arg_str;
+  jobject arg_obj;
+  PerlDroid *arg_pobj;
+  SV *arg_sv, *psigs;
+
+  args_len = (*my_jnienv)->GetArrayLength(my_jnienv, args);
+
+  method = (*my_jnienv)->GetStringUTFChars(my_jnienv, m, NULL);
+  sub = get_cv(method, 0);
+  (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, m, method);
+
+  jniObjClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Object");
+  jniClassClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Class");
+
+  ENTER;
+  SAVETMPS;
+
+  PUSHMARK(SP);
+
+  for (lo = 0; lo < args_len; lo++) {
+    char *src, *dst;
+
+    arg_obj = (*my_jnienv)->GetObjectArrayElement(my_jnienv, args, lo);
+    
+    jniMethodID = (*my_jnienv)->GetMethodID(my_jnienv, jniObjClass, "getClass", "()Ljava/lang/Class;");
+    tmp_obj = (*my_jnienv)->CallObjectMethod(my_jnienv, arg_obj, jniMethodID);
+    
+    jniMethodID = (*my_jnienv)->GetMethodID(my_jnienv, jniClassClass, "getName", "()Ljava/lang/String;");
+    tmp_obj2 = (*my_jnienv)->CallObjectMethod(my_jnienv, tmp_obj, jniMethodID);
+    className = (*my_jnienv)->GetStringUTFChars(my_jnienv, tmp_obj2, NULL);
+    
+    for (src = (char *) className, dst = arg_type; *src; src++, dst++)
+      if (*src == '.')
+	*dst = '/';
+      else
+	*dst = *src;
+
+    *(dst) = '\0';
+
+    printf("arg #%d type = %s\n", lo, arg_type);
+
+    if (!strcmp(arg_type, "java/lang/Boolean")) {
+      jniIntClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Boolean");
+      jniMethodID = (*my_jnienv)->GetMethodID(my_jnienv, jniIntClass, "booleanValue", "()Z");
+      arg_int = (*my_jnienv)->CallBooleanMethod(my_jnienv, arg_obj, jniMethodID) ? 1 : 0;
+      XPUSHs(sv_2mortal(newSViv(arg_int)));
+    } else if (!strcmp(arg_type, "java/lang/Integer")) {
+      jniIntClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Integer");
+      jniMethodID = (*my_jnienv)->GetMethodID(my_jnienv, jniIntClass, "intValue", "()I");
+      arg_int = (*my_jnienv)->CallIntMethod(my_jnienv, arg_obj, jniMethodID);
+      XPUSHs(sv_2mortal(newSViv(arg_int)));
+    } else if (!strcmp(arg_type, "java/lang/Integer")) {
+      jniDblClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Double");
+      jniMethodID = (*my_jnienv)->GetMethodID(my_jnienv, jniDblClass, "doubleValue", "()D");
+      arg_double = (*my_jnienv)->CallDoubleMethod(my_jnienv, arg_obj, jniMethodID);
+      XPUSHs(sv_2mortal(newSVnv(arg_double)));
+    } else if (!strcmp(arg_type, "java/lang/String")) {
+      arg_str = (*my_jnienv)->GetStringUTFChars(my_jnienv, arg_obj, NULL);
+      XPUSHs(sv_2mortal(newSVpv(arg_str, 0)));
+      (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, arg_obj, arg_str);
+    } else {
+      arg_pobj = (PerlDroid *)safemalloc(sizeof(PerlDroid));
+      java_class_to_perl_obj(arg_type, parg_type);
+      arg_pobj->jobj  = arg_obj;
+      psigs = get_sv(parg_type, FALSE);
+      arg_pobj->sigs = newSVsv(psigs);
+      arg_pobj->class = strdup(parg_type);
+      arg_sv = sv_newmortal();
+      sv_setref_pv(arg_sv, "PerlDroidPtr", (void*)arg_pobj);
+      XPUSHs(sv_2mortal(arg_sv));
+    }
+  }
+
+  PUTBACK;
+  
+  count = call_sv((SV *)sub, G_SCALAR);
+  
+  SPAGAIN;
+
+  if (count != 1) {
+    puts("Callback must return one scalar!");
+    exit(1);
+  }
+  
+  ret = POPs;
+  if (SvROK(ret) && SvTYPE(SvRV(ret)) == SVt_PVMG) {
+    tmp_param = SvIV((SV*)SvRV(ret));
+    pd_param = INT2PTR(PerlDroid *, tmp_param);
+    ret_obj = pd_param->jobj;
+  } else {
+    if (SvIOKp(ret)) {
+      jniClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Integer");
+      jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", "(I)V");
+      ret_obj = (*my_jnienv)->NewObject(my_jnienv, jniClass, jniConstructorID, SvIV(ret));
+    } else if (SvNOKp(ret)) {
+      jniClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Double");
+      jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", "(D)V");
+      ret_obj = (*my_jnienv)->NewObject(my_jnienv, jniClass, jniConstructorID, SvNV(ret));
+    } else if (SvPOKp(ret)) {
+      jniClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Double");
+      jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", "(Ljava/lang/String;)V");
+      ret_obj = (*my_jnienv)->NewObject(my_jnienv, jniClass, jniConstructorID, (*my_jnienv)->GetStringUTFChars(my_jnienv, SvPV_nolen(ret), NULL));
+      /*}*/
+    } else {
+      puts("Return type not recognized");
+      exit(1);
+    }
+  }
+  
+  PUTBACK;
+  FREETMPS;
+  LEAVE;
+
+  return ret_obj;
+}
+
+static jobject
+run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray args)
+{
+  my_jnienv = env;
+/*   jobject ret = NULL; */
+/*   int argc = 3; */
+/*   char ebuf[255]; */
+/*   char *argv[] = { "org.gtmp.perl", "-e", "0" }; */
+/*   FILE *file; */
+/*   SV *svret; */
+
+  return perl_run_callback(obj, m, args);
+/*   if (open_libperl_so()) { */
+/*     my_Perl_sys_init(&argc, (char ***) &argv); */
+/*     my_perl = my_perl_alloc(); */
+/*     PL_perl_destruct_level = 1; */
+/*     my_perl_construct(my_perl); */
+    
+/*     my_perl_parse(my_perl, xs_init, 3, argv, NULL); */
+
+/*     PL_exit_flags |= PERL_EXIT_DESTRUCT_END; */
+/*     my_perl_run(my_perl); */
+    
+/*     ret = perl_run_callback(obj, m, args); */
+/*   } */
+
+/*   return ret; */
 }
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
@@ -247,6 +485,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     { "run_perl", "(II)I", (void *) run_perl },
     { "nativeOnCreateDialog", "(Lorg/gtmp/perl/PerlDroid;Landroid/content/DialogInterface$OnClickListener;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog;", (void *) do_dialog },
     { "perlShowDialog", "(Lorg/gtmp/perl/PerlDroid;Landroid/content/DialogInterface$OnClickListener;Landroid/content/DialogInterface$OnClickListener;)I", (void *) do_dialog_perl },
+    { "perl_callback", "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void *) run_callback },
   };
   
   jint result = -1;
