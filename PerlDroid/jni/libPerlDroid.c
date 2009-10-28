@@ -191,12 +191,12 @@ do_dialog_perl(JNIEnv *env, jclass cls, jobject this, jobject pm, jobject nm) {
     svret = my_Perl_eval_pv(my_perl, ebuf, TRUE);
     ret = SvIV(sv_2mortal(svret));
     
-/*     PL_perl_destruct_level = 1; */
-/*     my_perl_destruct(my_perl); //FIXME: why does it takes all memory??? */
-/*     my_perl_free(my_perl); */
-/*     my_Perl_sys_term(); */
+    PL_perl_destruct_level = 1;
+    my_perl_destruct(my_perl);
+    my_perl_free(my_perl);
+    my_Perl_sys_term();
 
-/*     close_libperl_so(); */
+    close_libperl_so();
   }
 
   return ret;
@@ -231,7 +231,7 @@ run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
     ret = SvIV(sv_2mortal(svret));
     
     PL_perl_destruct_level = 1;
-    //my_perl_destruct(my_perl); FIXME: why does it takes all memory???
+    my_perl_destruct(my_perl);
     my_perl_free(my_perl);
     my_Perl_sys_term();
 
