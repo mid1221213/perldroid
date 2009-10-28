@@ -281,7 +281,7 @@ XS_constructor(hp, ...)
    OUTPUT:
 	RETVAL
 
-PerlDroid *
+void
 XS_method(method, obj, ...)
 	char *method;
 	PerlDroid *obj;
@@ -299,6 +299,8 @@ XS_method(method, obj, ...)
 	SV* parami;
 	char clazz[128];
 	jclass jniClass;
+	jclass ret_class;
+	jclass ret_test;
 	jmethodID jniMethodID;
 	jobject jniObject;
 	jvalue params[128];
@@ -307,6 +309,11 @@ XS_method(method, obj, ...)
 	PerlDroid *pd_param;
 	HV *hp;
 	SV *psigs;
+	PerlDroid *ret_obj;
+	jint ret_int;
+	jboolean ret_bool;
+	jdouble ret_double;	
+	const char *ret_string;
    CODE:
 	hp = (HV*)SvRV(obj->sigs);
 	CLASS = obj->class;
@@ -373,24 +380,64 @@ XS_method(method, obj, ...)
 		croak("Can't find method %s for class %s", method, clazz);
 	}
 
-	jniObject = (*my_jnienv)->CallObjectMethodA(my_jnienv, obj->jobj, jniMethodID, params);
-	if (!jniObject) {
-		croak("Can't call method %s", method);
+	switch(ret_type[0]) {
+		case 'L':
+			ret_type[strlen(ret_type) - 1] = '\0';
+			ret_class = (*my_jnienv)->FindClass(my_jnienv, ret_type + 1);
+			if (!ret_class) {
+				croak("Can't find class %s", ret_type + 1);
+			}
+
+			jniObject = (*my_jnienv)->CallObjectMethodA(my_jnienv, obj->jobj, jniMethodID, params);
+			if (!jniObject) {
+				croak("Can't call method %s", method);
+			}
+
+			ret_test  = (*my_jnienv)->FindClass(my_jnienv, "java/lang/CharSequence");
+			if ((*my_jnienv)->IsAssignableFrom(my_jnienv, ret_class, ret_test)) {
+				ret_string = (*my_jnienv)->GetStringUTFChars(my_jnienv, (jstring) jniObject, NULL);
+				ST(0) = newSVpv(ret_string, 0);
+				sv_2mortal(ST(0));
+				(*my_jnienv)->ReleaseStringUTFChars(my_jnienv, (jstring) jniObject, ret_string);
+			} else {
+				ret_obj = (PerlDroid *)safemalloc(sizeof(PerlDroid));
+				java_class_to_perl_obj(ret_type, clazz);
+				ret_obj->jobj  = jniObject;
+				psigs = get_sv(clazz, FALSE);
+				ret_obj->sigs = newSVsv(psigs);
+				ret_obj->class = strdup(clazz);
+				ST(0) = sv_newmortal();
+				sv_setref_pv(ST(0), "PerlDroidPtr", (void*)ret_obj);
+			}
+			break;
+
+		case 'I':
+		case 'B':
+		case 'S':
+		case 'J':
+			ret_int = (*my_jnienv)->CallIntMethodA(my_jnienv, obj->jobj, jniMethodID, params);
+			ST(0) = newSViv(ret_int);
+			sv_2mortal(ST(0));
+			break;
+		case 'F':
+		case 'D':
+			ret_double = (*my_jnienv)->CallDoubleMethodA(my_jnienv, obj->jobj, jniMethodID, params);
+			ST(0) = newSVnv(ret_double);
+			sv_2mortal(ST(0));
+			break;
+		case 'V':
+			(*my_jnienv)->CallVoidMethodA(my_jnienv, obj->jobj, jniMethodID, params);
+			break;
+		case 'Z':
+			ret_bool = (*my_jnienv)->CallBooleanMethodA(my_jnienv, obj->jobj, jniMethodID, params);
+			ST(0) = newSViv(ret_bool ? 1 : 0);
+			sv_2mortal(ST(0));
+			break;
+		default:
+			croak("Bug in ret type: %s", ret_type);
+			break;
 	}
-
-	ret = (PerlDroid *)safemalloc(sizeof(PerlDroid));
-	java_class_to_perl_obj(ret_type, clazz);
-	ret->jobj  = jniObject;
-	psigs = get_sv(clazz, FALSE);
-	ret->sigs = newSVsv(psigs);
-	ret->class = strdup(clazz);
-
 	free(ret_type);
-	warn("method %s returning a %s", method, clazz);
-
-	RETVAL = ret;
-   OUTPUT:
-	RETVAL
 
 MODULE = PerlDroid  PACKAGE = PerlDroidPtr
 
