@@ -442,7 +442,7 @@ run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray arg
   ret = POPs;
 
   if (!SvOK(ret)) {
-    return NULL;
+    ret_obj = NULL;
   } else if (SvROK(ret) && SvTYPE(SvRV(ret)) == SVt_PVMG) {
     tmp_param = SvIV((SV*)SvRV(ret));
     pd_param = INT2PTR(PerlDroid *, tmp_param);
