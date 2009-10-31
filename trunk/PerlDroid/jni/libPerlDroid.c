@@ -187,6 +187,13 @@ do_dialog_perl(JNIEnv *env, jclass cls, jobject this) {
 "sub onClick {"
 "  my ($arg1, $arg2) = @_;"
 "  print \"arg1=$arg1, arg2=$arg2\\n\";"
+"  if ($arg2 == - 1) {"
+"    warn 'class1 = ' . $arg1->getClass->getName;"
+"    $arg1->cancel;"
+"  } else {"
+"    warn 'classthis = ' . $this->getClass->getName;"
+"    $this->finish;"
+"  }"
 "}"
 "warn 'getting pm';"
 "my $pm = PerlDroid::XS_proxy($DialogInterface_OnClickListener);"
@@ -203,7 +210,7 @@ do_dialog_perl(JNIEnv *env, jclass cls, jobject this) {
 "warn 'after create';"
 "$adb->show; "
 "warn 'after show';"
-"warn 'class = ' . $pm->getClass->getName;"
+"#warn 'class = ' . $pm->getClass->getName;\n"
 "print \"Ok\n\";"
 "1;"
 "");
@@ -398,7 +405,7 @@ run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray arg
       jniMethodID = (*my_jnienv)->GetMethodID(my_jnienv, jniIntClass, "intValue", "()I");
       arg_int = (*my_jnienv)->CallIntMethod(my_jnienv, arg_obj, jniMethodID);
       XPUSHs(sv_2mortal(newSViv(arg_int)));
-    } else if (!strcmp(arg_type, "java/lang/Integer")) {
+    } else if (!strcmp(arg_type, "java/lang/Double")) {
       jniDblClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Double");
       jniMethodID = (*my_jnienv)->GetMethodID(my_jnienv, jniDblClass, "doubleValue", "()D");
       arg_double = (*my_jnienv)->CallDoubleMethod(my_jnienv, arg_obj, jniMethodID);
@@ -434,28 +441,27 @@ run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray arg
   
   ret = POPs;
 
-  if (SvROK(ret) && SvTYPE(SvRV(ret)) == SVt_PVMG) {
+  if (!SvOK(ret)) {
+    return NULL;
+  } else if (SvROK(ret) && SvTYPE(SvRV(ret)) == SVt_PVMG) {
     tmp_param = SvIV((SV*)SvRV(ret));
     pd_param = INT2PTR(PerlDroid *, tmp_param);
     ret_obj = pd_param->jobj;
+  } else if (SvIOKp(ret)) {
+    jniClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Integer");
+    jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", "(I)V");
+    ret_obj = (*my_jnienv)->NewObject(my_jnienv, jniClass, jniConstructorID, SvIV(ret));
+  } else if (SvNOKp(ret)) {
+    jniClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Double");
+    jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", "(D)V");
+    ret_obj = (*my_jnienv)->NewObject(my_jnienv, jniClass, jniConstructorID, SvNV(ret));
+  } else if (SvPOKp(ret)) {
+    jniClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/String");
+    jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", "(Ljava/lang/String;)V");
+    ret_obj = (*my_jnienv)->NewObject(my_jnienv, jniClass, jniConstructorID, (*my_jnienv)->GetStringUTFChars(my_jnienv, SvPV_nolen(ret), NULL));
   } else {
-    if (SvIOKp(ret)) {
-      jniClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Integer");
-      jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", "(I)V");
-      ret_obj = (*my_jnienv)->NewObject(my_jnienv, jniClass, jniConstructorID, SvIV(ret));
-    } else if (SvNOKp(ret)) {
-      jniClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Double");
-      jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", "(D)V");
-      ret_obj = (*my_jnienv)->NewObject(my_jnienv, jniClass, jniConstructorID, SvNV(ret));
-    } else if (SvPOKp(ret)) {
-      jniClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Double");
-      jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", "(Ljava/lang/String;)V");
-      ret_obj = (*my_jnienv)->NewObject(my_jnienv, jniClass, jniConstructorID, (*my_jnienv)->GetStringUTFChars(my_jnienv, SvPV_nolen(ret), NULL));
-      /*}*/
-    } else {
-      puts("Return type not recognized");
-      exit(1);
-    }
+    puts("Return type not recognized");
+    exit(1);
   }
   
   PUTBACK;
