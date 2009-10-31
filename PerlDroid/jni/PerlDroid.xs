@@ -194,13 +194,14 @@ SV** get_meth_in_parent(HV *hp, char *class, char *method)
 	while (str > parent_class && *str != ':')
 		str--;
 	*(--str) = '\0';
+	warn("in get_parent loading %s", parent_class);
 	load_module(PERL_LOADMOD_NOIMPORT, newSVpv(parent_class, strlen(parent_class)), NULL);
 
 	hp = (HV*)SvRV(get_sv(parent, FALSE));
 	method_sv = hv_fetch(hp, method, strlen(method), 0);
 
 	if (!method_sv)
-		return get_meth_in_parent(hp, parent_class, method);
+		return get_meth_in_parent(hp, class, method);
 
 	strcpy(class, parent);
 	return method_sv;
@@ -228,13 +229,13 @@ XS_proxy(hp)
 	jniIClass = (*my_jnienv)->FindClass(my_jnienv, clazz);
 
 	if (!jniIClass) {
-		croak("Can't find class %s", clazz);
+		croak("Can't find class p1 %s", clazz);
 	}
 
 	jniPClass = (*my_jnienv)->FindClass(my_jnienv, "org/gtmp/perl/PerlDroidProxy");
 
 	if (!jniPClass) {
-		croak("Can't find class org/gtmp/perl/PerlDroidProxy");
+		croak("Can't find class p2 org/gtmp/perl/PerlDroidProxy");
 	}
 
 	jniPMethodID = (*my_jnienv)->GetStaticMethodID(my_jnienv, jniPClass, "newInstance", "(Ljava/lang/Class;)Ljava/lang/Object;");
@@ -342,7 +343,7 @@ XS_constructor(hp, ...)
 	jniClass = (*my_jnienv)->FindClass(my_jnienv, jclazz);
 
 	if (!jniClass) {
-		croak("Can't find class %s", jclazz);
+		croak("Can't find class c1 %s", jclazz);
 	}
 
 	jniConstructorID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, "<init>", proto_str);
@@ -405,11 +406,14 @@ XS_method(method, obj, ...)
 	hp = (HV*)SvRV(obj->sigs);
 	CLASS = obj->class;
 	app = hv_fetch(hp, method, strlen(method), 0);
+	warn("method arg class = %s", CLASS);
 
 	if (!app)
 		app = get_meth_in_parent(hp, PCLASS, method);
 	else
 		strcpy(PCLASS, CLASS);
+
+	warn("method arg class2 = %s", PCLASS);
 
 	sig[cur++] = '(';
 
@@ -464,10 +468,12 @@ XS_method(method, obj, ...)
 	if (!ret_type)
 		croak("Signature not found");
 
+	warn("ret_type=%s", ret_type);
+
 	perl_obj_to_java_class(PCLASS + 11, clazz);
 	jniClass = (*my_jnienv)->FindClass(my_jnienv, clazz);
 	if (!jniClass) {
-		croak("Can't find class %s", clazz);
+		croak("Can't find class m1 %s", clazz);
 	}
 
 	jniMethodID = (*my_jnienv)->GetMethodID(my_jnienv, jniClass, method, proto_str);
@@ -480,7 +486,7 @@ XS_method(method, obj, ...)
 			ret_type[strlen(ret_type) - 1] = '\0';
 			ret_class = (*my_jnienv)->FindClass(my_jnienv, ret_type + 1);
 			if (!ret_class) {
-				croak("Can't find class %s", ret_type + 1);
+				croak("Can't find class m2 %s", ret_type + 1);
 			}
 
 			jniObject = (*my_jnienv)->CallObjectMethodA(my_jnienv, obj->jobj, jniMethodID, params);
@@ -506,7 +512,7 @@ XS_method(method, obj, ...)
 					while (str > clazz && *str != ':')
 						str--;
 					*(--str) = '\0';
-					load_module(0, newSVpv(clazz, strlen(clazz)), newSVpv("()", 2));
+					load_module(PERL_LOADMOD_NOIMPORT, newSVpv(clazz, strlen(clazz)), NULL);
 					psigs = get_sv(clazz, FALSE);
 					if (!psigs)
 						croak("Can't load module %s", clazz);
@@ -533,6 +539,7 @@ XS_method(method, obj, ...)
 			break;
 		case 'V':
 			(*my_jnienv)->CallVoidMethodA(my_jnienv, obj->jobj, jniMethodID, params);
+			XSRETURN_UNDEF;
 			break;
 		case 'Z':
 			ret_bool = (*my_jnienv)->CallBooleanMethodA(my_jnienv, obj->jobj, jniMethodID, params);
