@@ -118,10 +118,14 @@ sub package_
 	    $oclass =~ s/\./::/g;
 	    push @exports, "\$$class";
 	    $make_obj .= "our \$$class = bless {\n";
-	    $make_obj .= "  '<parent>' => '$parent',\n" if defined($parent);
 
 	    foreach my $meth (keys %{$class_methods{"${pkg_name}::$oclass"}}) {
-		$make_obj .= "  '$meth' => [ qw{" . join(' ', @{$class_methods{"${pkg_name}::$oclass"}{$meth}}) . "} ],\n";
+		if ($meth eq '<parent>') {
+		    my $par = $class_methods{"${pkg_name}::$oclass"}{'<parent>'};
+		    $make_obj .= "  '<parent>' => '$par',\n" if defined($par) && "${pkg_name}::$class" ne 'PerlDroid::java::lang::Object';
+		} else {
+		    $make_obj .= "  '$meth' => [ qw{" . join(' ', @{$class_methods{"${pkg_name}::$oclass"}{$meth}}) . "} ],\n";
+		}
 	    }
 
 	    $make_obj .= "}, '${pkg_name}::$class';\n";
@@ -205,6 +209,7 @@ sub interface
 sub method_
 {
     push @{$class_methods{$class_name}{$meth_name}}, "(" . join('', @params) . ")$retval" if $pass == 2;
+    $class_methods{$class_name}{'<parent>'} = $parent if $pass == 2;
 }
 
 sub constructor_
