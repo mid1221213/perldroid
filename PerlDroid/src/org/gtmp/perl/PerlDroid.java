@@ -4,6 +4,7 @@ package org.gtmp.perl;
 
 import android.os.Debug;
 import android.app.Activity;
+import android.util.Log;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.ScrollView;
@@ -26,6 +27,10 @@ import android.os.Message;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.widget.*;
+import java.lang.*;
+import java.lang.reflect.*;
+import android.content.*;
+import java.util.*;
 
 public class PerlDroid extends Activity
 {
@@ -81,8 +86,8 @@ public class PerlDroid extends Activity
 
     public static native int run_perl(int a, int b);
     public static native android.app.AlertDialog nativeOnCreateDialog(PerlDroid th, DialogInterface.OnClickListener pl, DialogInterface.OnClickListener nl);
-    public static native int perlShowDialog(PerlDroid th, DialogInterface.OnClickListener pl, DialogInterface.OnClickListener nl);
-    public static native Object perl_callback(Object obj, String m, Object[] args);
+    public static native int perlShowDialog(PerlDroid th);
+    public static native Object perl_callback(Class clazz, String m, Object[] args);
 
     static
     {
@@ -125,16 +130,16 @@ public class PerlDroid extends Activity
 	
 	findViewById(R.id.LinearLayout).setVerticalScrollBarEnabled(true);
 	
-	int ret = run_perl(5, 4);
-	Log("Result of 5+4: " + ret);
+// 	int ret = run_perl(5, 4);
+// 	Log("Result of 5+4: " + ret);
 
-	Object[] objj = {"toto", true, new RadioGroup.LayoutParams(2, 2) };
-	Object oret = perl_callback(new Object(), "yes", objj);
+// 	Object[] objj = {"toto", true, new RadioGroup.LayoutParams(2, 2) };
+// 	Object oret = perl_callback(new Object(), "yes", objj);
     
-// 	if (!coreAlreadyLoaded()) {
-// 	    Log("Downloading mandatory core modules");
-// 	    downloadCoreModules();
-// 	}
+	if (!coreAlreadyLoaded()) {
+	    Log("Downloading mandatory core modules");
+	    downloadCoreModules();
+	}
     }
 
     protected void downloadCoreModules()
@@ -144,19 +149,19 @@ public class PerlDroid extends Activity
 		{
 		    Log((java.lang.String) msg.obj);
 		    if (msg.obj == "Done") {
-			DialogInterface.OnClickListener pl = new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-				    dialog.cancel();
-				}
-			    };
+// 			DialogInterface.OnClickListener pl = new DialogInterface.OnClickListener() {
+// 				public void onClick(DialogInterface dialog, int id) {
+// 				    dialog.cancel();
+// 				}
+// 			    };
 			
-			DialogInterface.OnClickListener nl = new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-				    PerlDroid.this.finish();
-				}
-			    };
+// 			DialogInterface.OnClickListener nl = new DialogInterface.OnClickListener() {
+// 				public void onClick(DialogInterface dialog, int id) {
+// 				    PerlDroid.this.finish();
+// 				}
+// 			    };
 			
-			perlShowDialog(PerlDroid.this, pl, nl);
+ 			perlShowDialog(PerlDroid.this);
 			//int ret = run_perl(5, 4);
 			//Log("Result of 5+4: " + ret);
 		    }

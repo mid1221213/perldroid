@@ -22,6 +22,7 @@ typedef struct {
 	char *class;
 	SV *sigs;
 	jobject jobj;
+	jobject gref;
 } PerlDroid;
 
 static int perl_obj_to_java_class(char *perl_obj, char *java_class)
@@ -173,7 +174,91 @@ static char *comp_sig(char *sig, char *test_sig)
 	return 0;
 }
 
+SV** get_meth_in_parent(HV *hp, char *class, char *method)
+{
+	SV **parent_sv, **method_sv;
+	char parent_class[128];
+	char *parent, *str;
+	STRLEN lparent;
+
+	warn("in get_parent for %s", method);
+
+	parent_sv = hv_fetch(hp, "<parent>", 8, 0);
+	if (!parent_sv)
+		croak("Can't find method %s", method);
+
+	parent = SvPV(*parent_sv, lparent);
+	strcpy(parent_class, parent);
+	
+	str = parent_class + lparent;
+	while (str > parent_class && *str != ':')
+		str--;
+	*(--str) = '\0';
+	load_module(PERL_LOADMOD_NOIMPORT, newSVpv(parent_class, strlen(parent_class)), NULL);
+
+	hp = (HV*)SvRV(get_sv(parent, FALSE));
+	method_sv = hv_fetch(hp, method, strlen(method), 0);
+
+	if (!method_sv)
+		return get_meth_in_parent(hp, parent_class, method);
+
+	strcpy(class, parent);
+	return method_sv;
+}
+
 MODULE = PerlDroid  PACKAGE = PerlDroid
+
+PerlDroid *
+XS_proxy(hp)
+	HV* hp;
+   PREINIT:
+	char* CLASS;
+	IV tmp_param;
+	PerlDroid *pd_param;
+	jclass jniIClass, jniPClass;
+	jmethodID jniPMethodID;
+	jobject jniPObject;
+	PerlDroid *ret;
+	SV *psigs;
+	char clazz[128];
+   CODE:
+	CLASS = HvNAME(SvSTASH(hp));
+
+	perl_obj_to_java_class(CLASS + 11, clazz);
+	jniIClass = (*my_jnienv)->FindClass(my_jnienv, clazz);
+
+	if (!jniIClass) {
+		croak("Can't find class %s", clazz);
+	}
+
+	jniPClass = (*my_jnienv)->FindClass(my_jnienv, "org/gtmp/perl/PerlDroidProxy");
+
+	if (!jniPClass) {
+		croak("Can't find class org/gtmp/perl/PerlDroidProxy");
+	}
+
+	jniPMethodID = (*my_jnienv)->GetStaticMethodID(my_jnienv, jniPClass, "newInstance", "(Ljava/lang/Class;)Ljava/lang/Object;");
+	if (!jniPMethodID) {
+		croak("Can't find method newInstance for class org/gtmp/perl/PerlDroidProxy");
+	}
+
+	warn("Instantiating Proxy");
+	jniPObject = (*my_jnienv)->CallStaticObjectMethod(my_jnienv, jniPClass, jniPMethodID, jniIClass);
+	if (!jniPObject) {
+		croak("Can't instantiate Proxy");
+	}
+
+	warn("Preparing return object: %s, %s", CLASS, clazz);
+	ret = (PerlDroid *)safemalloc(sizeof(PerlDroid));
+	ret->sigs  = newSVsv(get_sv(CLASS, FALSE));
+	ret->jobj  = jniPObject;
+	ret->class = strdup(CLASS);
+	ret->gref = (*my_jnienv)->NewGlobalRef(my_jnienv, ret->jobj);
+
+	RETVAL = ret;
+
+   OUTPUT:
+	RETVAL
 
 PerlDroid *
 XS_constructor(hp, ...)
@@ -274,6 +359,7 @@ XS_constructor(hp, ...)
 	ret->sigs  = newSVsv((SV*)ST(0));
 	ret->jobj  = jniObject;
 	ret->class = strdup(CLASS);
+	ret->gref = (*my_jnienv)->NewGlobalRef(my_jnienv, ret->jobj);
 	free(ret_type);
 
 	RETVAL = ret;
@@ -314,10 +400,17 @@ XS_method(method, obj, ...)
 	jboolean ret_bool;
 	jdouble ret_double;	
 	const char *ret_string;
+	char PCLASS[128];
    CODE:
 	hp = (HV*)SvRV(obj->sigs);
 	CLASS = obj->class;
 	app = hv_fetch(hp, method, strlen(method), 0);
+
+	if (!app)
+		app = get_meth_in_parent(hp, PCLASS, method);
+	else
+		strcpy(PCLASS, CLASS);
+
 	sig[cur++] = '(';
 
 	if (items > 2)
@@ -354,6 +447,8 @@ XS_method(method, obj, ...)
 				}
 			}
 		}
+
+
 	sig[cur++] = ')';
 	sig[cur++] = 'V';
 	sig[cur] = '\0';
@@ -369,7 +464,7 @@ XS_method(method, obj, ...)
 	if (!ret_type)
 		croak("Signature not found");
 
-	perl_obj_to_java_class(CLASS + 11, clazz);
+	perl_obj_to_java_class(PCLASS + 11, clazz);
 	jniClass = (*my_jnienv)->FindClass(my_jnienv, clazz);
 	if (!jniClass) {
 		croak("Can't find class %s", clazz);
@@ -403,9 +498,20 @@ XS_method(method, obj, ...)
 				ret_obj = (PerlDroid *)safemalloc(sizeof(PerlDroid));
 				java_class_to_perl_obj(ret_type, clazz);
 				ret_obj->jobj  = jniObject;
-				psigs = get_sv(clazz, FALSE);
-				ret_obj->sigs = newSVsv(psigs);
+				ret_obj->gref = (*my_jnienv)->NewGlobalRef(my_jnienv, ret_obj->jobj);
 				ret_obj->class = strdup(clazz);
+				psigs = get_sv(clazz, FALSE);
+				if (!psigs) {
+					char *str = clazz + strlen(clazz);
+					while (str > clazz && *str != ':')
+						str--;
+					*(--str) = '\0';
+					load_module(0, newSVpv(clazz, strlen(clazz)), newSVpv("()", 2));
+					psigs = get_sv(clazz, FALSE);
+					if (!psigs)
+						croak("Can't load module %s", clazz);
+				}
+				ret_obj->sigs = newSVsv(psigs);
 				ST(0) = sv_newmortal();
 				sv_setref_pv(ST(0), "PerlDroidPtr", (void*)ret_obj);
 			}
@@ -447,4 +553,5 @@ DESTROY(perldroid)
 	CODE:
 		SvREFCNT_dec(perldroid->sigs);
 		free(perldroid->class);
+		(*my_jnienv)->DeleteGlobalRef(my_jnienv, perldroid->gref);
 		safefree(perldroid);

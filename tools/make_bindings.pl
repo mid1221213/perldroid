@@ -47,6 +47,7 @@ our $retval;
 our @params;
 our $uses;
 our %used;
+our $parent;
 our $java2jni = {
     ''        => '',
     'void'    => 'V',
@@ -117,6 +118,7 @@ sub package_
 	    $oclass =~ s/\./::/g;
 	    push @exports, "\$$class";
 	    $make_obj .= "our \$$class = bless {\n";
+	    $make_obj .= "  '<parent>' => '$parent',\n" if defined($parent);
 
 	    foreach my $meth (keys %{$class_methods{"${pkg_name}::$oclass"}}) {
 		$make_obj .= "  '$meth' => [ qw{" . join(' ', @{$class_methods{"${pkg_name}::$oclass"}{$meth}}) . "} ],\n";
@@ -143,6 +145,13 @@ sub package_
 sub class
 {
     my ($expat, $element, %attrs) = @_;
+
+    $parent = $attrs{extends};
+    if (defined($parent)) {
+	$parent =~ s/\$/_/g;
+	$parent =~ s/\./::/g;
+	$parent = "PerlDroid::$parent";
+    }
 
     my $name = $attrs{name};
     push @pkg_classes, $name;
