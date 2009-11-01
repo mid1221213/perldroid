@@ -26,11 +26,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.widget.*;
-import java.lang.*;
-import java.lang.reflect.*;
-import android.content.*;
-import java.util.*;
 
 public class PerlDroid extends Activity
 {
