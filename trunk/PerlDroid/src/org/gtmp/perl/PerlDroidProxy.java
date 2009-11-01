@@ -1,7 +1,8 @@
 package org.gtmp.perl;
 
-import java.lang.reflect.*;
-import android.content.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Method;
 
 public class PerlDroidProxy implements java.lang.reflect.InvocationHandler
 {
