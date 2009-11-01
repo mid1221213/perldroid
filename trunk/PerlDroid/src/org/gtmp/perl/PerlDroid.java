@@ -6,10 +6,12 @@ import android.os.Debug;
 import android.app.Activity;
 import android.util.Log;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.ScrollView;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileOutputStream;
@@ -26,14 +28,32 @@ import android.os.Handler;
 import android.os.Message;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.widget.ListView;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
+import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.ContextMenu;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 public class PerlDroid extends Activity
 {
-    TextView pStatus;
-    ScrollView pStatusSV;
-    String version = "5.10.0";
-    String URLPrefix = "http://dbx.gtmp.org/android/perl-core-modules-" + version;
-    String coreModules[] = {
+    private ArrayAdapter<String> list_adapter;
+    private static final String SCRIPTS_PATH = "scripts";
+    private static final int ACTIVITY_CREATE=0;
+    public static final int ADD_ID = Menu.FIRST;
+    public static final int DELETE_ID = Menu.FIRST;
+    public static final int SHORTCUT_ID = Menu.FIRST + 1;
+    private TextView pStatus;
+    private ListView listView;
+    private ScrollView pStatusSV;
+    private String version = "5.10.0";
+    private String URLPrefix = "http://dbx.gtmp.org/android/perl-core-modules-" + version;
+    private String coreModules[] = {
 	"attributes",
 	"attrs",
 	"AutoLoader",
@@ -112,29 +132,149 @@ public class PerlDroid extends Activity
 
     /** Called when the activity is first created. */
     @Override
-        public void onCreate(Bundle savedInstanceState)
+    public void onCreate(Bundle savedInstanceState)
     {
 	super.onCreate(savedInstanceState);
 
 	android.util.Log.v("PerlDroid", "Acting...");
-	setContentView(R.layout.main);
-	
-	pStatusSV = (ScrollView) findViewById(R.id.StatusTextSV);
-	pStatus = (TextView) findViewById(R.id.StatusText);
-	pStatus.setVerticalScrollBarEnabled(true);
-	
-	findViewById(R.id.LinearLayout).setVerticalScrollBarEnabled(true);
-	
-// 	int ret = run_perl(5, 4);
-// 	Log("Result of 5+4: " + ret);
-
-// 	Object[] objj = {"toto", true, new RadioGroup.LayoutParams(2, 2) };
-// 	Object oret = perl_callback(new Object(), "yes", objj);
-    
 	if (!coreAlreadyLoaded()) {
+	    setContentView(R.layout.init);
+	    
+	    pStatusSV = (ScrollView) findViewById(R.id.StatusTextSV);
+	    pStatus = (TextView) findViewById(R.id.StatusText);
+	    pStatus.setVerticalScrollBarEnabled(true);
+	    
+	    findViewById(R.id.LinearLayout).setVerticalScrollBarEnabled(true);
+	    
 	    Log("Downloading mandatory core modules");
 	    downloadCoreModules();
 	}
+    }
+
+    protected void setupScriptList()
+    {
+	setContentView(R.layout.main);
+	listView = (ListView) findViewById(R.id.ScriptList);
+        ArrayList<String> array = new ArrayList<String>();
+        list_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, array);
+        fillData();
+        registerForContextMenu(listView);
+
+	/** Called when a list item is clicked */
+	listView.setOnItemClickListener(new ListView.OnItemClickListener() {
+		public void onItemClick(AdapterView l, View v, int position, long id) {
+		    String scriptname = ((TextView)v).getText().toString();
+		    // String scriptpath = getFileStreamPath(SCRIPTS_PATH).toString() +  "/" + scriptname;
+		    Intent i = new Intent(PerlDroid.this, PerlDroidRunActivity.class);
+		    i.putExtra(Intent.EXTRA_SHORTCUT_NAME, scriptname);
+		    startActivityForResult(i, ACTIVITY_CREATE);
+		}
+	    });
+	
+    }
+
+    /** Load scripts from default directory. */
+    private void fillData()
+    {
+        File basedir = getFileStreamPath(SCRIPTS_PATH);
+        if (!basedir.exists())
+		basedir.mkdir();
+        String [] files = basedir.list();
+        if (files != null) {
+            list_adapter.clear();
+            for (String file : files) {
+                list_adapter.add(file);
+            }
+            listView.setAdapter(list_adapter);
+        }
+    }
+
+    /** Called when the Menu button is pressed */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        boolean result = super.onCreateOptionsMenu(menu);
+        menu.add(0, ADD_ID, 0, R.string.menu_add);
+        return result;
+    }
+
+    /** Called on long touch on an item */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
+    {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(0, DELETE_ID, 0, R.string.ctx_delete);
+        menu.add(0, SHORTCUT_ID, 0, R.string.ctx_shortcut);
+    }
+
+    /** Called when a context menu item is selected */
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+        case DELETE_ID:
+            deleteScript(info);
+            return true;
+        case SHORTCUT_ID:
+            shortcutScript(info);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+        }
+    }
+
+    /** delete a script given its menuitem */
+    private void deleteScript(AdapterContextMenuInfo info)
+    {
+        String filename = ((TextView)info.targetView).getText().toString();
+        String filepath = getFileStreamPath(SCRIPTS_PATH).toString() + "/" + filename;
+        File file = new File(filepath);
+        file.delete();
+        fillData();
+    }
+
+    /** Install shortcut */
+    private void shortcutScript(AdapterContextMenuInfo info)
+    {
+        String filename = ((TextView)info.targetView).getText().toString();
+        // String filepath = getFileStreamPath(SCRIPTS_PATH).toString() + "/" + filename;
+	Intent shortcut = new Intent(this, PerlDroidRunActivity.class);
+        shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME, filename);
+	Intent install = new Intent();
+        install.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
+        install.putExtra(Intent.EXTRA_SHORTCUT_NAME, filename);
+	Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.icon, null);
+        install.putExtra(Intent.EXTRA_SHORTCUT_ICON, bitmap);
+        install.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+        sendBroadcast(install);
+        Toast.makeText(this, R.string.shortcut_created, Toast.LENGTH_SHORT).show();
+
+    }
+
+    /** Called when the item is selected from the menu */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case ADD_ID:
+            return launch_download_activity();
+        }
+        /* default: */
+        return super.onOptionsItemSelected(item);
+    }
+
+    /** Launch the download activity */
+    private boolean launch_download_activity()
+    {
+        Intent  i = new Intent(this, PerlDroidAddActivity.class);
+        startActivityForResult(i, ACTIVITY_CREATE);
+        return true;
+    }
+
+    /** Called when the child activity is returning */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        /* FIXME: do something if resultCode is bad */
+        fillData();
     }
 
     protected void downloadCoreModules()
@@ -143,20 +283,14 @@ public class PerlDroid extends Activity
 		@Override public void handleMessage(Message msg)
 		{
 		    Log((java.lang.String) msg.obj);
-		    if (msg.obj == "Done") {
-// 			DialogInterface.OnClickListener pl = new DialogInterface.OnClickListener() {
-// 				public void onClick(DialogInterface dialog, int id) {
-// 				    dialog.cancel();
-// 				}
-// 			    };
-			
-// 			DialogInterface.OnClickListener nl = new DialogInterface.OnClickListener() {
-// 				public void onClick(DialogInterface dialog, int id) {
-// 				    PerlDroid.this.finish();
-// 				}
-// 			    };
-			
- 			perlShowDialog(PerlDroid.this);
+		    if (msg.obj == "Done") {			
+			Log("Tap screen to continue.");
+			pStatus.setOnClickListener(new TextView.OnClickListener() {
+				public void onClick(View view) {
+				    setupScriptList();
+				}
+			    });
+ 			//perlShowDialog(PerlDroid.this);
 			//int ret = run_perl(5, 4);
 			//Log("Result of 5+4: " + ret);
 		    }
@@ -191,7 +325,7 @@ public class PerlDroid extends Activity
     protected boolean coreAlreadyLoaded()
     {
 	File pathPrefix = getFileStreamPath(version);
-	File testFile = new File(pathPrefix + "/strict.pm");
+	File testFile = new File(pathPrefix + "/PerlDroid.pm");
 	return testFile.exists();
     }
 
