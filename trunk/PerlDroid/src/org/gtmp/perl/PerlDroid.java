@@ -48,6 +48,11 @@ public class PerlDroid extends Activity
     public static final int ADD_ID = Menu.FIRST;
     public static final int DELETE_ID = Menu.FIRST;
     public static final int SHORTCUT_ID = Menu.FIRST + 1;
+
+    public static native int perlShowDialog(PerlDroidRunActivity th);
+    public static native Object perl_callback(Class clazz, String m, Object[] args);
+
+    private boolean coreLoaded = false;
     private TextView pStatus;
     private ListView listView;
     private ScrollView pStatusSV;
@@ -99,11 +104,6 @@ public class PerlDroid extends Activity
 	"PerlDroid",
     };
 
-    public static native int run_perl(int a, int b);
-    public static native android.app.AlertDialog nativeOnCreateDialog(PerlDroid th, DialogInterface.OnClickListener pl, DialogInterface.OnClickListener nl);
-    public static native int perlShowDialog(PerlDroid th);
-    public static native Object perl_callback(Class clazz, String m, Object[] args);
-
     static
     {
 	android.util.Log.v("PerlDroid", "Loading lib");
@@ -148,11 +148,14 @@ public class PerlDroid extends Activity
 	    
 	    Log("Downloading mandatory core modules");
 	    downloadCoreModules();
+	} else {
+	    setupScriptList();
 	}
     }
 
     protected void setupScriptList()
     {
+	coreLoaded = true;
 	setContentView(R.layout.main);
 	listView = (ListView) findViewById(R.id.ScriptList);
         ArrayList<String> array = new ArrayList<String>();
@@ -194,8 +197,19 @@ public class PerlDroid extends Activity
     public boolean onCreateOptionsMenu(Menu menu)
     {
         boolean result = super.onCreateOptionsMenu(menu);
-        menu.add(0, ADD_ID, 0, R.string.menu_add);
+	menu.add(0, ADD_ID, 0, R.string.menu_add);
         return result;
+    }
+
+    /** Called when the Menu button is pressed */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+        boolean result = super.onPrepareOptionsMenu(menu);
+	if (coreLoaded)
+	    return result;
+	else
+	    return false;
     }
 
     /** Called on long touch on an item */
