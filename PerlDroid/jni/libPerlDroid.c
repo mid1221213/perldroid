@@ -5,7 +5,7 @@
 #include <perl.h>                 /* from the Perl distribution     */
 #include <dlfcn.h>
 
-#define CLASSNAME "org/gtmp/perl/PerlDroid"
+#define CLASSNAME "org/gtmp/perl/PerlDroidRunActivity"
 
 static PerlInterpreter *my_perl;  /***    The Perl interpreter    ***/
 
@@ -124,38 +124,6 @@ close_libperl_so(void)
   dlclose(lp_h);
 }
 
-jobject
-do_dialog(JNIEnv *env, jclass cls, jobject this, jobject pm, jobject nm) {
-  jclass adbClass = (*env)->FindClass(env, "android/app/AlertDialog$Builder");
-  jmethodID adbConstructor, spbID, snbID, smsgID, crtID;
-  jobject adb;
-
-  if(!adbClass) {
-    return NULL;
-  }
-
-  adbConstructor = (*env)->GetMethodID(env, adbClass, "<init>", "(Landroid/content/Context;)V");
-  if(!adbConstructor) {
-    return NULL;
-  }
-
-  adb = (*env)->NewObject(env, adbClass, adbConstructor, this);
-  if(!adb) {
-    return NULL;
-  }
-  
-  smsgID = (*env)->GetMethodID(env, adbClass, "setMessage", "(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;");
-  spbID  = (*env)->GetMethodID(env, adbClass, "setPositiveButton", "(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;");
-  snbID  = (*env)->GetMethodID(env, adbClass, "setNegativeButton", "(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;");
-  crtID  = (*env)->GetMethodID(env, adbClass, "create", "()Landroid/app/AlertDialog;");
-
-  (*env)->CallObjectMethod(env, adb, smsgID, (*env)->NewStringUTF(env, "Salut ma poule !"));
-  (*env)->CallObjectMethod(env, adb, spbID,  (*env)->NewStringUTF(env, "Ok"), pm);
-  (*env)->CallObjectMethod(env, adb, snbID,  (*env)->NewStringUTF(env, "Dégage"), nm);
-
-  return (*env)->CallObjectMethod(env, adb, crtID);
-}
-
 EXTERN_C void
 xs_init(pTHX)
 {
@@ -165,7 +133,8 @@ xs_init(pTHX)
 }
 
 jint
-do_dialog_perl(JNIEnv *env, jclass cls, jobject this) {
+do_dialog_perl(JNIEnv *env, jclass cls, jobject this)
+{
   my_jnienv = env;
   jint ret = -1;
   int argc = 3;
@@ -264,35 +233,47 @@ do_dialog_perl(JNIEnv *env, jclass cls, jobject this) {
   return ret;
 }
 
-static jint
-run_perl(JNIEnv *env, jclass clazz, jint a, jint b)
+jint
+run_perl(JNIEnv *env, jclass cls, jobject this, jstring script)
 {
   my_jnienv = env;
   jint ret = -1;
-  int argc = 3;
-  char ebuf[255];
-  char *argv[] = { "org.gtmp.perl", "-e", "0" };
-  FILE *file;
-  SV *svret;
+  int argc = 2;
+  char *argv[3];
+  SV *pthis, *ppthis;
+  PerlDroid *param;
+  const char *script_path;
 
   if (open_libperl_so()) {
-    //    sprintf(ebuf, "$| = 1;use PerlDroid;use PerlDroid::org::json; my $tst = $JSONException->new('c'); print \"\\$tst=$tst\\n\"; $a = %d + %d; print \"\\$a=$a\\n\";$a", a, b);
-/*     sprintf(ebuf, "$| = 1;use PerlDroid;use PerlDroid::org::json; my $tst = $JSONObject->new($JSONTokener->new('{}')); print \"\\$tst=$tst\\n\"; $a = %d + %d; print \"\\$a=$a\\n\";$a", a, b); */
-    sprintf(ebuf, "$| = 1;use PerlDroid;use PerlDroid::android::content;sub onClick { my ($arg1, $arg2) = @_; print \"arg1=$arg1, arg2=$arg2\\n\";} PerlDroid::XS_proxy($DialogInterface_OnClickListener);$a = %d + %d; print \"\\$a=$a\\n\";$a", a, b);
+    script_path = (*my_jnienv)->GetStringUTFChars(my_jnienv, script, NULL);
+    argv[0] = "org.gtmp.perl";
+    argv[1] = (char *) script_path;
+    argv[2] = NULL;
 
     my_Perl_sys_init(&argc, (char ***) &argv);
     my_perl = my_perl_alloc();
     PL_perl_destruct_level = 1;
     my_perl_construct(my_perl);
     
-    my_perl_parse(my_perl, xs_init, 3, argv, NULL);
+    my_perl_parse(my_perl, xs_init, 2, argv, NULL);
+
+    pthis  = get_sv("this", TRUE);
+    ppthis = get_sv("PerlDroid::android::content::Context", FALSE);
+
+    param = (PerlDroid *)safemalloc(sizeof(PerlDroid));
+    param->sigs  = newSVsv(ppthis);
+    param->jobj  = this;
+    param->gref = (*my_jnienv)->NewGlobalRef(my_jnienv, param->jobj);
+    param->class = strdup("PerlDroid::android::content::Context");
+    sv_setref_pv(pthis, "PerlDroidPtr", (void*)param);
 
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-    my_perl_run(my_perl);
-    
-    svret = my_Perl_eval_pv(my_perl, ebuf, TRUE);
-    ret = SvIV(sv_2mortal(svret));
-    
+    ret = my_perl_run(my_perl);
+
+    (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, script, script_path);
+
+    // Don't destruct interpreter because of possible callbacks
+
 /*     PL_perl_destruct_level = 1; */
 /*     my_perl_destruct(my_perl); */
 /*     my_perl_free(my_perl); */
@@ -474,10 +455,8 @@ run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray arg
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
   JNINativeMethod my_methods[] = {
-    { "run_perl", "(II)I", (void *) run_perl },
-    { "nativeOnCreateDialog", "(Lorg/gtmp/perl/PerlDroid;Landroid/content/DialogInterface$OnClickListener;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog;", (void *) do_dialog },
-    { "perlShowDialog", "(Lorg/gtmp/perl/PerlDroid;)I", (void *) do_dialog_perl },
-/*     { "perlShowDialog", "(Lorg/gtmp/perl/PerlDroid;Landroid/content/DialogInterface$OnClickListener;Landroid/content/DialogInterface$OnClickListener;)I", (void *) do_dialog_perl }, */
+    { "perl_run", "(Lorg/gtmp/perl/PerlDroidRunActivity;Ljava/lang/String;)I", (void *) run_perl },
+/*     { "perlShowDialog", "(Lorg/gtmp/perl/PerlDroidRunActivity;)I", (void *) do_dialog_perl }, */
     { "perl_callback", "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void *) run_callback },
   };
   

@@ -14,7 +14,7 @@
             </intent-filter>
         </activity>
         <activity android:name="PerlDroidAddActivity" />
-        <activity android:name="PerlDroidRunActivity">
+        <activity android:name="PerlDroidRunActivity" android:process=":PerlDroidRun" android:multiprocess="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>

@@ -13,7 +13,6 @@ public class PerlDroidProxy implements java.lang.reflect.InvocationHandler
 	return Proxy.newProxyInstance(
 				      clazz.getClassLoader(),
 				      new Class[] { clazz },
-// 				      clazz.getInterfaces(),
 				      new PerlDroidProxy(clazz)
 				      );
     }
@@ -24,6 +23,6 @@ public class PerlDroidProxy implements java.lang.reflect.InvocationHandler
 
     public Object invoke(Object proxy, Method m, Object[] args) throws Throwable
     {
-	return PerlDroid.perl_callback(this.clazz, m.getName(), args);
+	return PerlDroidRunActivity.perl_callback(this.clazz, m.getName(), args);
     }
 }
