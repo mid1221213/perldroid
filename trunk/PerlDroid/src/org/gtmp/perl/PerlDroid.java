@@ -49,9 +49,6 @@ public class PerlDroid extends Activity
     public static final int DELETE_ID = Menu.FIRST;
     public static final int SHORTCUT_ID = Menu.FIRST + 1;
 
-    public static native int perlShowDialog(PerlDroidRunActivity th);
-    public static native Object perl_callback(Class clazz, String m, Object[] args);
-
     private boolean coreLoaded = false;
     private TextView pStatus;
     private ListView listView;
@@ -100,21 +97,10 @@ public class PerlDroid extends Activity
 	"vars",
 	"version",
 	"warnings",
+	"warnings::register",
 	"XSLoader",
 	"PerlDroid",
     };
-
-    static
-    {
-	android.util.Log.v("PerlDroid", "Loading lib");
-	try {
-	    System.loadLibrary("PerlDroid");
-	    android.util.Log.v("PerlDroid", "Successfully loaded JNI layer");
-	} catch (UnsatisfiedLinkError ex) {
-	    String msg = ex.getMessage();
-	    android.util.Log.v("PerlDroid", "Not loaded JNI layer (msg: " + msg + ")");
-	}
-    }
 
     public void Log(String string)
     {
@@ -170,7 +156,8 @@ public class PerlDroid extends Activity
 		    // String scriptpath = getFileStreamPath(SCRIPTS_PATH).toString() +  "/" + scriptname;
 		    Intent i = new Intent(PerlDroid.this, PerlDroidRunActivity.class);
 		    i.putExtra(Intent.EXTRA_SHORTCUT_NAME, scriptname);
-		    startActivityForResult(i, ACTIVITY_CREATE);
+// 		    startActivityForResult(i, ACTIVITY_CREATE);
+		    startActivity(i);
 		}
 	    });
 	
