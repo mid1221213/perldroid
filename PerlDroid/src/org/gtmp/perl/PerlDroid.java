@@ -39,6 +39,7 @@ import android.view.ContextMenu;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import java.lang.Runtime;
 
 public class PerlDroid extends Activity
 {
@@ -102,6 +103,18 @@ public class PerlDroid extends Activity
 	"PerlDroid",
     };
 
+    static
+    {
+	android.util.Log.v("PerlDroid", "Loading lib");
+	try {
+	    System.loadLibrary("PerlDroid");
+	    android.util.Log.v("PerlDroid", "Successfully loaded JNI layer");
+	} catch (UnsatisfiedLinkError ex) {
+	    String msg = ex.getMessage();
+	    android.util.Log.v("PerlDroid", "Not loaded JNI layer (msg: " + msg + ")");
+	}
+    }
+
     public void Log(String string)
     {
 	pStatus.setText(pStatus.getText() + "\n" + string);
@@ -156,6 +169,7 @@ public class PerlDroid extends Activity
 		    // String scriptpath = getFileStreamPath(SCRIPTS_PATH).toString() +  "/" + scriptname;
 		    Intent i = new Intent(PerlDroid.this, PerlDroidRunActivity.class);
 		    i.putExtra(Intent.EXTRA_SHORTCUT_NAME, scriptname);
+		    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
 // 		    startActivityForResult(i, ACTIVITY_CREATE);
 		    startActivity(i);
 		}
@@ -240,6 +254,7 @@ public class PerlDroid extends Activity
         // String filepath = getFileStreamPath(SCRIPTS_PATH).toString() + "/" + filename;
 	Intent shortcut = new Intent(this, PerlDroidRunActivity.class);
         shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME, filename);
+	shortcut.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
 	Intent install = new Intent();
         install.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
         install.putExtra(Intent.EXTRA_SHORTCUT_NAME, filename);
@@ -285,15 +300,13 @@ public class PerlDroid extends Activity
 		{
 		    Log((java.lang.String) msg.obj);
 		    if (msg.obj == "Done") {			
+			JNIStub.perl_chmod("/data/data/org.gtmp.perl/files");
 			Log("Tap screen to continue.");
 			pStatus.setOnClickListener(new TextView.OnClickListener() {
 				public void onClick(View view) {
 				    setupScriptList();
 				}
 			    });
- 			//perlShowDialog(PerlDroid.this);
-			//int ret = run_perl(5, 4);
-			//Log("Result of 5+4: " + ret);
 		    }
 		}
 	    };
@@ -332,6 +345,8 @@ public class PerlDroid extends Activity
 
     protected void unZip(InputStream in)
     {
+	File basedirectory = getFileStreamPath(version);
+
 	try {
 	    ZipInputStream zin = new ZipInputStream(in);
 
@@ -341,7 +356,6 @@ public class PerlDroid extends Activity
 		String outFilename = entry.getName();
 
 		// Compute the file's directory and create it if needed
-		File basedirectory = getFileStreamPath(version);
 		String subdirectoryString = basedirectory + "/" + outFilename;
 		int sep = subdirectoryString.lastIndexOf("/");
 		subdirectoryString = subdirectoryString.substring(0, sep);

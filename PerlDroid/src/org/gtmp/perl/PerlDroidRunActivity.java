@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.view.View;
 import android.widget.TextView;
 import android.os.Bundle;
+import android.content.Context;
 
 public class PerlDroidRunActivity extends Activity
 {
@@ -14,7 +15,7 @@ public class PerlDroidRunActivity extends Activity
 
     private TextView status;
 
-    public static native int perl_run(PerlDroidRunActivity th, String script);
+    public static native int perl_run(Context th, String script);
     public static native Object perl_callback(Class clazz, String m, Object[] args);
 
     static
