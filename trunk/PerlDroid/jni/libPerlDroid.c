@@ -5,7 +5,7 @@
 #include <perl.h>                 /* from the Perl distribution     */
 #include <dlfcn.h>
 
-#define CLASSNAME "org/gtmp/perl/PerlDroidRunActivity"
+#define CLASSNAME "org/gtmp/perl/JNIStub"
 
 static PerlInterpreter *my_perl;  /***    The Perl interpreter    ***/
 
@@ -314,6 +314,39 @@ java_class_to_perl_obj(char *java_class, char *perl_obj)
   *perl_obj = '\0';
 }
 
+void chmodr(const char* path) {
+  int i;
+  int nfiles;
+  struct dirent** dirlist;
+
+  chmod(path, 0755);
+  nfiles = scandir(path, &dirlist, NULL, NULL);
+  for (i = 0; i < nfiles; i++) {
+    char buf[256];
+    sprintf(buf, "%s/%s", path, dirlist[i]->d_name);
+    /* recurse only if it is not . nor .. */
+    if (strcmp(dirlist[i]->d_name, ".") &&
+	strcmp(dirlist[i]->d_name, "..")) {
+      if (dirlist[i]->d_type == DT_DIR)
+	chmodr(buf);
+      else
+	chmod(buf, 0755);
+    }
+  }
+}
+
+static jobject
+run_chmod(JNIEnv *env, jclass clazz, jstring path_string)
+{
+  const char *path;
+  my_jnienv = env;
+  path = (*my_jnienv)->GetStringUTFChars(my_jnienv, path_string, NULL);
+
+  chmodr(path);
+
+  (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, path_string, path);
+}
+
 static jobject
 run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray args)
 {
@@ -452,12 +485,44 @@ run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray arg
   return ret_obj;
 }
 
+jint register_perl(JNIEnv *env, jclass clazz, jstring class)
+{
+  const char *class_name;
+  char buf[128];
+  int lo;
+
+  my_jnienv = env;
+
+  JNINativeMethod my_methods[] = {
+    { "perl_run", "(Landroid/content/Context;Ljava/lang/String;)I", (void *) run_perl },
+    { "perl_callback", "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void *) run_callback },
+  };
+  
+  jint result = 0;
+
+  class_name = (*my_jnienv)->GetStringUTFChars(my_jnienv, class, NULL);
+  for (lo = 0; lo <= strlen(class_name); lo++)
+    if (class_name[lo] == '.')
+      buf[lo] = '/';
+    else
+      buf[lo] = class_name[lo];
+  (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, class, class_name);
+
+  if (jniRegisterNativeMethods(env, buf, my_methods, NELEM(my_methods))) {
+    goto bail;
+  }
+    
+  result = 1;
+
+ bail:
+  return result;
+}
+
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
   JNINativeMethod my_methods[] = {
-    { "perl_run", "(Lorg/gtmp/perl/PerlDroidRunActivity;Ljava/lang/String;)I", (void *) run_perl },
-/*     { "perlShowDialog", "(Lorg/gtmp/perl/PerlDroidRunActivity;)I", (void *) do_dialog_perl }, */
-    { "perl_callback", "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void *) run_callback },
+    { "perl_chmod", "(Ljava/lang/String;)V", (void *) run_chmod },
+    { "perl_register", "(Ljava/lang/String;)I", (void *) register_perl },
   };
   
   jint result = -1;
