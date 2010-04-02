@@ -1,35 +1,7 @@
-- Package Manager
-	- package format
-		- filename name.pd
-		- zipped
-		- mime type application/x-perldroid
-		- file specs.xml
-			- name
-			- author(s)
-			- URL
-			- version
-			- file_list
-			- dependancies
-			- entry_point
-			- copyright_information
-			- permissions
-			- script_type
-				- activity
-				- provider
-				- modules
-				- widget
-		- "licence" file
-		- "files" directory
-			- Module1
-			- ...
-	- package loader
-	- package installer
-	- package updater
-	- package remover
-	- package DB
-- run scripts in separate process
-- limit script permissions
-- wrappers
-	- activity
-	- provider
-	- widget
+- Package generator using templating system
+	- Task generator
+		- activity
+		- provider
+		- widget
+		- Service
+		- Provider
