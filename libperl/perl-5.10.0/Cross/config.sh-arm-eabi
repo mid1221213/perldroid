@@ -59,8 +59,8 @@ cat='cat'
 cc="$GCC"
 cccdlflags=''
 ccdlflags='-Wl,-E'
-ccflags="-lc -lgcc -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/include -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -nostdlib -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE_ -march=armv5te -mtune=xscale -msoft-float"
-ccflags_uselargefiles="-lc -lgcc -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/include -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -nostdlib -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE_ -march=armv5te -mtune=xscale -msoft-float"
+ccflags="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/include -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -nostdlib -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE_ -march=armv5te -mtune=xscale -msoft-float"
+ccflags_uselargefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/include -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -nostdlib -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE_ -march=armv5te -mtune=xscale -msoft-float"
 ccname="$GCC"
 ccsymbols=''
 ccversion=''
@@ -738,8 +738,8 @@ known_extensions='B Compress/Raw/Zlib Cwd DB_File Data/Dumper Devel/DProf Devel/
 ksh=''
 ld="$GCC"
 lddlflags='-shared -ldl'
-ldflags="-nostdlib -Wl,-dynamic-linker,/system/bin/linker $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtbegin_dynamic.o $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtend_android.o"
-ldflags_uselargefiles="-nostdlib -Wl,-dynamic-linker,/system/bin/linker $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtbegin_dynamic.o $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtend_android.o"
+ldflags="-nostdlib -Wl,-dynamic-linker,/system/bin/linker $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtbegin_dynamic.o $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtend_android.o -L$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib -lc -lgcc"
+ldflags_uselargefiles="-nostdlib -Wl,-dynamic-linker,/system/bin/linker $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtbegin_dynamic.o $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtend_android.o -L$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib -lc -lgcc"
 ldlibpthname='LD_LIBRARY_PATH'
 less='less'
 lib_ext='.a'
