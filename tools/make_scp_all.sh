@@ -1,9 +1,8 @@
 #! /bin/bash
 
 echo -n "Are you sure you want to proceed (Return for OK, ^C for NOK)?"; read ok
-cd ~/perldroid/tools
 
-rm -rf target_* PerlDroid.zip
+rm -rf target_core PerlDroid.zip
 
 ./make_core_modules_pkg.pl ~/perl-5.10.0/install_me_here/usr/lib/perl/5.10.0
 
