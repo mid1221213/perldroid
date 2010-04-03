@@ -130,7 +130,7 @@ esac
 
 if test ! -f $makefile ; then
 #	test -f Makefile.PL && $run ../$depth/miniperl -I../$depth/lib Makefile.PL INSTALLDIRS=perl INSTALLMAN3DIR=none PERL_CORE=1 $passthru
-	test -f Makefile.PL && $run ../$depth/miniperl -I../$depth/fake_config_library -MConfig Makefile.PL INSTALLDIRS=perl INSTALLMAN3DIR=none PERL_CORE=1 $passthru CC="$HOME/android-ndk/build/prebuilt/linux-x86/arm-eabi-4.4.0/bin/arm-eabi-gcc $CFLAGS" LD="$HOME/android-ndk/build/prebuilt/linux-x86/arm-eabi-4.4.0/bin/arm-eabi-gcc $LDFLAGS" PERLRUN="/usr/bin/perl -I../$depth/fake_config_library -MConfig" FULLPERLRUN="/usr/bin/perl -I../$depth/fake_config_library -MConfig" NOECHO= MKPATH="mkdir -p" PERL="/usr/bin/perl -I/usr/lib/perl/5.10.0" ABSPERLRUN="/usr/bin/perl -I/usr/lib/perl/5.10.0"
+	test -f Makefile.PL && $run ../$depth/miniperl -I../$depth/fake_config_library -MConfig Makefile.PL INSTALLDIRS=perl INSTALLMAN3DIR=none PERL_CORE=1 $passthru CC="$HOME/android-ndk/build/prebuilt/linux-x86/arm-eabi-4.4.0/bin/arm-eabi-gcc $CFLAGS" GCC="$HOME/android-ndk/build/prebuilt/linux-x86/arm-eabi-4.4.0/bin/arm-eabi-gcc $CFLAGS" LD="$HOME/android-ndk/build/prebuilt/linux-x86/arm-eabi-4.4.0/bin/arm-eabi-gcc $LDFLAGS" PERLRUN="/usr/bin/perl -I../$depth/fake_config_library -MConfig" FULLPERLRUN="/usr/bin/perl -I../$depth/fake_config_library -MConfig" NOECHO= MKPATH="mkdir -p" PERL="/usr/bin/perl -I/usr/lib/perl/5.10.0" ABSPERLRUN="/usr/bin/perl -I/usr/lib/perl/5.10.0"
 fi
 if test ! -f $makefile ; then
 	echo "Warning: No Makefile!"
