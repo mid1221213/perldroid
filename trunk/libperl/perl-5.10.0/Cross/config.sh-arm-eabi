@@ -13,6 +13,8 @@
 # Target system     : linux shut 2.6.27-11-generic #1 smp thu jan 15 11:03:58 utc 2009 i686 gnulinux 
 
 GCC=$HOME/android-ndk/build/prebuilt/linux-x86/arm-eabi-4.4.0/bin/arm-eabi-gcc
+ARCHI=android-3
+
 Author=''
 Date='$Date'
 Header=''
@@ -57,8 +59,8 @@ cat='cat'
 cc="$GCC"
 cccdlflags=''
 ccdlflags='-Wl,-E'
-ccflags='-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400'
-ccflags_uselargefiles='-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400'
+ccflags="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/include"
+ccflags_uselargefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/include"
 ccname="$GCC"
 ccsymbols=''
 ccversion=''
