@@ -7,8 +7,6 @@ rm -rf target_* PerlDroid.zip
 
 ./make_core_modules_pkg.pl ~/perl-5.10.0/install_me_here/usr/lib/perl/5.10.0
 
-./make_bindings.pl ~/mydroid/out/target/common/obj/PACKAGING/public_api.xml
-
 cd target_droid
 mkdir -p arm-linux-multi/auto/PerlDroid
 cd ../../PerlDroid/jni/
