@@ -1,5 +1,5 @@
---- ../ext/util/make_ext	2010-04-04 01:22:45.928630361 +0200
-+++ make_ext.android	2010-04-04 01:21:47.995920064 +0200
+--- ../ext/util/make_ext	2010-04-04 01:36:19.544379537 +0200
++++ make_ext.android	2010-04-04 01:35:45.146658973 +0200
 @@ -32,6 +32,9 @@
  	;;
  esac
@@ -15,7 +15,7 @@
  # CCCDLFLAGS such as -fPIC -- see static_target in the main Makefile.SH)
  case "$target" in
 -dynamic)    makeargs="LINKTYPE=dynamic";
-+dynamic)    makeargs="LINKTYPE=dynamic PERL_ARCHIVE=/data/data/org.gtmp.perl/lib/libperl.so";
++dynamic)    makeargs="LINKTYPE=dynamic PERL_ARCHIVE=$HOME/android-ndk/apps/perldroid/jni/libperl/perl-5.10.0/libperl.so";
  	    target=all
  	    ;;
  static)     makeargs="LINKTYPE=static CCCDLFLAGS="
