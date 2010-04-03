@@ -1,12 +1,12 @@
---- ../ext/util/make_ext	2010-04-04 01:36:19.544379537 +0200
-+++ make_ext.android	2010-04-04 01:35:45.146658973 +0200
+--- ../ext/util/make_ext	2010-04-04 01:40:10.132379299 +0200
++++ make_ext.android	2010-04-04 01:39:43.625630126 +0200
 @@ -32,6 +32,9 @@
  	;;
  esac
  
 +ARCHI=android-3
 +CFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/include -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -nostdlib -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE_ -march=armv5te -mtune=xscale -msoft-float"
-+LDFLAGS="-nostdlib -Wl,-dynamic-linker,/system/bin/linker $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtbegin_dynamic.o $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtend_android.o -L$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib -lc -lgcc -lm -ldl"
++LDFLAGS="-nostdlib -Wl,-dynamic-linker,/system/bin/linker -L$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib -lc -lgcc -lm -ldl"
  
  case $CONFIG in
  '')
