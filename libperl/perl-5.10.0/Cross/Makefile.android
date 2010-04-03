@@ -10,9 +10,9 @@ export CROSS=$(ARCH)-$(OS)-
 export FULL_OPTIMIZATION = -fexpensive-optimizations -fomit-frame-pointer -O2
 export OPTIMIZATION = -O2
 
-export CC = agcc
+export CC = ${HOME}/android-ndk/build/prebuilt/linux-x86/arm-eabi-4.4.0/bin/arm-eabi-gcc
 export CXX = $(CROSS)g++
-export LD = agcc
+export LD = ${HOME}/android-ndk/build/prebuilt/linux-x86/arm-eabi-4.4.0/bin/arm-eabi-gcc
 export STRIP = $(CROSS)strip
 export AR = $(CROSS)ar
 export RANLIB = $(CROSS)ranlib
