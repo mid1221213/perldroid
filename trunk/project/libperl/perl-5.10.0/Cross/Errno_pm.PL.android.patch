@@ -8,8 +8,8 @@
 -	    '/usr/include/errno.h' : '/usr/local/include/errno.h';
 +#	my $linux_errno_h = -e '/usr/include/errno.h' ?
 +#	    '/usr/include/errno.h' : '/usr/local/include/errno.h';
-+	my $linux_errno_h = -e "$ENV{HOME}/android-ndk/build/platforms/android-3/arch-arm/usr/include/errno.h" ?
-+	    "$ENV{HOME}/android-ndk/build/platforms/android-3/arch-arm/usr/include/errno.h" : '/usr/local/include/errno.h';
++	my $linux_errno_h = -e "$ENV{HOME}/android-ndk/build/platforms/android-4/arch-arm/usr/include/errno.h" ?
++	    "$ENV{HOME}/android-ndk/build/platforms/android-4/arch-arm/usr/include/errno.h" : '/usr/local/include/errno.h';
  	$file{$linux_errno_h} = 1;
      } elsif ($^O eq 'MacOS') {
  	# note that we are only getting the GUSI errno's here ...
