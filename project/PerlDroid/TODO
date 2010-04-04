@@ -1,0 +1,7 @@
+- Package generator using templating system
+	- Task generator
+		- activity
+		- provider
+		- widget
+		- Service
+		- Provider

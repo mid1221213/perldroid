@@ -1,0 +1,15 @@
+--- ../ext/Errno/Errno_pm.PL	2010-04-04 03:21:03.233880310 +0200
++++ Errno_pm.PL.android	2010-04-04 03:19:09.292790372 +0200
+@@ -147,8 +147,10 @@
+ 	     ) {
+ 	# Some Linuxes have weird errno.hs which generate
+ 	# no #file or #line directives
+-	my $linux_errno_h = -e '/usr/include/errno.h' ?
+-	    '/usr/include/errno.h' : '/usr/local/include/errno.h';
++#	my $linux_errno_h = -e '/usr/include/errno.h' ?
++#	    '/usr/include/errno.h' : '/usr/local/include/errno.h';
++	my $linux_errno_h = -e "$ENV{HOME}/android-ndk/build/platforms/android-3/arch-arm/usr/include/errno.h" ?
++	    "$ENV{HOME}/android-ndk/build/platforms/android-3/arch-arm/usr/include/errno.h" : '/usr/local/include/errno.h';
+ 	$file{$linux_errno_h} = 1;
+     } elsif ($^O eq 'MacOS') {
+ 	# note that we are only getting the GUSI errno's here ...
