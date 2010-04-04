@@ -1,18 +1,16 @@
---- ../ext/util/make_ext	2010-04-04 02:02:16.160545380 +0200
-+++ make_ext.android	2010-04-04 02:02:04.288379928 +0200
-@@ -32,6 +32,11 @@
+--- ../ext/util/make_ext	2010-04-04 02:17:16.653629432 +0200
++++ make_ext.android	2010-04-04 02:04:54.024897234 +0200
+@@ -32,6 +32,9 @@
  	;;
  esac
  
 +ARCHI=android-3
 +export CFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/include -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -nostdlib -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE_ -march=armv5te -mtune=xscale -msoft-float"
 +export LDFLAGS="-nostdlib -Wl,-dynamic-linker,/system/bin/linker -L$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib -lc -lgcc -lm -ldl"
-+export CC="$HOME/android-ndk/build/prebuilt/linux-x86/arm-eabi-4.4.0/bin/arm-eabi-gcc"
-+export GCC=$CC
  
  case $CONFIG in
  '')
-@@ -96,7 +101,7 @@
+@@ -96,7 +99,7 @@
  # 'dynamic', 'static', and 'static_pic' (the last one respects
  # CCCDLFLAGS such as -fPIC -- see static_target in the main Makefile.SH)
  case "$target" in
@@ -21,7 +19,7 @@
  	    target=all
  	    ;;
  static)     makeargs="LINKTYPE=static CCCDLFLAGS="
-@@ -126,7 +131,8 @@
+@@ -126,7 +129,8 @@
  esac
  
  if test ! -f $makefile ; then

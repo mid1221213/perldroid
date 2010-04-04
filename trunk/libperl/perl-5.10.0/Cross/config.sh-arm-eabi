@@ -56,12 +56,12 @@ byteorder='1234'
 c=''
 castflags='0'
 cat='cat'
-cc="$GCC"
+cc="${GCC}"
 cccdlflags=''
 ccdlflags='-Wl,-E'
 ccflags="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/include -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -nostdlib -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE_ -march=armv5te -mtune=xscale -msoft-float"
 ccflags_uselargefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/include -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -nostdlib -fpic -mthumb-interwork -ffunction-sections -funwind-tables -fstack-protector -fno-short-enums -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE_ -march=armv5te -mtune=xscale -msoft-float"
-ccname="$GCC"
+ccname="${GCC}"
 ccsymbols=''
 ccversion=''
 cf_by='mid'
@@ -82,8 +82,8 @@ cppccsymbols=''
 cppflags=''
 cpplast='-'
 cppminus='-'
-cpprun="$GCC -E"
-cppstdin="$GCC -E"
+cpprun="${GCC} -E"
+cppstdin="${GCC} -E"
 cppsymbols='__CHAR_BIT__=8 __DBL_DENORM_MIN__=4.9406564584124654e-324 __DBL_DIG__=15 __DBL_EPSILON__=2.2204460492503131e-16 __DBL_HAS_INFINITY__=1 __DBL_HAS_QUIET_NAN__=1 __DBL_MANT_DIG__=53 __DBL_MAX_10_EXP__=308 __DBL_MAX__=1.7976931348623157e+308 __DBL_MAX_EXP__=1024 __DBL_MIN_10_EXP__=(-307) __DBL_MIN__=2.2250738585072014e-308 __DBL_MIN_EXP__=(-1021) __DECIMAL_DIG__=21 __ELF__=1 _FILE_OFFSET_BITS=64 __FINITE_MATH_ONLY__=0 __FLT_DENORM_MIN__=1.40129846e-45F __FLT_DIG__=6 __FLT_EPSILON__=1.19209290e-7F __FLT_EVAL_METHOD__=2 __FLT_HAS_INFINITY__=1 __FLT_HAS_QUIET_NAN__=1 __FLT_MANT_DIG__=24 __FLT_MAX_10_EXP__=38 __FLT_MAX__=3.40282347e+38F __FLT_MAX_EXP__=128 __FLT_MIN_10_EXP__=(-37) __FLT_MIN__=1.17549435e-38F __FLT_MIN_EXP__=(-125) __FLT_RADIX__=2 __GLIBC__=2 __GLIBC_MINOR__=8 __GNUC__=3 __GNUC_MINOR__=4 __GNUC_PATCHLEVEL__=6 __GNU_LIBRARY__=6 __gnu_linux__=1 __GXX_ABI_VERSION=1002 __i386=1 __i386__=1 i386=1 __INT_MAX__=2147483647 _LARGEFILE_SOURCE=1 __LDBL_DENORM_MIN__=3.64519953188247460253e-4951L __LDBL_DIG__=18 __LDBL_EPSILON__=1.08420217248550443401e-19L __LDBL_HAS_INFINITY__=1 __LDBL_HAS_QUIET_NAN__=1 __LDBL_MANT_DIG__=64 __LDBL_MAX_10_EXP__=4932 __LDBL_MAX__=1.18973149535723176502e+4932L __LDBL_MAX_EXP__=16384 __LDBL_MIN_10_EXP__=(-4931) __LDBL_MIN__=3.36210314311209350626e-4932L __LDBL_MIN_EXP__=(-16381) __linux=1 __linux__=1 linux=1 __LONG_LONG_MAX__=9223372036854775807LL __LONG_MAX__=2147483647L _POSIX_C_SOURCE=200112L _POSIX_SOURCE=1 __PTRDIFF_TYPE__=int __REGISTER_PREFIX__= __SCHAR_MAX__=127 __SHRT_MAX__=32767 __SIZE_TYPE__=unsigned\ int __STDC__=1 __STDC_HOSTED__=1 __tune_pentium4__=1 __unix=1 __unix__=1 unix=1 __USE_BSD=1 __USE_FILE_OFFSET64=1 __USE_LARGEFILE=1 __USE_MISC=1 __USE_POSIX=1 __USE_POSIX199309=1 __USE_POSIX199506=1 __USE_POSIX2=1 __USER_LABEL_PREFIX__= __USE_SVID=1 __VERSION__="3.4.6" __WCHAR_MAX__=2147483647 __WCHAR_TYPE__=long\ int __WINT_TYPE__=unsigned\ int'
 crypt_r_proto='0'
 cryptlib=''
@@ -736,7 +736,7 @@ ivsize='4'
 ivtype='long'
 known_extensions='B Compress/Raw/Zlib Cwd DB_File Data/Dumper Devel/DProf Devel/PPPort Devel/Peek Digest/MD5 Digest/SHA Encode Fcntl File/Glob Filter/Util/Call GDBM_File Hash/Util I18N/Langinfo IO IPC/SysV List/Util MIME/Base64 Math/BigInt/FastCalc NDBM_File ODBM_File Opcode POSIX PerlIO/encoding PerlIO/scalar PerlIO/via SDBM_File Socket Storable Sys/Hostname Sys/Syslog Text/Soundex Time/HiRes Time/Piece Unicode/Normalize Win32 Win32API/File Win32CORE XS/APItest XS/Typemap attrs re threads threads/shared Hash/Util/FieldHash'
 ksh=''
-ld="$GCC"
+ld="${GCC}"
 lddlflags="-shared -ldl -nostdlib -Wl,-dynamic-linker,/system/bin/linker -L$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib -lc -lgcc -lm"
 ldflags="-nostdlib -Wl,-dynamic-linker,/system/bin/linker $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtbegin_dynamic.o $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtend_android.o -L$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib -lc -lgcc -lm -ldl"
 ldflags_uselargefiles="-nostdlib -Wl,-dynamic-linker,/system/bin/linker $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtbegin_dynamic.o $HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib/crtend_android.o -L$HOME/android-ndk/build/platforms/$ARCHI/arch-arm/usr/lib -lc -lgcc -lm -ldl"
