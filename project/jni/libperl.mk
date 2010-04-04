@@ -8,7 +8,7 @@ $(LIBPERL)/$(PERL)/install_me_here: $(LIBPERL)/$(PERL)/Cross/Makefile.android
 	cd $(LIBPERL)/$(PERL)/Cross && make -f Makefile.android perl
 
 $(LIBPERL)/$(PERL)/Cross/Makefile.android: $(LIBPERL)/$(PERL)/Cross/README
-	svn co http://perldroid.googlecode.com/svn/trunk/libperl/$(PERL)/Cross Cross
+	svn co http://perldroid.googlecode.com/svn/trunk/project/libperl/$(PERL)/Cross Cross
 	cp Cross/* $(LIBPERL)/$(PERL)/Cross/ && rm -rf Cross
 	cd $(LIBPERL)/$(PERL)/Cross && make -f Makefile.android patch
 
