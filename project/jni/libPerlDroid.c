@@ -273,7 +273,6 @@ run_perl(JNIEnv *env, jclass cls, jobject this, jstring script)
     sv_setref_pv(pthis, "PerlDroidPtr", (void*)param);
 
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-    LOGV2("before running %s", script_path);
     ret = my_perl_run(my_perl);
 
     (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, script, script_path);
