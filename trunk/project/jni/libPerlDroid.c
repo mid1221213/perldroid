@@ -4,6 +4,11 @@
 #include <EXTERN.h>               /* from the Perl distribution     */
 #include <perl.h>                 /* from the Perl distribution     */
 #include <dlfcn.h>
+#define LOG_TAG "libPerlDroid"
+#include "android/log.h"
+#define LOGV2(fmt, arg) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, fmt, arg)
+#define LOGE2(fmt, arg) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, arg)
+#define LOGE3(fmt, arg1, arg2) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, arg1, arg2)
 
 #define CLASSNAME "org/gtmp/perl/JNIStub"
 
@@ -268,6 +273,7 @@ run_perl(JNIEnv *env, jclass cls, jobject this, jstring script)
     sv_setref_pv(pthis, "PerlDroidPtr", (void*)param);
 
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
+    LOGV2("before running %s", script_path);
     ret = my_perl_run(my_perl);
 
     (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, script, script_path);
