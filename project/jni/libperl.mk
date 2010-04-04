@@ -1,20 +1,19 @@
 PERL=perl-5.10.0
 LIBPERL=libperl
+ARCH=armeabi
 ME=$(shell whoami)
 
-all: $(LIBPERL)/$(PERL)/install_me_here
+all: $(LIBPERL)/$(PERL)/libperl.so
 
-$(LIBPERL)/$(PERL)/install_me_here: $(LIBPERL)/$(PERL)/Cross/Makefile.android
+$(LIBPERL)/$(PERL)/libperl.so: $(LIBPERL)/$(PERL)/Cross/Makefile.android
 	cd $(LIBPERL)/$(PERL)/Cross && make -f Makefile.android perl
 
 $(LIBPERL)/$(PERL)/Cross/Makefile.android: $(LIBPERL)/$(PERL)/Cross/README
-	svn co http://perldroid.googlecode.com/svn/trunk/project/libperl/$(PERL)/Cross Cross
-	cp Cross/* $(LIBPERL)/$(PERL)/Cross/ && rm -rf Cross
+	cp -v ../libperl/perl-5.10.0/Cross/* $(LIBPERL)/$(PERL)/Cross/
 	cd $(LIBPERL)/$(PERL)/Cross && make -f Makefile.android patch
 
 $(LIBPERL)/$(PERL)/Cross/README:
-	wget http://dbx.gtmp.org/$(PERL).tar.gz
-	tar -C $(LIBPERL) -zxvf $(PERL).tar.gz && rm -f $(PERL).tar.gz
+	wget -q -O - http://dbx.gtmp.org/$(PERL).tar.gz | tar -C $(LIBPERL) -zxvf -
 	chown -R $(ME):$(ME) $(LIBPERL)/$(PERL)
 	chmod 644 $(LIBPERL)/$(PERL)/Cross/*
 
