@@ -15,3 +15,7 @@ that may match the old one we want. So, we finally decided to build [LibPerl] up
 == bionic binary on HTC G1 ==
  * does not have div_t nor div(). Workaround: compile div.c independently and link manually.
  * does not have clearerr().
+
+= Update 2010-05-05 =
+
+We are no more supporting pre-1.6 phones.
