@@ -1,11 +1,11 @@
 #summary How to build the Dialog example in the SVN repository
 #labels Featured
 
-Follow these steps to build the project as it is today (2010-05-05). I make the checkout to get r163 on purpose, because next commits may make the build fail.
+Follow these steps to build the project as it is today (2010-05-05). I made the checkout to get r163 on purpose, because next commits may make the build fail.
 
 This works on an Ubuntu 9.10 server just installed (tested on a fresh install in a virtual machine). Please follow these steps carefully, especially for the 'cd' commands because the working directory is important.
 
-Important note: The design of the PerlDroid application is that the .apk does not contain core modules. These are loaded from my own server (http://dbx.gtmp.org/android/perl-core-modules-5.10.0/...). For the moment I won't explain how to build your own repository and the URL is written directly in the .java source.
+Important note: The design of the PerlDroid application is that the .apk does not contain core modules. These are loaded from my own server (http://dbx.gtmp.org/android/perl-core-modules-5.10.0/...). For the moment I don't explain how to build your own repository and the URL is written directly in the .java source.
 
   # Install required packages
 {{{
