@@ -148,149 +148,15 @@ public class PerlDroid extends Activity
 	    Log("Downloading mandatory core modules");
 	    downloadCoreModules();
 	} else {
-	    setupScriptList();
+	    setupEmptyList();
 	}
     }
 
-    protected void setupScriptList()
+    protected void setupEmptyList()
     {
 	coreLoaded = true;
 	setContentView(R.layout.main);
-	listView = (ListView) findViewById(R.id.ScriptList);
-        ArrayList<String> array = new ArrayList<String>();
-        list_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, array);
-        fillData();
-        registerForContextMenu(listView);
-
-	/** Called when a list item is clicked */
-	listView.setOnItemClickListener(new ListView.OnItemClickListener() {
-		public void onItemClick(AdapterView l, View v, int position, long id) {
-		    String scriptname = ((TextView)v).getText().toString();
-		    // String scriptpath = getFileStreamPath(SCRIPTS_PATH).toString() +  "/" + scriptname;
-		    Intent i = new Intent(PerlDroid.this, PerlDroidRunActivity.class);
-		    i.putExtra(Intent.EXTRA_SHORTCUT_NAME, scriptname);
-		    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-// 		    startActivityForResult(i, ACTIVITY_CREATE);
-		    startActivity(i);
-		}
-	    });
-	
-    }
-
-    /** Load scripts from default directory. */
-    private void fillData()
-    {
-        File basedir = getFileStreamPath(SCRIPTS_PATH);
-        if (!basedir.exists())
-		basedir.mkdir();
-        String [] files = basedir.list();
-        if (files != null) {
-            list_adapter.clear();
-            for (String file : files) {
-                list_adapter.add(file);
-            }
-            listView.setAdapter(list_adapter);
-        }
-    }
-
-    /** Called when the Menu button is pressed */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        boolean result = super.onCreateOptionsMenu(menu);
-	menu.add(0, ADD_ID, 0, R.string.menu_add);
-        return result;
-    }
-
-    /** Called when the Menu button is pressed */
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu)
-    {
-        boolean result = super.onPrepareOptionsMenu(menu);
-	if (coreLoaded)
-	    return result;
-	else
-	    return false;
-    }
-
-    /** Called on long touch on an item */
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo)
-    {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        menu.add(0, DELETE_ID, 0, R.string.ctx_delete);
-        menu.add(0, SHORTCUT_ID, 0, R.string.ctx_shortcut);
-    }
-
-    /** Called when a context menu item is selected */
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-        switch (item.getItemId()) {
-        case DELETE_ID:
-            deleteScript(info);
-            return true;
-        case SHORTCUT_ID:
-            shortcutScript(info);
-            return true;
-        default:
-            return super.onContextItemSelected(item);
-        }
-    }
-
-    /** delete a script given its menuitem */
-    private void deleteScript(AdapterContextMenuInfo info)
-    {
-        String filename = ((TextView)info.targetView).getText().toString();
-        String filepath = getFileStreamPath(SCRIPTS_PATH).toString() + "/" + filename;
-        File file = new File(filepath);
-        file.delete();
-        fillData();
-    }
-
-    /** Install shortcut */
-    private void shortcutScript(AdapterContextMenuInfo info)
-    {
-        String filename = ((TextView)info.targetView).getText().toString();
-        // String filepath = getFileStreamPath(SCRIPTS_PATH).toString() + "/" + filename;
-	Intent shortcut = new Intent(this, PerlDroidRunActivity.class);
-        shortcut.putExtra(Intent.EXTRA_SHORTCUT_NAME, filename);
-	shortcut.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-	Intent install = new Intent();
-        install.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
-        install.putExtra(Intent.EXTRA_SHORTCUT_NAME, filename);
-	Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.icon, null);
-        install.putExtra(Intent.EXTRA_SHORTCUT_ICON, bitmap);
-        install.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
-        sendBroadcast(install);
-        Toast.makeText(this, R.string.shortcut_created, Toast.LENGTH_SHORT).show();
-
-    }
-
-    /** Called when the item is selected from the menu */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case ADD_ID:
-            return launch_download_activity();
-        }
-        /* default: */
-        return super.onOptionsItemSelected(item);
-    }
-
-    /** Launch the download activity */
-    private boolean launch_download_activity()
-    {
-        Intent  i = new Intent(this, PerlDroidAddActivity.class);
-        startActivityForResult(i, ACTIVITY_CREATE);
-        return true;
-    }
-
-    /** Called when the child activity is returning */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        /* FIXME: do something if resultCode is bad */
-        fillData();
+	listView = (ListView) findViewById(R.id.EmptyList);
     }
 
     protected void downloadCoreModules()
@@ -304,7 +170,7 @@ public class PerlDroid extends Activity
 			Log("Tap screen to continue.");
 			pStatus.setOnClickListener(new TextView.OnClickListener() {
 				public void onClick(View view) {
-				    setupScriptList();
+				    setupEmptyList();
 				}
 			    });
 		    }
