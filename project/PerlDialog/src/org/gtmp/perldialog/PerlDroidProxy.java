@@ -18,7 +18,7 @@ public class PerlDroidProxy implements java.lang.reflect.InvocationHandler
     }
     
     private PerlDroidProxy(Class clazz) {
-          this.clazz = clazz;
+	this.clazz = clazz;
     }
 
     public Object invoke(Object proxy, Method m, Object[] args) throws Throwable
