@@ -23,6 +23,8 @@ public class PerlDroidProxy implements java.lang.reflect.InvocationHandler
 
     public Object invoke(Object proxy, Method m, Object[] args) throws Throwable
     {
-	return PerlDroidRunActivity.perl_callback(this.clazz, m.getName(), args);
+	// Change PerlDroid with main class of your app on next line and uncomment it
+	// return PerlDroid.perl_callback(this.clazz, m.getName(), args);
+	return true; // Remove this line
     }
 }
