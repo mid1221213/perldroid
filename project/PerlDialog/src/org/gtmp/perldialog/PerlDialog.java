@@ -15,7 +15,7 @@ import java.io.FileWriter;
 public class PerlDialog extends Activity
 {
     public static native int perl_run(Object thiz, String clazz, String script, String path);
-    public static native Object perl_callback(Class clazz, String m, Object[] args);
+    public static native Object perl_callback(String clazzName, String m, Object[] args);
     public static final String SCRIPT_NAME = "PerlDialog.pl";
     public static final String R_NAME = "R.pm";
 

@@ -49,6 +49,8 @@ static NV (*my_Perl_sv_2nv)(pTHX_ SV* sv);
 static char* (*my_Perl_sv_2pv_flags)(pTHX_ SV* sv, STRLEN* lp, I32 flags);
 static void (*my_Perl_free_tmps)(pTHX);
 static void (*my_Perl_pop_scope)(pTHX);
+static void (*my_Perl_croak_nocontext)(const char *pat, ...);
+static void (*my_Perl_warn_nocontext)(const char *pat, ...);
 
 static void (*my_boot_DynaLoader)(pTHX_ CV* cv);
 
@@ -73,6 +75,8 @@ static void (*my_boot_DynaLoader)(pTHX_ CV* cv);
 #define Perl_sv_2pv_flags my_Perl_sv_2pv_flags
 #define Perl_free_tmps my_Perl_free_tmps
 #define Perl_pop_scope my_Perl_pop_scope
+#define Perl_croak_nocontext my_Perl_croak_nocontext
+#define Perl_warn_nocontext my_Perl_warn_nocontext
 
 JNIEnv *my_jnienv;
 
@@ -82,37 +86,39 @@ open_libperl_so(void)
   lp_h = dlopen("/data/data/org.gtmp.perl/lib/libperl.so", RTLD_LAZY);
   
   if (lp_h) {
-    my_Perl_sys_init       = dlsym(lp_h, "Perl_sys_init");
-    my_perl_alloc          = dlsym(lp_h, "perl_alloc");
-    my_perl_construct      = dlsym(lp_h, "perl_construct");
-    my_perl_destruct       = dlsym(lp_h, "perl_destruct");
-    my_perl_parse          = dlsym(lp_h, "perl_parse");
-    my_perl_run            = dlsym(lp_h, "perl_run");
-    my_Perl_eval_pv        = dlsym(lp_h, "Perl_eval_pv");
-    my_perl_free           = dlsym(lp_h, "perl_free");
-    my_Perl_sys_term       = dlsym(lp_h, "Perl_sys_term");
-    my_Perl_get_sv         = dlsym(lp_h, "Perl_get_sv");
-    my_Perl_sv_2iv_flags   = dlsym(lp_h, "Perl_sv_2iv_flags");
-    my_Perl_sv_2mortal     = dlsym(lp_h, "Perl_sv_2mortal");
-    my_Perl_newXS          = dlsym(lp_h, "Perl_newXS");
-    my_Perl_safesysmalloc  = dlsym(lp_h, "Perl_safesysmalloc");
-    my_Perl_newSVsv        = dlsym(lp_h, "Perl_newSVsv");
-    my_Perl_call_sv        = dlsym(lp_h, "Perl_call_sv");
-    my_Perl_sv_setref_pv   = dlsym(lp_h, "Perl_sv_setref_pv");
-    my_Perl_get_cv         = dlsym(lp_h, "Perl_get_cv");
-    my_Perl_push_scope     = dlsym(lp_h, "Perl_push_scope");
-    my_Perl_save_int       = dlsym(lp_h, "Perl_save_int");
-    my_Perl_markstack_grow = dlsym(lp_h, "Perl_markstack_grow");
-    my_Perl_stack_grow     = dlsym(lp_h, "Perl_stack_grow");
-    my_Perl_newSViv        = dlsym(lp_h, "Perl_newSViv");
-    my_Perl_newSVnv        = dlsym(lp_h, "Perl_newSVnv");
-    my_Perl_newSVpv        = dlsym(lp_h, "Perl_newSVpv");
-    my_Perl_sv_newmortal   = dlsym(lp_h, "Perl_sv_newmortal");
-    my_Perl_sv_2nv         = dlsym(lp_h, "Perl_sv_2nv");
-    my_Perl_sv_2pv_flags   = dlsym(lp_h, "Perl_sv_2pv_flags");
-    my_Perl_free_tmps      = dlsym(lp_h, "Perl_free_tmps");
-    my_Perl_pop_scope      = dlsym(lp_h, "Perl_pop_scope");
-    my_boot_DynaLoader     = dlsym(lp_h, "boot_DynaLoader");
+    my_Perl_sys_init        = dlsym(lp_h, "Perl_sys_init");
+    my_perl_alloc           = dlsym(lp_h, "perl_alloc");
+    my_perl_construct       = dlsym(lp_h, "perl_construct");
+    my_perl_destruct        = dlsym(lp_h, "perl_destruct");
+    my_perl_parse           = dlsym(lp_h, "perl_parse");
+    my_perl_run             = dlsym(lp_h, "perl_run");
+    my_Perl_eval_pv         = dlsym(lp_h, "Perl_eval_pv");
+    my_perl_free            = dlsym(lp_h, "perl_free");
+    my_Perl_sys_term        = dlsym(lp_h, "Perl_sys_term");
+    my_Perl_get_sv          = dlsym(lp_h, "Perl_get_sv");
+    my_Perl_sv_2iv_flags    = dlsym(lp_h, "Perl_sv_2iv_flags");
+    my_Perl_sv_2mortal      = dlsym(lp_h, "Perl_sv_2mortal");
+    my_Perl_newXS           = dlsym(lp_h, "Perl_newXS");
+    my_Perl_safesysmalloc   = dlsym(lp_h, "Perl_safesysmalloc");
+    my_Perl_newSVsv         = dlsym(lp_h, "Perl_newSVsv");
+    my_Perl_call_sv         = dlsym(lp_h, "Perl_call_sv");
+    my_Perl_sv_setref_pv    = dlsym(lp_h, "Perl_sv_setref_pv");
+    my_Perl_get_cv          = dlsym(lp_h, "Perl_get_cv");
+    my_Perl_push_scope      = dlsym(lp_h, "Perl_push_scope");
+    my_Perl_save_int        = dlsym(lp_h, "Perl_save_int");
+    my_Perl_markstack_grow  = dlsym(lp_h, "Perl_markstack_grow");
+    my_Perl_stack_grow      = dlsym(lp_h, "Perl_stack_grow");
+    my_Perl_newSViv         = dlsym(lp_h, "Perl_newSViv");
+    my_Perl_newSVnv         = dlsym(lp_h, "Perl_newSVnv");
+    my_Perl_newSVpv         = dlsym(lp_h, "Perl_newSVpv");
+    my_Perl_sv_newmortal    = dlsym(lp_h, "Perl_sv_newmortal");
+    my_Perl_sv_2nv          = dlsym(lp_h, "Perl_sv_2nv");
+    my_Perl_sv_2pv_flags    = dlsym(lp_h, "Perl_sv_2pv_flags");
+    my_Perl_free_tmps       = dlsym(lp_h, "Perl_free_tmps");
+    my_Perl_pop_scope       = dlsym(lp_h, "Perl_pop_scope");
+    my_Perl_croak_nocontext = dlsym(lp_h, "Perl_croak_nocontext");
+    my_Perl_warn_nocontext  = dlsym(lp_h, "Perl_warn_nocontext");
+    my_boot_DynaLoader      = dlsym(lp_h, "boot_DynaLoader");
   } else
     return 0;
 
@@ -241,7 +247,7 @@ run_chmod(JNIEnv *env, jclass clazz, jstring path_string)
 }
 
 static jobject
-run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray args)
+run_callback(JNIEnv *env, jclass clazz, jstring clazz_name, jstring m, jobjectArray args)
 {
   dSP;
   int count;
@@ -253,9 +259,10 @@ run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray arg
   CV *sub;
   jclass jniClass, jniObjClass, jniClassClass, jniIntClass, jniDblClass;
   jmethodID jniConstructorID, jniMethodID;
+  char *from_className;
   const char *className;
   jsize args_len;
-  char arg_type[128], parg_type[128];
+  char arg_type[128], parg_type[128], fromPerlPkg[128];
   int lo;
   int arg_int;
   double arg_double;
@@ -263,14 +270,41 @@ run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray arg
   jobject arg_obj;
   PerlDroid *arg_pobj;
   SV *arg_sv, *psigs;
+  char *src, *dst;
 
   my_jnienv = env;
 
   args_len = (*my_jnienv)->GetArrayLength(my_jnienv, args);
 
+  from_className = (char *)(*my_jnienv)->GetStringUTFChars(my_jnienv, clazz_name, NULL);
   method = (*my_jnienv)->GetStringUTFChars(my_jnienv, m, NULL);
-  sub = get_cv(method, 0);
+
+  warn("frompkg=[%s]", from_className);
+  if (!strncmp(from_className, "[PKG]", 5)) {
+    strcpy(fromPerlPkg, from_className + 5);
+  } else {
+    strcpy(fromPerlPkg, "PerlDroid::");
+    for (src = (char *) from_className, dst = fromPerlPkg + 11; *src; src++)
+      if (*src == '.') {
+	*dst++ = ':';
+	*dst++ = ':';
+      } else if (*src == '$') {
+	*dst++ = '_';
+      } else
+	*dst++ = *src;
+    *dst = '\0';
+  }
+
+  strcpy(fromPerlPkg + strlen(fromPerlPkg), "::");
+  strcpy(fromPerlPkg + strlen(fromPerlPkg), method);
+
+  (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, clazz_name, from_className);
   (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, m, method);
+
+  sub = get_cv(fromPerlPkg, 0);
+
+  if (!sub)
+    croak("Method %s not found", fromPerlPkg);
 
   jniObjClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Object");
   jniClassClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Class");
@@ -281,8 +315,6 @@ run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray arg
   PUSHMARK(SP);
 
   for (lo = 0; lo < args_len; lo++) {
-    char *src, *dst;
-
     arg_obj = (*my_jnienv)->GetObjectArrayElement(my_jnienv, args, lo);
     
     jniMethodID = (*my_jnienv)->GetMethodID(my_jnienv, jniObjClass, "getClass", "()Ljava/lang/Class;");
@@ -298,9 +330,7 @@ run_callback(JNIEnv *env, jclass clazz, jobject obj, jstring m, jobjectArray arg
       else
 	*dst = *src;
 
-    *(dst) = '\0';
-
-    printf("arg #%d type = %s\n", lo, arg_type);
+    *dst = '\0';
 
     if (!strcmp(arg_type, "java/lang/Boolean")) {
       jniIntClass = (*my_jnienv)->FindClass(my_jnienv, "java/lang/Boolean");
@@ -388,7 +418,7 @@ jint register_perl(JNIEnv *env, jclass clazz, jstring class)
 
   JNINativeMethod my_methods[] = {
     { "perl_run", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I", (void *) run_perl },
-    { "perl_callback", "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void *) run_callback },
+    { "perl_callback", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void *) run_callback },
   };
   
   jint result = 0;

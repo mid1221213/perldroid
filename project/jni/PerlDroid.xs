@@ -235,8 +235,9 @@ XS_cast(from, hp)
 	RETVAL
 
 PerlDroid *
-XS_proxy(hp)
+XS_proxy(hp, pkg)
 	HV* hp;
+	char* pkg;
    PREINIT:
 	char* CLASS;
 	IV tmp_param;
@@ -247,6 +248,7 @@ XS_proxy(hp)
 	PerlDroid *ret;
 	SV *psigs;
 	char clazz[128];
+	jstring jpkg;
    CODE:
 	CLASS = HvNAME(SvSTASH(hp));
 
@@ -263,16 +265,20 @@ XS_proxy(hp)
 	  croak("Can't find class p2 org/gtmp/perl/PerlDroidProxy");
 	}
 
-	jniPMethodID = (*my_jnienv)->GetStaticMethodID(my_jnienv, jniPClass, "newInstance", "(Ljava/lang/Class;)Ljava/lang/Object;");
+	jniPMethodID = (*my_jnienv)->GetStaticMethodID(my_jnienv, jniPClass, "newInstance", "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object;");
 	if (!jniPMethodID) {
 	  croak("Can't find method newInstance for class org/gtmp/perl/PerlDroidProxy");
 	}
 
+	jpkg = (*my_jnienv)->NewStringUTF(my_jnienv, pkg);
+
 	warn("Instantiating Proxy");
-	jniPObject = (*my_jnienv)->CallStaticObjectMethod(my_jnienv, jniPClass, jniPMethodID, jniIClass);
+jniPObject = (*my_jnienv)->CallStaticObjectMethod(my_jnienv, jniPClass, jniPMethodID, jniIClass, jpkg);
 	if (!jniPObject) {
 	  croak("Can't instantiate Proxy");
 	}
+
+	(*my_jnienv)->ReleaseStringUTFChars(my_jnienv, jpkg, pkg);
 
 	warn("Preparing return object: %s, %s", CLASS, clazz);
 	ret = (PerlDroid *)safemalloc(sizeof(PerlDroid));
