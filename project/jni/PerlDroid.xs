@@ -355,10 +355,11 @@ XS_method(method, obj, ...)
 	const char *ret_string;
 	char PCLASS[128];
    CODE:
-	hp = (HV*)SvRV(obj->sigs);
+	warn("method arg = %p", obj);
 	CLASS = obj->class;
-	app = hv_fetch(hp, method, strlen(method), 0);
 	warn("method arg class = %s", CLASS);
+	hp = (HV*)SvRV(obj->sigs);
+	app = hv_fetch(hp, method, strlen(method), 0);
 
 	if (!app)
 	  app = get_meth_in_parent(hp, PCLASS, method);
