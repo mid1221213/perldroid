@@ -43,12 +43,7 @@ import java.lang.Runtime;
 
 public class PerlDroid extends Activity
 {
-    private ArrayAdapter<String> list_adapter;
     private static final String SCRIPTS_PATH = "scripts";
-    private static final int ACTIVITY_CREATE=0;
-    public static final int ADD_ID = Menu.FIRST;
-    public static final int DELETE_ID = Menu.FIRST;
-    public static final int SHORTCUT_ID = Menu.FIRST + 1;
 
     private boolean coreLoaded = false;
     private TextView pStatus;
