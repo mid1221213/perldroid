@@ -1,4 +1,5 @@
 use strict;
+use R;
 
 $| = 1; 
 use PerlDroid;
@@ -30,3 +31,4 @@ $adb->show;
 
 print "Ok\n";
 warn 'classthis = ' . $this->getClass->getName;
+printf("R.layout.main=0x%x\n", $R{layout}{main});

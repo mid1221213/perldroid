@@ -134,21 +134,24 @@ xs_init(pTHX)
 }
 
 jint
-run_perl(JNIEnv *env, jclass cls, jobject this, jstring clazz, jstring script)
+run_perl(JNIEnv *env, jclass cls, jobject this, jstring clazz, jstring script, jstring path)
 {
   my_jnienv = env;
   jint ret = -1;
-  int argc = 2;
-  char *argv[3];
+  int argc = 3;
+  char *argv[4];
   SV *pthis, *ppthis;
   PerlDroid *param;
   const char *script_path;
+  const char *inc_path;
   char *clazz_name;
   char clazz_perl[128];
+  char include[128];
   char *str;
 
   if (open_libperl_so()) {
     script_path = (*my_jnienv)->GetStringUTFChars(my_jnienv, script, NULL);
+    inc_path = (*my_jnienv)->GetStringUTFChars(my_jnienv, path, NULL);
     clazz_name  = (char *)((*my_jnienv)->GetStringUTFChars(my_jnienv, clazz, NULL));
 
     str = clazz_name;
@@ -160,16 +163,19 @@ run_perl(JNIEnv *env, jclass cls, jobject this, jstring clazz, jstring script)
 
     java_class_to_perl_obj(clazz_name, clazz_perl);
 
+    sprintf(include, "-I%s", inc_path);
+
     argv[0] = "org.gtmp.perl";
-    argv[1] = (char *) script_path;
-    argv[2] = NULL;
+    argv[1] = include;
+    argv[2] = (char *) script_path;
+    argv[3] = NULL;
 
     my_Perl_sys_init(&argc, (char ***) &argv);
     my_perl = my_perl_alloc();
     PL_perl_destruct_level = 1;
     my_perl_construct(my_perl);
     
-    my_perl_parse(my_perl, xs_init, 2, argv, NULL);
+    my_perl_parse(my_perl, xs_init, argc, argv, NULL);
 
     pthis  = get_sv("this", TRUE);
     ppthis = get_sv(clazz_perl, FALSE);
@@ -185,6 +191,7 @@ run_perl(JNIEnv *env, jclass cls, jobject this, jstring clazz, jstring script)
     ret = my_perl_run(my_perl);
 
     (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, script, script_path);
+    (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, path, inc_path);
     (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, clazz, clazz_name);
 
     // Don't destruct interpreter because of possible callbacks
@@ -380,7 +387,7 @@ jint register_perl(JNIEnv *env, jclass clazz, jstring class)
   my_jnienv = env;
 
   JNINativeMethod my_methods[] = {
-    { "perl_run", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)I", (void *) run_perl },
+    { "perl_run", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I", (void *) run_perl },
     { "perl_callback", "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void *) run_callback },
   };
   
