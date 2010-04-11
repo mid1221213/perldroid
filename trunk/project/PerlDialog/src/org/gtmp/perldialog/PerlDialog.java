@@ -8,12 +8,16 @@ import android.content.res.AssetManager;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.Class;
+import java.io.FileWriter;
 
 public class PerlDialog extends Activity
 {
-    public static native int perl_run(Object thiz, String clazz, String script);
+    public static native int perl_run(Object thiz, String clazz, String script, String path);
     public static native Object perl_callback(Class clazz, String m, Object[] args);
     public static final String SCRIPT_NAME = "PerlDialog.pl";
+    public static final String R_NAME = "R.pm";
 
     static
     {
@@ -30,7 +34,7 @@ public class PerlDialog extends Activity
 
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState)
+	public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
@@ -54,7 +58,28 @@ public class PerlDialog extends Activity
 	} catch (Exception ex) {
 	}
 
+	try {
+	    FileWriter r_out = new FileWriter(path + "/" + R_NAME);
+	    r_out.append("package R;\nrequire Exporter;\nour @ISA = qw/Exporter/;\nour @EXPORT = qw/%R/;\nour %R = (\n");
+	    
+	    for (Class c : R.class.getDeclaredClasses()) {
+		String cn = c.getName();
+		r_out.append("  '" + cn.substring(cn.lastIndexOf('$') + 1) + "' => {\n");
+		for (Field field : c.getFields()) {
+		    long l = field.getLong(field);
+		    String fn = field.getName();
+		    r_out.append("    '" + fn.substring(fn.lastIndexOf('$') + 1) + "' => 0x" + java.lang.Long.toHexString(l) + ",\n");
+		}
+		r_out.append("  },\n");
+	    }
+	    
+	    r_out.append(");\n1;\n");
+	    r_out.close();
+	} catch (Exception ex) {
+	}
+
+
 	android.util.Log.v("PerlDroid", "Launching script: " + path + "/" + SCRIPT_NAME + " (" + this.getClass().getSuperclass().getName() + ")");
-	perl_run(this, this.getClass().getSuperclass().getName(), path + "/" + SCRIPT_NAME);
+	perl_run(this, this.getClass().getSuperclass().getName(), path + "/" + SCRIPT_NAME, path.toString());
     }
 }
