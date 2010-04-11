@@ -3,6 +3,7 @@
 #include <XSUB.h>
 #include <jni.h>
 #include <string.h>
+#include "PerlDroid.h"
 
 extern JNIEnv *my_jnienv;
 
@@ -17,66 +18,6 @@ char *nat2cls[] = {
   "Djava/lang/Double",
   "sjava/lang/String"
 };
-
-typedef struct {
-  char *class;
-  SV *sigs;
-  jobject jobj;
-  jobject gref;
-} PerlDroid;
-
-static int perl_obj_to_java_class(char *perl_obj, char *java_class)
-{
-  char c;
-  char *java_class_orig = java_class;
-
-  while (c = *(perl_obj++)) {
-    switch(c) {
-    case ':':
-      *(java_class++) = '/';
-      perl_obj++;
-      break;
-    case '_':
-      *(java_class++) = '$';
-      break;
-    default:
-      *(java_class++) = c;
-      break;
-    }
-  }
-
-  *java_class = '\0';
-
-  return java_class - java_class_orig;
-}
-
-static void java_class_to_perl_obj(char *java_class, char *perl_obj)
-{
-  char c;
-
-  strcpy(perl_obj, "PerlDroid::");
-  perl_obj += 11;
-
-  while (c = *(java_class++)) {
-    switch(c) {
-    case '/':
-      *(perl_obj++) = ':';
-      *(perl_obj++) = ':';
-      break;
-    case '$':
-      *(perl_obj++) = '_';
-      break;
-    case 'L':
-    case ';':
-      break;
-    default:
-      *(perl_obj++) = c;
-      break;
-    }
-  }
-
-  *perl_obj = '\0';
-}
 
 static int get_type(char **s, char *sb)
 {
@@ -207,6 +148,47 @@ SV** get_meth_in_parent(HV *hp, char *class, char *method)
   return method_sv;
 }
 
+static void
+perl_args_to_java_args(SV *parami, int num_param, jvalue params[], char sig[], int *cur)
+{
+  IV tmp_param;
+  PerlDroid *pd_param;
+  char *pclass;
+
+  warn("num_param=%d, cur=%d", num_param, (*cur));
+
+  if (SvROK(parami) && SvTYPE(SvRV(parami)) == SVt_PVMG) {
+    tmp_param = SvIV((SV*)SvRV(parami));
+    pd_param = INT2PTR(PerlDroid *, tmp_param);
+    pclass = pd_param->class;
+    sig[(*cur)++] = 'L';
+    (*cur) += perl_obj_to_java_class(pclass + 11, sig + (*cur));
+    sig[(*cur)++] = ';';
+    params[num_param].l = (jobject) pd_param->jobj;
+  } else {
+    if (SvIOKp(parami)) {
+      sig[(*cur)++] = 'I';
+      params[num_param].i = (jint) SvIV(parami);
+    } else if (SvNOKp(parami)) {
+      sig[(*cur)++] = 'D';
+      params[num_param].d = (jdouble) SvNV(parami);
+    } else if (SvPOKp(parami)) {
+      /*SvPV(parami, len);
+	if (len == 1) {
+	char *str;
+	sig[(*cur)++] = 'C';
+	str = SvPV_nolen(parami);
+	params[i - 1].c = str[0];
+	} else {*/
+      sig[(*cur)++] = 's';
+      params[num_param].l = (jobject) (*my_jnienv)->NewStringUTF(my_jnienv, SvPV_nolen(parami));
+      /*}*/
+    } else {
+      croak("Type not recognized param #%d", num_param);
+    }
+  }
+}
+
 MODULE = PerlDroid  PACKAGE = PerlDroid
 
 PerlDroid *
@@ -292,36 +274,7 @@ XS_constructor(hp, ...)
 	if (items > 1) /* we have arguments */
 	  for (i = 1; i < items; i++) {
 	    parami = ST(i);
-	    if (SvROK(parami) && SvTYPE(SvRV(parami)) == SVt_PVMG) {
-	      tmp_param = SvIV((SV*)SvRV(parami));
-	      pd_param = INT2PTR(PerlDroid *, tmp_param);
-	      pclass = pd_param->class;
-	      sig[cur++] = 'L';
-	      cur += perl_obj_to_java_class(pclass + 11, sig + cur);
-	      sig[cur++] = ';';
-	      params[i - 1].l = (jobject) pd_param->jobj;
-	    } else {
-	      if (SvIOKp(parami)) {
-		sig[cur++] = 'I';
-		params[i - 1].i = (jint) SvIV(parami);
-	      } else if (SvNOKp(parami)) {
-		sig[cur++] = 'D';
-		params[i - 1].d = (jdouble) SvNV(parami);
-	      } else if (SvPOKp(parami)) {
-		/*SvPV(parami, len);
-		  if (len == 1) {
-		  char *str;
-		  sig[cur++] = 'C';
-		  str = SvPV_nolen(parami);
-		  params[i - 1].c = str[0];
-		  } else {*/
-		sig[cur++] = 's';
-		params[i - 1].l = (jobject) (*my_jnienv)->NewStringUTF(my_jnienv, SvPV_nolen(parami));
-		/*}*/
-	      } else {
-		croak("Type not recognized param #%d", i);
-	      }
-	    }
+	    perl_args_to_java_args(parami, i - 1, params, sig, &cur);
 	  }
 
         sig[cur++] = ')';
@@ -393,8 +346,6 @@ XS_method(method, obj, ...)
 	jobject jniObject;
 	jvalue params[128];
 	PerlDroid *ret;
-	IV tmp_param;
-	PerlDroid *pd_param;
 	HV *hp;
 	SV *psigs;
 	PerlDroid *ret_obj;
@@ -421,36 +372,7 @@ XS_method(method, obj, ...)
 	if (items > 2)
 	  for (i = 2; i < items; i++) {
 	    parami = ST(i);
-	    if (SvROK(parami) && SvTYPE(SvRV(parami)) == SVt_PVMG) {
-	      tmp_param = SvIV((SV*)SvRV(parami));
-	      pd_param = INT2PTR(PerlDroid *, tmp_param);
-	      pclass = pd_param->class;
-	      sig[cur++] = 'L';
-	      cur += perl_obj_to_java_class(pclass + 11, sig + cur);
-	      sig[cur++] = ';';
-	      params[i - 2].l = (jobject) pd_param->jobj;
-	    } else {
-	      if (SvIOKp(parami)) {
-		sig[cur++] = 'I';
-		params[i - 2].i = (jint) SvIV(parami);
-	      } else if (SvNOKp(parami)) {
-		sig[cur++] = 'D';
-		params[i - 2].d = (jdouble) SvNV(parami);
-	      } else if (SvPOKp(parami)) {
-		/*SvPV(parami, len);
-		  if (len == 1) {
-		  char *str;
-		  sig[cur++] = 'C';
-		  str = SvPV_nolen(parami);
-		  params[i - 2].c = str[0];
-		  } else {*/
-		sig[cur++] = 's';
-		params[i - 2].l = (jobject) (*my_jnienv)->NewStringUTF(my_jnienv, SvPV_nolen(parami));
-		/*}*/
-	      } else {
-		croak("Type not recognized param #%d", i);
-	      }
-	    }
+	    perl_args_to_java_args(parami, i - 2, params, sig, &cur);
 	  }
 
 
