@@ -134,7 +134,7 @@ xs_init(pTHX)
 }
 
 jint
-run_perl(JNIEnv *env, jclass cls, jobject this, jstring script)
+run_perl(JNIEnv *env, jclass cls, jobject this, jstring clazz, jstring script)
 {
   my_jnienv = env;
   jint ret = -1;
@@ -143,9 +143,23 @@ run_perl(JNIEnv *env, jclass cls, jobject this, jstring script)
   SV *pthis, *ppthis;
   PerlDroid *param;
   const char *script_path;
+  char *clazz_name;
+  char clazz_perl[128];
+  char *str;
 
   if (open_libperl_so()) {
     script_path = (*my_jnienv)->GetStringUTFChars(my_jnienv, script, NULL);
+    clazz_name  = (char *)((*my_jnienv)->GetStringUTFChars(my_jnienv, clazz, NULL));
+
+    str = clazz_name;
+    while (*str) {
+      if (*str == '.')
+	*str = '/';
+      str++;
+    }
+
+    java_class_to_perl_obj(clazz_name, clazz_perl);
+
     argv[0] = "org.gtmp.perl";
     argv[1] = (char *) script_path;
     argv[2] = NULL;
@@ -158,19 +172,20 @@ run_perl(JNIEnv *env, jclass cls, jobject this, jstring script)
     my_perl_parse(my_perl, xs_init, 2, argv, NULL);
 
     pthis  = get_sv("this", TRUE);
-    ppthis = get_sv("PerlDroid::android::content::Context", FALSE);
+    ppthis = get_sv(clazz_perl, FALSE);
 
     param = (PerlDroid *)safemalloc(sizeof(PerlDroid));
     param->sigs  = newSVsv(ppthis);
     param->jobj  = this;
     param->gref = (*my_jnienv)->NewGlobalRef(my_jnienv, param->jobj);
-    param->class = strdup("PerlDroid::android::content::Context");
+    param->class = strdup(clazz_perl);
     sv_setref_pv(pthis, "PerlDroidPtr", (void*)param);
 
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
     ret = my_perl_run(my_perl);
 
     (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, script, script_path);
+    (*my_jnienv)->ReleaseStringUTFChars(my_jnienv, clazz, clazz_name);
 
     // Don't destruct interpreter because of possible callbacks
 
@@ -365,7 +380,7 @@ jint register_perl(JNIEnv *env, jclass clazz, jstring class)
   my_jnienv = env;
 
   JNINativeMethod my_methods[] = {
-    { "perl_run", "(Landroid/content/Context;Ljava/lang/String;)I", (void *) run_perl },
+    { "perl_run", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)I", (void *) run_perl },
     { "perl_callback", "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void *) run_callback },
   };
   

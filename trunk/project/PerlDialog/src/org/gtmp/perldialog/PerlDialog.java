@@ -11,7 +11,7 @@ import java.io.File;
 
 public class PerlDialog extends Activity
 {
-    public static native int perl_run(Context th, String script);
+    public static native int perl_run(Object thiz, String clazz, String script);
     public static native Object perl_callback(Class clazz, String m, Object[] args);
     public static final String SCRIPT_NAME = "PerlDialog.pl";
 
@@ -54,7 +54,7 @@ public class PerlDialog extends Activity
 	} catch (Exception ex) {
 	}
 
-	android.util.Log.v("PerlDroid", "Launching script");
-	perl_run(this, path + "/" + SCRIPT_NAME);
+	android.util.Log.v("PerlDroid", "Launching script: " + path + "/" + SCRIPT_NAME + " (" + this.getClass().getSuperclass().getName() + ")");
+	perl_run(this, this.getClass().getSuperclass().getName(), path + "/" + SCRIPT_NAME);
     }
 }

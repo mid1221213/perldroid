@@ -1,8 +1,9 @@
+use strict;
+
 $| = 1; 
 use PerlDroid;
-use PerlDroid::java::lang;
-use PerlDroid::android::app;
 use PerlDroid::android::content;
+use PerlDroid::android::app;
 
 use vars qw/$this/;
 
@@ -28,3 +29,4 @@ $adb->create;
 $adb->show; 
 
 print "Ok\n";
+warn 'classthis = ' . $this->getClass->getName;
