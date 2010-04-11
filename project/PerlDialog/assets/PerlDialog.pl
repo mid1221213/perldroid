@@ -5,6 +5,7 @@ $| = 1;
 use PerlDroid;
 use PerlDroid::android::content;
 use PerlDroid::android::app;
+use PerlDroid::android::widget;
 
 use vars qw/$this/;
 
@@ -32,3 +33,4 @@ $adb->show;
 print "Ok\n";
 warn 'classthis = ' . $this->getClass->getName;
 printf("R.layout.main=0x%x\n", $R{layout}{main});
+$this->findViewById($R{id}{TV})->cast($TextView)->setText("Mid was here! :-)");

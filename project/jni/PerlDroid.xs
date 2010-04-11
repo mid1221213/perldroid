@@ -192,6 +192,49 @@ perl_args_to_java_args(SV *parami, int num_param, jvalue params[], char sig[], i
 MODULE = PerlDroid  PACKAGE = PerlDroid
 
 PerlDroid *
+XS_cast(from, hp)
+	PerlDroid* from;
+	HV* hp;
+   PREINIT:
+	char *toClass;
+	jclass jniFromClass, jniToClass;
+	PerlDroid *ret;
+	char fromClazz[128];
+	char toClazz[128];
+   CODE:
+	toClass = HvNAME(SvSTASH(hp));
+
+	perl_obj_to_java_class(toClass + 11, toClazz);
+	jniToClass = (*my_jnienv)->FindClass(my_jnienv, toClazz);
+
+	if (!jniToClass) {
+	  croak("cast: Can't find class TO %s", toClazz);
+	}
+
+	perl_obj_to_java_class(from->class + 11, fromClazz);
+	jniFromClass = (*my_jnienv)->FindClass(my_jnienv, fromClazz);
+
+	if (!jniFromClass) {
+	  croak("cast: Can't find class FROM %s", fromClazz);
+	}
+
+	if (!(*my_jnienv)->IsAssignableFrom(my_jnienv, jniFromClass, jniToClass)) {
+	  warn("Forced cast from %s to %s", fromClazz, toClazz);
+	}
+
+	warn("Preparing return cast object: %s, %s", toClass, toClazz);
+	ret = (PerlDroid *)safemalloc(sizeof(PerlDroid));
+	ret->sigs  = newSVsv(get_sv(toClass, FALSE));
+	ret->jobj  = from->jobj;
+	ret->class = strdup(toClass);
+	ret->gref = (*my_jnienv)->NewGlobalRef(my_jnienv, ret->jobj);
+
+	RETVAL = ret;
+
+   OUTPUT:
+	RETVAL
+
+PerlDroid *
 XS_proxy(hp)
 	HV* hp;
    PREINIT:
