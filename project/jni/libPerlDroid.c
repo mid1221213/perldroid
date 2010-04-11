@@ -4,6 +4,8 @@
 #include <EXTERN.h>               /* from the Perl distribution     */
 #include <perl.h>                 /* from the Perl distribution     */
 #include <dlfcn.h>
+#include "PerlDroid.h"
+
 #define LOG_TAG "libPerlDroid"
 #include "android/log.h"
 #define LOGV2(fmt, arg) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, fmt, arg)
@@ -73,12 +75,6 @@ static void (*my_boot_DynaLoader)(pTHX_ CV* cv);
 #define Perl_pop_scope my_Perl_pop_scope
 
 JNIEnv *my_jnienv;
-typedef struct {
-  char *class;
-  SV *sigs;
-  jobject jobj;
-  jobject gref;
-} PerlDroid;
 
 int
 open_libperl_so(void)
@@ -187,35 +183,6 @@ run_perl(JNIEnv *env, jclass cls, jobject this, jstring script)
   }
 
   return ret;
-}
-
-static void
-java_class_to_perl_obj(char *java_class, char *perl_obj)
-{
-  char c;
-  
-  strcpy(perl_obj, "PerlDroid::");
-  perl_obj += 11;
-  
-  while (c = *(java_class++)) {
-    switch(c) {
-    case '/':
-      *(perl_obj++) = ':';
-      *(perl_obj++) = ':';
-      break;
-    case '$':
-      *(perl_obj++) = '_';
-      break;
-    case 'L':
-    case ';':
-      break;
-    default:
-      *(perl_obj++) = c;
-      break;
-    }
-  }
-  
-  *perl_obj = '\0';
 }
 
 void chmodr(const char* path) {
