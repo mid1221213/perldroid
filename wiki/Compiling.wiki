@@ -1,7 +1,7 @@
 #summary How to build the project and the PerlDialog example in the SVN repository
 #labels Featured
 
-Follow these steps to build the project as it is today (2010-04-05). I made the checkout to get r163 on purpose, because following commits may change the build sequence.
+Follow these steps to build the project as it is today (2010-04-11). I made the checkout to get r179 on purpose, because following commits may change the build sequence.
 
 This works on an Ubuntu 9.10 server just installed (tested on a fresh install in a virtual machine). Please follow these steps carefully, especially for the 'cd' commands because the working directory is important.
 
@@ -32,7 +32,7 @@ build/host-setup.sh
   # Now get the PerlDroid source
 {{{
 cd ~/android-ndk/apps
-svn checkout http://perldroid.googlecode.com/svn/trunk/@163 perldroid
+svn checkout http://perldroid.googlecode.com/svn/trunk/@179 perldroid
 }}}
   # Next step is to get perl source (5.10.0, on my server), compile libperl.so and libPerlDroid.so (and to remove libPerlDroid_so.so which is only needed to build PerlDroid.so). This step will take a lot of time but should end nicely with no error.
 {{{
