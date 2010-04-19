@@ -133,7 +133,7 @@ public class PerlDroid extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
 	super.onCreate(savedInstanceState);
-
+        mDbHelper = new PerlDroidDb(this);
 	android.util.Log.v("PerlDroid", "Acting...");
 	if (!coreAlreadyLoaded()) {
 	    setContentView(R.layout.init);
@@ -141,7 +141,6 @@ public class PerlDroid extends Activity
 	    pStatusSV = (ScrollView) findViewById(R.id.StatusTextSV);
 	    pStatus = (TextView) findViewById(R.id.StatusText);
 	    pStatus.setVerticalScrollBarEnabled(true);
-            mDbHelper = new PerlDroidDb(this);
 	    findViewById(R.id.LinearLayout).setVerticalScrollBarEnabled(true);
 	    Log("Downloading mandatory core modules");
 	    downloadCoreModules();
