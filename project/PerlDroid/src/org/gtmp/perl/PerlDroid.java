@@ -168,10 +168,7 @@ public class PerlDroid extends Activity
         // Now create a simple cursor adapter and set it to display
         SimpleCursorAdapter modules = 
             new SimpleCursorAdapter(this, R.layout.row, modulesCursor, from, to);
-
-        if (modules != null) {
-            listView.setAdapter(modules);
-        }
+        listView.setAdapter(modules);
         registerForContextMenu(listView);
         mDbHelper.close();
     }
@@ -340,17 +337,17 @@ public class PerlDroid extends Activity
 	    ex.printStackTrace();
 	    android.util.Log.v("PerlDroid", "Can't unzip (msg: " + msg + ")");
 	}
-	// Do not create a database entry for a core module
-    int i;
-    for (i = 0; i < coreModules.length; i++)
-        if (coreModules[i] == module)
-            break;
-    if (i < coreModules.length)
-        return;
-    // Create the module entry in database   
-    mDbHelper.open();
-    mDbHelper.createModule(module, files);
-    mDbHelper.close();
+        // Do not create a database entry for a core module
+        int i;
+        for (i = 0; i < coreModules.length; i++)
+            if (coreModules[i] == module)
+                break;
+        if (i < coreModules.length)
+            return;
+        // Create the module entry in database   
+        mDbHelper.open();
+        mDbHelper.createModule(module, files);
+        mDbHelper.close();
     }
 
     public InputStream getUrlData(String url) {
@@ -367,7 +364,6 @@ public class PerlDroid extends Activity
 	} catch (URISyntaxException e) {
 	    e.printStackTrace();
 	}
-
 	return null;
     }
 }
