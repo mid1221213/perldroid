@@ -36,7 +36,6 @@ public class PerlDroidProxy implements java.lang.reflect.InvocationHandler
 	this.clazz = clazz;
 	this.pkg = pkg;
     }
-
     public Object invoke(Object proxy, Method m, Object[] args) throws Throwable
     {
 	return org.gtmp.perldialog.PerlDialog.perl_callback((this.pkg != null ? "[PKG]" + this.pkg : this.clazz.getName()), m.getName(), args);
