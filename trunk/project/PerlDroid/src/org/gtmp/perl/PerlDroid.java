@@ -216,6 +216,7 @@ public class PerlDroid extends Activity
             for(File file : files) {
                 if(file.isDirectory()) {
                   deleteRecDir(file);
+                  dir.delete();
                 }
             }
         }
