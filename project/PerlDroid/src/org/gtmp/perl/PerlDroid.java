@@ -15,6 +15,8 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.io.Serializable;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileOutputStream;
@@ -203,6 +205,22 @@ public class PerlDroid extends Activity
         }
     }
 
+    /** Delete recursive if no files somewhere in */
+    private void deleteRecDir(File dir) {
+        if(dir.exists() && dir.isDirectory()) {
+            if(dir.list().length == 0) {
+                dir.delete();
+                return;
+            }
+            File[] files = dir.listFiles();
+            for(File file : files) {
+                if(file.isDirectory()) {
+                  deleteRecDir(file);
+                }
+            }
+        }
+    }
+
     private void deleteAllFiles(String module)
     {
         ArrayList<String> parents = new ArrayList<String>();
@@ -230,12 +248,13 @@ public class PerlDroid extends Activity
         cur.close();
         cur = null;
         mDbHelper.close();
-        Collections.sort(parents);
+        /* now delete parent directories */
+        Collections.sort(parents, new DirComp());
         Collections.reverse(parents);
         for (String p : parents) {
             File dir = new File(getFileStreamPath(version).toString() + "/" + p);
             if (dir.exists()) {
-                dir.delete();
+                deleteRecDir(dir); /* will delete if no files somewhere in */
             }
         }
     }
@@ -246,6 +265,36 @@ public class PerlDroid extends Activity
         String filepath = getFileStreamPath(version).toString() + "/" + path;
         File file = new File(filepath);
         file.delete();
+    }
+
+    /** Compare two directory strings
+     *  by counting the number of slashes it contains
+     */
+    class DirComp extends Object implements Comparator<String>, Serializable
+    {
+        public int compare(String dir1, String dir2)
+        {
+            int slash1 = 0;
+            int slash2 = 0;
+            int i;
+            for (i = 0; -1 != (i = (dir1.indexOf('/', i))); i++) {
+                slash1++;
+            }
+            for (i = 0; -1 != (i = (dir2.indexOf('/', i))); i++) {
+                slash2++;
+            }
+            if (slash1 > slash2)
+                return 1;
+            if (slash1 == slash2)
+                return 0;
+            /* else slash1 < slash2 */
+            return -1;
+        }
+
+        public boolean equals (Object obj)
+        {
+            return obj.equals(this);
+        }
     }
 
     protected void downloadCoreModules()
@@ -342,8 +391,8 @@ public class PerlDroid extends Activity
         for (i = 0; i < coreModules.length; i++)
             if (coreModules[i] == module)
                 break;
-        if (i < coreModules.length)
-            return;
+//        if (i < coreModules.length)
+//            return;
         // Create the module entry in database   
         mDbHelper.open();
         mDbHelper.createModule(module, files);
