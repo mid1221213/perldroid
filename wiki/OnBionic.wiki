@@ -1,5 +1,4 @@
 #summary Some info on the android libc
-#labels Featured
 
 = Introduction =
 
@@ -16,6 +15,6 @@ that may match the old one we want. So, we finally decided to build [LibPerl] up
  * does not have div_t nor div(). Workaround: compile div.c independently and link manually.
  * does not have clearerr().
 
-= Update 2010-05-05 =
+= Update 2010-04-05 =
 
 We are no more supporting pre-1.6 phones.
