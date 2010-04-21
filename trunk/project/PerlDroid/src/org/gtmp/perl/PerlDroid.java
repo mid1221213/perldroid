@@ -223,6 +223,7 @@ public class PerlDroid extends Activity
 
     private void deleteAllFiles(String module)
     {
+        String path = "";
         ArrayList<String> parents = new ArrayList<String>();
         mDbHelper.open();
         Cursor cur = mDbHelper.getModId(module);
@@ -233,7 +234,7 @@ public class PerlDroid extends Activity
         cur = mDbHelper.fetchFiles(modId);
         cur.moveToFirst();
         while (!cur.isAfterLast()) {
-            String path = cur.getString(cur.getColumnIndex(mDbHelper.KEY_FILENAME));
+            path = cur.getString(cur.getColumnIndex(mDbHelper.KEY_FILENAME));
             deletePath(path);
             String parent;
             try {
@@ -254,6 +255,14 @@ public class PerlDroid extends Activity
         for (String p : parents) {
             File dir = new File(getFileStreamPath(version).toString() + "/" + p);
             deleteRecDir(dir); /* will delete if no files somewhere in */
+        }
+        // delete the root directory of (last) Filename if any */
+        int slash = path.indexOf('/');
+        if (slash != -1) {
+            String root = path.substring(0, slash);
+	    android.util.Log.v("PerlDroid", "deleting root " + root);
+            File rootdir = new File(getFileStreamPath(version).toString() + "/" + root);
+            deleteRecDir(rootdir);
         }
     }
 
@@ -376,7 +385,7 @@ public class PerlDroid extends Activity
 		
 		out.close();
 		// add the file in module's files list
-        files.add(outFilename);
+                files.add(outFilename);
 	    }
 	    zin.close();
 	} catch (IOException ex) {
@@ -389,8 +398,8 @@ public class PerlDroid extends Activity
         for (i = 0; i < coreModules.length; i++)
             if (coreModules[i] == module)
                 break;
-        if (i < coreModules.length)
-            return;
+//        if (i < coreModules.length)
+//            return;
         // Create the module entry in database   
         mDbHelper.open();
         mDbHelper.createModule(module, files);
