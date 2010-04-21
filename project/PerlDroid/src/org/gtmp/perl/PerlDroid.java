@@ -56,7 +56,8 @@ public class PerlDroid extends Activity
     private PerlDroidDb mDbHelper;
     private ScrollView pStatusSV;
     private String version = "5.10.0";
-    private String URLPrefix = "http://dbx.gtmp.org/android/perl-core-modules-" + version;
+    private String CoreURLPrefix = "http://dbx.gtmp.org/android/perl-core-modules-" + version;
+    private String ExtraURLPrefix = "http://dbx.gtmp.org/android/perl-extra-modules-" + version;
     private String coreModules[] = {
 	"attributes",
 	"attrs",
@@ -156,12 +157,11 @@ public class PerlDroid extends Activity
 	    pStatus = (TextView) findViewById(R.id.StatusText);
 	    pStatus.setVerticalScrollBarEnabled(true);
 	    findViewById(R.id.LinearLayout).setVerticalScrollBarEnabled(true);
-            for (String module : askmodules) {
-                Log("Downloading extra module " + module + "... ");
-	        downloadExtraModule(module);
-            }
+            downloadExtraModules(askmodules);
         }
-        setupList();
+        if (askmodules == null && coreAlreadyLoaded()) {
+            setupList();
+        }
     }
 
     /** Setup the modules list */
@@ -287,12 +287,50 @@ public class PerlDroid extends Activity
         file.delete();
     }
 
-    protected void downloadExtraModule(String module)
+    protected void downloadExtraModules(ArrayList<String> modules)
     {
-        /* FIXME */
-        Log("Done.");
+        final ArrayList<String> moduleslist = modules;
+	final Handler handler = new Handler() {
+		@Override public void handleMessage(Message msg)
+		{
+		    Log((java.lang.String) msg.obj);
+		    if (msg.obj == "Done") {			
+			JNIStub.perl_chmod("/data/data/org.gtmp.perl/files");
+			Log("Tap screen to continue.");
+			pStatus.setOnClickListener(new TextView.OnClickListener() {
+				public void onClick(View view) {
+                                    setupList();
+				}
+			    });
+		    }
+		}
+	    };
+	
+	Thread mBackground = new Thread(new Runnable()
+	    {
+		public void run()
+		{
+		    for (String file : moduleslist) {
+			Message myMsg = handler.obtainMessage();
+			myMsg.obj = "Getting " + file + "...";
+			handler.sendMessage(myMsg);
+			downloadExtraModule(file);
+		    }
+		    Message myMsg = handler.obtainMessage();
+		    myMsg.obj = "Done";
+		    handler.sendMessage(myMsg);
+		}
+	    });
+
+	mBackground.start();
     }
     
+    protected void downloadExtraModule(String module)
+    {
+	InputStream in = getUrlData(ExtraURLPrefix + "/" + module + ".zip");
+	unZip(in, module);
+    }
+
     protected void downloadCoreModules()
     {
 	final Handler handler = new Handler() {
@@ -304,7 +342,7 @@ public class PerlDroid extends Activity
 			Log("Tap screen to continue.");
 			pStatus.setOnClickListener(new TextView.OnClickListener() {
 				public void onClick(View view) {
-                                    /* just continue */
+                                    setupList();
 				}
 			    });
 		    }
@@ -332,7 +370,7 @@ public class PerlDroid extends Activity
 
     protected void downloadCoreModule(String module)
     {
-	InputStream in = getUrlData(URLPrefix + "/" + module + ".zip");
+	InputStream in = getUrlData(CoreURLPrefix + "/" + module + ".zip");
 	unZip(in, module);
     }
 
