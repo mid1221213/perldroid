@@ -253,13 +253,11 @@ public class PerlDroid extends Activity
         Collections.reverse(parents);
         for (String p : parents) {
             File dir = new File(getFileStreamPath(version).toString() + "/" + p);
-            if (dir.exists()) {
-                deleteRecDir(dir); /* will delete if no files somewhere in */
-            }
+            deleteRecDir(dir); /* will delete if no files somewhere in */
         }
     }
 
-    /** delete a file given its menuitem */
+    /** Delete a file given its relative path */
     public void deletePath(String path)
     {
         String filepath = getFileStreamPath(version).toString() + "/" + path;
@@ -391,8 +389,8 @@ public class PerlDroid extends Activity
         for (i = 0; i < coreModules.length; i++)
             if (coreModules[i] == module)
                 break;
-//        if (i < coreModules.length)
-//            return;
+        if (i < coreModules.length)
+            return;
         // Create the module entry in database   
         mDbHelper.open();
         mDbHelper.createModule(module, files);
