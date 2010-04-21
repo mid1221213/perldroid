@@ -1,5 +1,4 @@
 #summary Some info on libperl.so
-#labels Featured
 
 = Introduction =
 
@@ -15,3 +14,7 @@ We use the android prebuilt toolchain and the agcc gcc wrapper to build libperl 
 
 Once libperl.so is built, we must build a wrapper that is usable by the android platform.
 You may know that android does not support anything but a Java application... So, libperl's interface must be bound into a [Jni] wrapper: LibPerlDroid.
+
+= UPDATE 2010-04-21 =
+
+This page is outdated.
