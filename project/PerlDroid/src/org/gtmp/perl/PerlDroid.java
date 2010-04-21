@@ -146,9 +146,22 @@ public class PerlDroid extends Activity
 	    findViewById(R.id.LinearLayout).setVerticalScrollBarEnabled(true);
 	    Log("Downloading mandatory core modules");
 	    downloadCoreModules();
-	} else {
-	    setupList();
 	}
+        // Look if we are asked to download an extra module
+        Bundle extras = getIntent().getExtras();
+        ArrayList<String> askmodules = extras != null ? extras.getStringArrayList("download") : null;
+        if (askmodules != null) {
+	    setContentView(R.layout.init);
+	    pStatusSV = (ScrollView) findViewById(R.id.StatusTextSV);
+	    pStatus = (TextView) findViewById(R.id.StatusText);
+	    pStatus.setVerticalScrollBarEnabled(true);
+	    findViewById(R.id.LinearLayout).setVerticalScrollBarEnabled(true);
+            for (String module : askmodules) {
+                Log("Downloading extra module " + module + "... ");
+	        downloadExtraModule(module);
+            }
+        }
+        setupList();
     }
 
     /** Setup the modules list */
@@ -251,7 +264,7 @@ public class PerlDroid extends Activity
         cur = null;
         mDbHelper.close();
         /* now delete parent directories */
-        Collections.sort(parents, new DirComp());
+        Collections.sort(parents);
         Collections.reverse(parents);
         for (String p : parents) {
             File dir = new File(getFileStreamPath(version).toString() + "/" + p);
@@ -261,7 +274,6 @@ public class PerlDroid extends Activity
         int slash = path.indexOf('/');
         if (slash != -1) {
             String root = path.substring(0, slash);
-	    android.util.Log.v("PerlDroid", "deleting root " + root);
             File rootdir = new File(getFileStreamPath(version).toString() + "/" + root);
             deleteRecDir(rootdir);
         }
@@ -275,36 +287,12 @@ public class PerlDroid extends Activity
         file.delete();
     }
 
-    /** Compare two directory strings
-     *  by counting the number of slashes it contains
-     */
-    class DirComp extends Object implements Comparator<String>, Serializable
+    protected void downloadExtraModule(String module)
     {
-        public int compare(String dir1, String dir2)
-        {
-            int slash1 = 0;
-            int slash2 = 0;
-            int i;
-            for (i = 0; -1 != (i = (dir1.indexOf('/', i))); i++) {
-                slash1++;
-            }
-            for (i = 0; -1 != (i = (dir2.indexOf('/', i))); i++) {
-                slash2++;
-            }
-            if (slash1 > slash2)
-                return 1;
-            if (slash1 == slash2)
-                return 0;
-            /* else slash1 < slash2 */
-            return -1;
-        }
-
-        public boolean equals (Object obj)
-        {
-            return obj.equals(this);
-        }
+        /* FIXME */
+        Log("Done.");
     }
-
+    
     protected void downloadCoreModules()
     {
 	final Handler handler = new Handler() {
@@ -316,7 +304,7 @@ public class PerlDroid extends Activity
 			Log("Tap screen to continue.");
 			pStatus.setOnClickListener(new TextView.OnClickListener() {
 				public void onClick(View view) {
-				    setupList();
+                                    /* just continue */
 				}
 			    });
 		    }
