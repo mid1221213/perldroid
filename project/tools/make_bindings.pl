@@ -326,7 +326,7 @@ sub method_
 	    unless ($creating_tmpl) {
 		$call_super  = "    public $cmeth_name(" . join(', ', @iparams) . ")\n    {\n";
 		$call_super .= "        super(" . join(', ', @mparams) . ");\n";
-		$call_super .= "        org.gtmp.perl.BootStrap.perl_callback(this.getClass().getName(), \"$cmeth_name\", new Object[] { " . join(', ', @mparams) . " }, this);\n";
+		$call_super .= "        org.gtmp.perl.PerlDroid.perl_callback(this.getClass().getName(), \"$cmeth_name\", new Object[] { " . join(', ', @mparams) . " }, this);\n";
 		$call_super .= "    }\n";
 		return;
 	    }
@@ -340,7 +340,7 @@ sub method_
 
 	if ($tretval) {
 	    if ($tretval eq 'void') {
-		$meth_code .= "        org.gtmp.perl.BootStrap.perl_callback(this.getClass().getName(), \"$cmeth_name\", new Object[] { " . join(', ', @mparams) . " }, this);\n";
+		$meth_code .= "        org.gtmp.perl.PerlDroid.perl_callback(this.getClass().getName(), \"$cmeth_name\", new Object[] { " . join(', ', @mparams) . " }, this);\n";
 	    } else {
 		if ($creating_tmpl) {
 		    $meth_code .=  "        $tretval ret, Object ret_perl;\n";
@@ -348,7 +348,7 @@ sub method_
 		} else {
 		    $meth_code .=  "        Object ret_perl;\n";
 		}
-		$meth_code .=  "        ret_perl = org.gtmp.perl.BootStrap.perl_callback(this.getClass().getName(), \"$cmeth_name\", new Object[] { " . join(', ', @mparams) . " }, this);\n";
+		$meth_code .=  "        ret_perl = org.gtmp.perl.PerlDroid.perl_callback(this.getClass().getName(), \"$cmeth_name\", new Object[] { " . join(', ', @mparams) . " }, this);\n";
 		if ($creating_tmpl) {
 		    $meth_code .=   "        if (ret_perl == null)\n            return ret;\n";
 		}
@@ -361,7 +361,7 @@ sub method_
 	    } else {
 		$meth_code .=  "        Object ret_perl;\n";
 	    }
-	    $meth_code .=  "        ret_perl = org.gtmp.perl.BootStrap.perl_callback(this.getClass().getName(), \"$cmeth_name\", new Object[] { " . join(', ', @mparams) . " }, this);\n";
+	    $meth_code .=  "        ret_perl = org.gtmp.perl.PerlDroid.perl_callback(this.getClass().getName(), \"$cmeth_name\", new Object[] { " . join(', ', @mparams) . " }, this);\n";
 	    if ($creating_tmpl) {
 		$meth_code .=   "        if (ret_perl == null)\n            return ret;\n";
 	    }

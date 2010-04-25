@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
 import java.lang.Class;
 import java.io.FileWriter;
 
-public class BootStrap
+public class PerlDroid
 {
 //     private static native int perl_register(String clazz);
     private static native int perl_run(String path);
