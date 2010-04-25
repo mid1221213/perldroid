@@ -28,14 +28,14 @@ public class PerlDroidDb {
     private SQLiteDatabase mDb;
     
     private static final String MODULE_TABLE_CREATE =
-            "create table " + MODULE_TABLE + " (" 
-                            + KEY_MODID + " integer primary key autoincrement, " 
-                            + KEY_MODNAME + " text not null);";
+	"create table " + MODULE_TABLE + " (" 
+	+ KEY_MODID + " integer primary key autoincrement, " 
+	+ KEY_MODNAME + " text not null);";
 
     private static final String FILES_TABLE_CREATE =
-            "create table " + FILES_TABLE + " (" 
-                            + FKEY_MODID + " integer, " 
-                            + KEY_FILENAME + " text not null);";
+	"create table " + FILES_TABLE + " (" 
+	+ FKEY_MODID + " integer, " 
+	+ KEY_FILENAME + " text not null);";
 
     private final Context mCtx;
 
@@ -46,16 +46,16 @@ public class PerlDroidDb {
         }
 
         @Override
-        public void onCreate(SQLiteDatabase db) {
+	    public void onCreate(SQLiteDatabase db) {
 
             db.execSQL(MODULE_TABLE_CREATE);
             db.execSQL(FILES_TABLE_CREATE);
         }
 
         @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+	    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-                    + newVersion + ", which will destroy all old data");
+		  + newVersion + ", which will destroy all old data");
             db.execSQL("DROP TABLE IF EXISTS " + MODULE_TABLE);
             db.execSQL("DROP TABLE IF EXISTS " + FILES_TABLE);
             onCreate(db);
