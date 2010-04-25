@@ -2,7 +2,8 @@
 #define PERLDROID_H
 
 typedef struct {
-  char *class;
+  char *jclass;
+  char *pclass;
   SV *sigs;
   jobject jobj;
   jobject gref;
@@ -20,6 +21,7 @@ java_class_to_perl_obj(char *java_class, char *perl_obj)
   while (c = *(java_class++)) {
     switch(c) {
     case '/':
+    case '.':
       *(perl_obj++) = ':';
       *(perl_obj++) = ':';
       break;
