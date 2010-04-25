@@ -6,20 +6,22 @@ rm -rf target_droid target_subclasses target_tmpl
 
 ./make_bindings.pl public_api.xml
 
-echo "Compiling BootStrap"
+cd src_tmpl
 
-javac -g -bootclasspath ~/android-sdk/platforms/android-4/android.jar -g -target 1.5 org/gtmp/perl/BootStrap.java
+echo "Compiling PerlDroid.java"
 
-echo "JARing BootStrap"
+javac -g -bootclasspath ~/android-sdk/platforms/android-4/android.jar -g -target 1.5 org/gtmp/perl/PerlDroid.java
 
-jar cvf BootStrap.jar org/gtmp/perl/*.class
+echo "JARing PerlDroid.class"
 
-cd target_subclasses
+jar cvf PerlDroid.jar org/gtmp/perl/*.class
+
+cd ../target_subclasses
 
 echo "Compiling..."
 
 find . -name '*.java' >src.list
-javac -bootclasspath $HOME/android-sdk/platforms/android-4/android.jar:$HOME/android-ndk/apps/perldroid/project/tools/BootStrap.jar -g -target 1.5 @src.list
+javac -bootclasspath $HOME/android-sdk/platforms/android-4/android.jar:$HOME/android-ndk/apps/perldroid/project/tools/src_tmpl/PerlDroid.jar -g -target 1.5 @src.list
 
 echo "DEXing..."
 

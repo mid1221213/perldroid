@@ -12,7 +12,7 @@
 #define LOGE2(fmt, arg) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, arg)
 #define LOGE3(fmt, arg1, arg2) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, arg1, arg2)
 
-#define CLASSNAME "org/gtmp/perl/JNIStub"
+#define CLASSNAME "org/gtmp/perl/PerlDroid"
 
 static PerlInterpreter *my_perl;  /***    The Perl interpreter    ***/
 
@@ -533,7 +533,6 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
   JNINativeMethod my_methods[] = {
     { "perl_chmod", "(Ljava/lang/String;)V", (void *) run_chmod },
-/*     { "perl_register", "(Ljava/lang/String;)I", (void *) register_perl }, */
     { "perl_callback", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", (void *) run_callback },
     { "perl_run", "(Ljava/lang/String;)I", (void *) run_perl },
   };

@@ -49,6 +49,7 @@ import java.lang.Runtime;
 
 public class PerlDroid extends Activity
 {
+    public static native void perl_chmod(String path);
     private boolean coreLoaded = false;
     private TextView pStatus;
     private ListView listView;
@@ -294,7 +295,7 @@ public class PerlDroid extends Activity
 	    {
 		Log((java.lang.String) msg.obj);
 		if (msg.obj == "Done") {			
-		    JNIStub.perl_chmod("/data/data/org.gtmp.perl/files");
+		    perl_chmod(getFileStreamPath("").toString());
 		    Log("Tap screen to continue.");
 		    pStatus.setOnClickListener(new TextView.OnClickListener() {
 			    public void onClick(View view) {
@@ -314,7 +315,7 @@ public class PerlDroid extends Activity
 		{
 		    Log((java.lang.String) msg.obj);
 		    if (msg.obj == "Done") {			
-			JNIStub.perl_chmod("/data/data/org.gtmp.perl/files");
+			perl_chmod(getFileStreamPath("").toString());
 			Log("Tap screen to continue.");
 			pStatus.setOnClickListener(new TextView.OnClickListener() {
 				public void onClick(View view) {
