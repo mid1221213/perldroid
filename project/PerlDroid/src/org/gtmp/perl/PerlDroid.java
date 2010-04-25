@@ -305,7 +305,7 @@ public class PerlDroid extends Activity
 	    }
 	};
 
-    protected void downloadModules(String baseUrl, boolean core, ArrayList<String> modules)
+    protected void downloadModules(final String baseUrl, boolean core, ArrayList<String> modules)
     {
 	final boolean  coretrue = core;
 	final ArrayList<String> moduleslist = modules;
@@ -338,7 +338,7 @@ public class PerlDroid extends Activity
 			for (String file : moduleslist) { /* parameter ArrayList */
 			    Message myMsg = handler.obtainMessage();
 			    myMsg.obj = "Getting " + file + "...";
-			    hander.sendMessage(myMsg);
+			    handler.sendMessage(myMsg);
 			    downloadModule(baseUrl, file);
 			}
 		    }
