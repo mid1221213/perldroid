@@ -328,8 +328,8 @@ sub method_
 		$call_super .= "        super(" . join(', ', @mparams) . ");\n";
 		$call_super .= "        org.gtmp.perl.PerlDroid.perl_callback(this.getClass().getName(), \"$cmeth_name\", new Object[] { " . join(', ', @mparams) . " }, this);\n";
 		$call_super .= "    }\n";
-		return;
 	    }
+	    return;
 	} else {
 	    if ($call_super) {
 		$meth_code .= $call_super;
@@ -340,10 +340,12 @@ sub method_
 
 	if ($tretval) {
 	    if ($tretval eq 'void') {
+		$meth_code .= "        super.$cmeth_name(" . join(', ', @mparams) . ");\n" if $creating_tmpl;
 		$meth_code .= "        org.gtmp.perl.PerlDroid.perl_callback(this.getClass().getName(), \"$cmeth_name\", new Object[] { " . join(', ', @mparams) . " }, this);\n";
 	    } else {
 		if ($creating_tmpl) {
-		    $meth_code .=  "        $tretval ret, Object ret_perl;\n";
+		    $meth_code .=  "        $tretval ret;\n";
+		    $meth_code .=  "        Object ret_perl;\n";
 		    $meth_code .=  "        ret = super.$cmeth_name(" . join(', ', @mparams) . ");\n";
 		} else {
 		    $meth_code .=  "        Object ret_perl;\n";
@@ -356,7 +358,8 @@ sub method_
 	    }
 	} else {
 	    if ($creating_tmpl) {
-		$meth_code .=  "        $iretval ret, Object ret_perl;\n";
+		$meth_code .=  "        $iretval ret;\n";
+		$meth_code .=  "        Object ret_perl;\n";
 		$meth_code .=  "        ret = super.$cmeth_name(" . join(', ', @mparams) . ");\n";
 	    } else {
 		$meth_code .=  "        Object ret_perl;\n";
