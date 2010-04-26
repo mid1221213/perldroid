@@ -34,4 +34,4 @@ rm -f src.list
 
 cd ..
 
-cp -v subclasses.jar ../PerlDroid/assets/
+cp -vf subclasses.jar ../PerlDroid/assets/
