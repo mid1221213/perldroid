@@ -73,7 +73,7 @@ public class PerlDroidProxy implements InvocationHandler
     public Object invoke(Object proxy, Method m, Object[] args) throws Throwable
     {
 	android.util.Log.v("PerlDroidProxy", "invoking " + m.getName() + " on " + proxy.toString());
-	Object obj = org.gtmp.perl.BootStrap.perl_callback((this.pkg != null ? "[PKG]" + this.pkg : this.clazz != null ? this.clazz.getName() : this.interf.getName()), m.getName(), args, null);
+	Object obj = org.gtmp.perl.PerlDroid.perl_callback((this.pkg != null ? "[PKG]" + this.pkg : this.clazz != null ? this.clazz.getName() : this.interf.getName()), m.getName(), args, null);
 	if (obj == null) {
 	    return m.getDeclaringClass().getSuperclass().getMethod(m.getName(), m.getParameterTypes()).invoke(proxy, args);
 	} else {
