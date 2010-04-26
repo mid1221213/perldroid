@@ -1,5 +1,7 @@
 #! /bin/bash
 
+cd ~/android-ndk/apps/perldroid/project/tools
+
 rm -rf target_droid target_subclasses target_tmpl
 
 [[ ! -f public_api.xml ]] && wget -nd -O public_api.xml "http://android.git.kernel.org/?p=platform/frameworks/base.git;a=blob_plain;f=api/current.xml;hb=donut"
@@ -31,3 +33,5 @@ rm -f src.list
 ~/android-sdk/platforms/android-4/tools/dx --dex --output=../subclasses.jar .
 
 cd ..
+
+cp -v subclasses.jar ../PerlDroid/assets/
