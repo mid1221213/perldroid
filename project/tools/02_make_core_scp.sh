@@ -4,7 +4,7 @@ cd ~/android-ndk/apps/perldroid/project/tools
 
 rm -rf target_core PerlDroid.zip
 
-./make_core_modules_pkg.pl ~/android-ndk/apps/perldroid/project/jni/libperl/perl-5.10.0/install_me_here/usr/lib/perl/5.10.0
+./make_core_modules_pkg.pl ~/perldroid/project/jni/libperl/perl-5.10.1/install_me_here/usr/files/5.10.1
 
 mkdir -p target_droid
 cd target_droid
