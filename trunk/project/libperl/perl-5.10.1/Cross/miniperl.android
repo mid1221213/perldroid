@@ -1,0 +1,6 @@
+#! /usr/bin/perl
+
+use strict;
+use warnings;
+
+system("perl", "-Ifake_config_library", "-MConfig", @ARGV);
