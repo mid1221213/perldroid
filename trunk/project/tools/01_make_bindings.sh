@@ -1,6 +1,6 @@
 #! /bin/bash
 
-cd ~/android-ndk/apps/perldroid/project/tools
+cd ~/perldroid/project/tools
 
 rm -rf target_droid target_subclasses target_tmpl
 
@@ -23,7 +23,7 @@ cd ../target_subclasses
 echo "Compiling..."
 
 find . -name '*.java' >src.list
-javac -bootclasspath $HOME/android-sdk/platforms/android-4/android.jar:$HOME/android-ndk/apps/perldroid/project/tools/src_tmpl/PerlDroid.jar -g -target 1.5 @src.list
+javac -bootclasspath $HOME/android-sdk/platforms/android-4/android.jar:$HOME/perldroid/project/tools/src_tmpl/PerlDroid.jar -g -target 1.5 @src.list
 
 echo "DEXing..."
 

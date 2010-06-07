@@ -1,6 +1,6 @@
 #! /bin/bash
 
-cd ~/android-ndk/apps/perldroid/project/tools
+cd ~/perldroid/project/tools
 
 rm -rf target_core PerlDroid.zip
 
@@ -9,10 +9,10 @@ rm -rf target_core PerlDroid.zip
 mkdir -p target_droid
 cd target_droid
 mkdir -p arm-linux-multi/auto/PerlDroid
-cd ~/android-ndk
-make APP=perldroid
+cd ~/perldroid
+~/android-ndk/ndk-build
 cd -
-mv ~/android-ndk/apps/perldroid/project/libs/armeabi/libPerlDroid_so.so arm-linux-multi/auto/PerlDroid/PerlDroid.so
+mv ~/perldroid/project/libs/armeabi/libPerlDroid_so.so arm-linux-multi/auto/PerlDroid/PerlDroid.so
 find . -name "*.*" | zip ../target_core/PerlDroid.zip -@
 
 cd ../target_core
