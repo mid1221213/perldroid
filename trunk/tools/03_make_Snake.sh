@@ -1,6 +1,6 @@
 #! /bin/bash
 
-cd ~/android-ndk/apps/perldroid/project
+cd ~/perldroid
 
 ~/android-sdk/tools/android update project --name Snake --target 4 --path Snake/
 
