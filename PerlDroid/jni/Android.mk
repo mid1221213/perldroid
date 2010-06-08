@@ -1,5 +1,4 @@
 LOCAL_PATH := $(call my-dir)
-DUMMY := $(shell cd $(LOCAL_PATH); make -f libperl.mk >&2)
 PERL_PATH := $(LOCAL_PATH)/libperl/perl-5.10.1
 
 include $(CLEAR_VARS)
