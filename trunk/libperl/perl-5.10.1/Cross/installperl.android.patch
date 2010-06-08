@@ -1,0 +1,13 @@
+--- ../installperl	2009-08-14 00:40:10.000000000 +0200
++++ installperl.android	2010-06-04 21:44:56.063150461 +0200
+@@ -3,8 +3,8 @@
+ BEGIN {
+     require 5.004;
+     chdir '..' if !-d 'lib' and -d '../lib';
+-    @INC = 'lib';
+-    $ENV{PERL5LIB} = 'lib';
++#     @INC = 'lib';
++#     $ENV{PERL5LIB} = 'lib';
+ 
+     # This needs to be at BEGIN time, before any use of Config
+     require './install_lib.pl';

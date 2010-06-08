@@ -1,4 +1,4 @@
 #! /bin/bash
 
-cd ~/android-ndk
-make APP=perldroid
+cd ~/perldroid/PerlDroid
+~/android-ndk/ndk-build
