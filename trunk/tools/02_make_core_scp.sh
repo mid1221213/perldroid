@@ -7,7 +7,7 @@ cd ~/perldroid/tools
 rm -rf target_core PerlDroid.zip
 
 # Make core modules
-./make_core_modules_pkg.pl ~/perldroid/PerlDroid/jni/libperl/perl-$VERSION/install_me_here/usr/files/$VERSION
+./make_core_modules_pkg.pl ../PerlDroid/jni/libperl/perl-$VERSION/install_me_here/usr/files/$VERSION
 
 # Make libperl.so & the rest
 ./02_make.sh
