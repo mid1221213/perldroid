@@ -30,7 +30,7 @@ static void (*my_perl_free)(pTHXx);
 static SV* (*my_Perl_get_sv)(pTHX_ const char *, I32);
 static IV (*my_Perl_sv_2iv_flags)(pTHX_ SV*, I32);
 static SV* (*my_Perl_sv_2mortal)(pTHX_ SV* sv);
-static Malloc_t	(*my_Perl_safesysmalloc)(MEM_SIZE nbytes);
+static Malloc_t	(*my_Perl_malloc)(MEM_SIZE nbytes);
 static SV *(*my_Perl_newSVsv)(pTHX_ SV* old);
 static SV *(*my_Perl_sv_setref_pv)(pTHX_ SV* rv, const char* classname, void* pv);
 static int (*my_Perl_call_sv)(pTHX_ SV* sv, I32 flags);
@@ -58,14 +58,14 @@ static SV* (*my_Perl_newRV)(pTHX_ SV* sv);
 static void (*my_Perl_load_module_nocontext)(U32 flags, SV* name, SV* ver, ...);
 static HV* (*my_Perl_gv_stashpv)(pTHX_ const char* name, I32 flags);
 static SV* (*my_Perl_sv_bless)(pTHX_ SV* sv, HV* stash);
-
+static SV* (*my_Perl_newSV_type)(pTHX_ svtype type);
 static void (*my_boot_DynaLoader)(pTHX_ CV* cv);
 
 #define Perl_get_sv my_Perl_get_sv
 #define Perl_sv_2iv_flags my_Perl_sv_2iv_flags
 #define Perl_sv_2mortal my_Perl_sv_2mortal
 #define Perl_newXS  my_Perl_newXS
-#define Perl_safesysmalloc my_Perl_safesysmalloc
+#define Perl_malloc my_Perl_malloc
 #define Perl_newSVsv my_Perl_newSVsv
 #define Perl_call_sv my_Perl_call_sv
 #define Perl_call_method my_Perl_call_method
@@ -92,6 +92,7 @@ static void (*my_boot_DynaLoader)(pTHX_ CV* cv);
 #define Perl_load_module_nocontext my_Perl_load_module_nocontext
 #define Perl_gv_stashpv my_Perl_gv_stashpv
 #define Perl_sv_bless my_Perl_sv_bless
+#define Perl_newSV_type my_Perl_newSV_type
 
 JNIEnv *my_jnienv;
 
@@ -114,7 +115,7 @@ open_libperl_so(void)
     my_Perl_sv_2iv_flags          = dlsym(lp_h, "Perl_sv_2iv_flags");
     my_Perl_sv_2mortal            = dlsym(lp_h, "Perl_sv_2mortal");
     my_Perl_newXS                 = dlsym(lp_h, "Perl_newXS");
-    my_Perl_safesysmalloc         = dlsym(lp_h, "Perl_safesysmalloc");
+    my_Perl_malloc                = dlsym(lp_h, "Perl_malloc");
     my_Perl_newSVsv               = dlsym(lp_h, "Perl_newSVsv");
     my_Perl_call_sv               = dlsym(lp_h, "Perl_call_sv");
     my_Perl_call_method           = dlsym(lp_h, "Perl_call_method");
@@ -141,6 +142,7 @@ open_libperl_so(void)
     my_Perl_load_module_nocontext = dlsym(lp_h, "Perl_load_module_nocontext");
     my_Perl_gv_stashpv            = dlsym(lp_h, "Perl_gv_stashpv");
     my_Perl_sv_bless              = dlsym(lp_h, "Perl_sv_bless");
+    my_Perl_newSV_type            = dlsym(lp_h, "Perl_newSV_type");
 
     my_boot_DynaLoader            = dlsym(lp_h, "boot_DynaLoader");
   } else

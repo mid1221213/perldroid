@@ -9,7 +9,7 @@ $(LIBPERL)/$(PERL)/libperl.so: $(LIBPERL)/$(PERL)/Cross/Makefile.android
 	cd $(LIBPERL)/$(PERL)/Cross && make -f Makefile.android perl
 
 $(LIBPERL)/$(PERL)/Cross/Makefile.android: $(LIBPERL)/$(PERL)/Cross/README
-	cp -v ../libperl/perl-5.10.0/Cross/* $(LIBPERL)/$(PERL)/Cross/
+	cp -v ../../$(LIBPERL)/$(PERL)/Cross/* $(LIBPERL)/$(PERL)/Cross/
 	cd $(LIBPERL)/$(PERL)/Cross && make -f Makefile.android patch
 
 $(LIBPERL)/$(PERL)/Cross/README:
