@@ -9,9 +9,12 @@ rm -rf target_core PerlDroid.zip
 mkdir -p target_droid
 cd target_droid
 mkdir -p arm-linux-multi/auto/PerlDroid
+
 cd ~/perldroid/PerlDroid
 ~/android-ndk/ndk-build
+cp -v jni/libperl/perl-5.10.1/libperl.so libs/armeabi/
 cd -
+
 mv ~/perldroid/PerlDroid/libs/armeabi/libPerlDroid_so.so arm-linux-multi/auto/PerlDroid/PerlDroid.so
 find . -name "*.*" | zip ../target_core/PerlDroid.zip -@
 
