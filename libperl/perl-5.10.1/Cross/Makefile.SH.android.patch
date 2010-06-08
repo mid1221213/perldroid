@@ -1,0 +1,77 @@
+--- ../Makefile.SH	2009-08-03 22:43:30.000000000 +0200
++++ Makefile.SH.android	2010-06-04 21:44:56.063150461 +0200
+@@ -537,9 +537,16 @@
+ .c.s:
+ 	$(CCCMDSRC) -S $*.c
+ 
+-all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) miniperl $(generated_pods) $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
+-	@echo " ";
+-	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
++all: $(FIRSTMAKEFILE) miniperl$(EXE_EXT) miniperl 
++	rm -f miniperl; cp Cross/miniperl.android miniperl
++
++more: extra.pods $(private) $(public)
++
++more2: $(dynamic_ext)
++
++more3: $(nonxs_ext)
++
++more4: extras.make
+ 
+ sperl$(OBJ_EXT): perl.c $(h)
+ 	$(RMS) sperl.c
+@@ -598,7 +605,7 @@
+ globals\$(OBJ_EXT): uudmap.h
+ 
+ uudmap.h: generate_uudmap\$(HOST_EXE_EXT)
+-	\$(RUN) ./generate_uudmap\$(HOST_EXE_EXT) >uudmap.h
++	cp Cross/uudmap.h.android ./uudmap.h
+ 
+ generate_uudmap\$(HOST_EXE_EXT): generate_uudmap\$(OBJ_EXT)
+ 	\$(CC) -o generate_uudmap\$(EXE_EXT) \$(LDFLAGS) generate_uudmap\$(OBJ_EXT) \$(libs)
+@@ -816,7 +823,9 @@
+ 	$(LDLIBPTH) $(CC) $(CLDFLAGS) -o miniperl$(EXE_EXT) \
+ 	    $(mini_obj) \
+ 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perlmini$(OBJ_EXT) $(libs)
+-	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
++#	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
++	rm -f miniperl
++	cp Cross/miniperl.android miniperl
+ !NO!SUBS!
+ 		;;
+ 	esac
+@@ -1075,11 +1084,11 @@
+ INSTALL_DEPENDENCE = all
+ 
+ install.perl:	$(INSTALL_DEPENDENCE) installperl
+-	$(LDLIBPTH) $(RUN) ./perl installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
++	$(LDLIBPTH) $(RUN) ./miniperl installperl -p --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
+ 	-@test ! -s extras.lst || $(MAKE) extras.install
+ 
+ install.man:	all installman
+-	$(LDLIBPTH) $(RUN) ./perl installman --destdir=$(DESTDIR) $(INSTALLFLAGS)
++#	$(LDLIBPTH) $(RUN) ./perl installman --destdir=$(DESTDIR) $(INSTALLFLAGS)
+ 
+ # XXX Experimental. Hardwired values, but useful for testing.
+ # Eventually Configure could ask for some of these values.
+@@ -1177,16 +1186,16 @@
+ # DynaLoader may be needed for extensions that use Makefile.PL.
+ 
+ $(DYNALOADER):	miniperl$(EXE_EXT) preplibrary FORCE
+-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
++	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) "PERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "ABSPERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(HOME)/perldroid/project/jni/libperl/perl-5.10.1/libperl.so LINKTYPE=static $(STATIC_LDFLAGS)
+ 
+ d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
+-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic
++	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) "PERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "ABSPERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(HOME)/perldroid/project/jni/libperl/perl-5.10.1/libperl.so LINKTYPE=dynamic
+ 
+ s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
+-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
++	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) "PERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "ABSPERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(HOME)/perldroid/project/jni/libperl/perl-5.10.1/libperl.so LINKTYPE=static $(STATIC_LDFLAGS)
+ 
+ n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary FORCE
+-	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
++	$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) "PERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "ABSPERLRUN=/usr/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(HOME)/perldroid/project/jni/libperl/perl-5.10.1/libperl.so
+ !NO!SUBS!
+ 
+ $spitshell >>$Makefile <<EOF

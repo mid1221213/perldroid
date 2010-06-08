@@ -2,7 +2,7 @@
 
 cd ~/perldroid
 
-~/android-sdk/tools/android update project --name PerlDroid --target 4 --path PerlDroid/
+~/android-sdk/tools/android update project --name PerlDroid --target android-4 --path PerlDroid/
 
 cd PerlDroid
 

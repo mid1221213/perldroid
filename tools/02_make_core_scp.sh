@@ -9,7 +9,7 @@ rm -rf target_core PerlDroid.zip
 mkdir -p target_droid
 cd target_droid
 mkdir -p arm-linux-multi/auto/PerlDroid
-cd ~/perldroid
+cd ~/perldroid/PerlDroid
 ~/android-ndk/ndk-build
 cd -
 mv ~/perldroid/PerlDroid/libs/armeabi/libPerlDroid_so.so arm-linux-multi/auto/PerlDroid/PerlDroid.so
