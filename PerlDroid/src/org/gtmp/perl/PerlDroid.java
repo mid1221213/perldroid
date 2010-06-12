@@ -45,11 +45,14 @@ import android.view.ContextMenu;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.content.res.AssetManager;
 import java.lang.Runtime;
 
 public class PerlDroid extends Activity
 {
     public static native void perl_chmod(String path);
+    public static native Object perl_callback(String clazzName, String m, Object[] args, Object thiz);
+    private static native int perl_run(String path);
     private boolean coreLoaded = false;
     private TextView pStatus;
     private ListView listView;
@@ -148,6 +151,29 @@ public class PerlDroid extends Activity
 	    pStatus = (TextView) findViewById(R.id.StatusText);
 	    pStatus.setVerticalScrollBarEnabled(true);
 	    findViewById(R.id.LinearLayout).setVerticalScrollBarEnabled(true);
+
+	    android.util.Log.v("PerlDroid", "Installing subclasses.jar");
+	    Log("Installing subclasses.jar");
+	    File path = this.getFileStreamPath("");
+	    try {
+		AssetManager amgr = this.getAssets();
+		Log("=> Unzipping subclasses.jar");
+		InputStream in = amgr.open("subclasses.jar");
+		FileOutputStream out = new FileOutputStream(path + "/" + "subclasses.jar");
+		    
+		// Transfer bytes from the ZIP file to the output file
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+		    out.write(buf, 0, len);
+		}
+		    
+		in.close();
+		out.close();
+	    } catch (Exception ex) {
+		Log("=> Error Unzipping subclasses.jar");
+	    }
+
 	    Log("Downloading mandatory core modules");
 	    downloadModules(CoreURLPrefix, true, null);
 	}

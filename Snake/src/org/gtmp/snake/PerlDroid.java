@@ -17,6 +17,7 @@ public class PerlDroid
 //     private static native int perl_register(String clazz);
     private static native int perl_run(String path);
     public static native Object perl_callback(String clazzName, String m, Object[] args, Object thiz);
+    public static native void perl_chmod(String path);
     public static final String R_NAME = "R.pm";
 
     static
