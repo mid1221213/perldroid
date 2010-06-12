@@ -59,7 +59,7 @@ public class PerlDroid extends Activity
     private static final int DELETE_ID = Menu.FIRST;
     private PerlDroidDb mDbHelper;
     private ScrollView pStatusSV;
-    private String version = "5.10.0";
+    private String version = "5.10.1";
     private String CoreURLPrefix = "http://dbx.gtmp.org/android/perl-core-modules-" + version;
     private String ExtraURLPrefix = "http://dbx.gtmp.org/android/perl-extra-modules-" + version;
     private String coreModules[] = {
