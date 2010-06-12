@@ -5,10 +5,10 @@ ME=$(shell whoami)
 
 all: $(LIBPERL)/$(PERL)/libperl.so
 
-$(LIBPERL)/$(PERL)/libperl.so: $(LIBPERL)/$(PERL)/Cross/Makefile.android
+$(LIBPERL)/$(PERL)/libperl.so: $(LIBPERL)/$(PERL)/CROSS_PATCHED
 	cd $(LIBPERL)/$(PERL)/Cross && make -f Makefile.android perl
 
-$(LIBPERL)/$(PERL)/Cross/Makefile.android: $(LIBPERL)/$(PERL)/Cross/README
+$(LIBPERL)/$(PERL)/CROSS_PATCHED: $(LIBPERL)/$(PERL)/Cross/README
 	cp -v ../../$(LIBPERL)/$(PERL)/Cross/* $(LIBPERL)/$(PERL)/Cross/
 	cd $(LIBPERL)/$(PERL)/Cross && make -f Makefile.android patch
 
