@@ -423,9 +423,9 @@ public class PerlDroid extends Activity
 		files.add(outFilename);
 	    }
 	    zin.close();
-	} catch (IOException ex) {
+	} catch (Exception ex) {
 	    String msg = ex.getMessage();
-	    ex.printStackTrace();
+	    //  ex.printStackTrace();
 	    android.util.Log.v("PerlDroid", "Can't unzip (msg: " + msg + ")");
 	}
 	// Do not create a database entry for a core module
@@ -448,13 +448,11 @@ public class PerlDroid extends Activity
 	    HttpGet method = new HttpGet(uri);
 	    HttpResponse res = client.execute(method);
 	    return res.getEntity().getContent();
-	} catch (ClientProtocolException e) {
-	    e.printStackTrace();
-	} catch (IOException e) {
-	    e.printStackTrace();
-	} catch (URISyntaxException e) {
-	    e.printStackTrace();
-	}
+	} catch (Exception ex) {
+	    // e.printStackTrace();
+	    String msg = ex.getMessage();
+	    android.util.Log.v("PerlDroid", "Can't download data (msg:" + msg + ")" );
+        }
 	return null;
     }
 }
