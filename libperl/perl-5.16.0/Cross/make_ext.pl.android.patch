@@ -1,0 +1,12 @@
+--- ../make_ext.pl	2012-04-25 02:18:34.000000000 +0200
++++ make_ext.pl.android	2012-06-21 17:47:07.394725824 +0200
+@@ -128,7 +128,8 @@
+ # it, please supply patches. Until then, I'm sticking to KISS
+ my @make = split ' ', $1 || $Config{make} || $ENV{MAKE};
+ # Using an array of 0 or 1 elements makes the subsequent code simpler.
+-my @run = $Config{run};
++#my @run = $Config{run};
++my @run;
+ @run = () if not defined $run[0] or $run[0] eq '';
+ 
+ 

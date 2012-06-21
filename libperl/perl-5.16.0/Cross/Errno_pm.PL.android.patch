@@ -1,0 +1,13 @@
+--- ../ext/Errno/Errno_pm.PL	2012-04-25 02:18:33.000000000 +0200
++++ Errno_pm.PL.android	2012-06-21 17:47:07.394725824 +0200
+@@ -144,8 +144,8 @@
+ 	     ) {
+ 	# Some Linuxes have weird errno.hs which generate
+ 	# no #file or #line directives
+-	my $linux_errno_h = -e '/usr/include/errno.h' ?
+-	    '/usr/include/errno.h' : '/usr/local/include/errno.h';
++	my $linux_errno_h = -e "$ENV{HOME}/android-ndk/platforms/android-14/arch-arm" . '/usr/include/errno.h' ?
++	    "$ENV{HOME}/android-ndk/platforms/android-14/arch-arm" . '/usr/include/errno.h' : "$ENV{HOME}/android-ndk/platforms/android-14/arch-arm" . '/usr/local/include/errno.h';
+ 	$file{$linux_errno_h} = 1;
+     } elsif ($^O eq 'beos' || $^O eq 'haiku') {
+ 	# hidden in a special place

@@ -1,0 +1,19 @@
+--- ../perl.h	2012-04-25 02:18:35.000000000 +0200
++++ perl.h.android	2012-06-21 17:47:07.394725824 +0200
+@@ -11,6 +11,8 @@
+ #ifndef H_PERL
+ #define H_PERL 1
+ 
++#define PAGE_SIZE 0x400
++
+ #ifdef PERL_FOR_X2P
+ /*
+  * This file is being used for x2p stuff.
+@@ -5311,6 +5313,7 @@
+ #define RESTORE_NUMERIC_STANDARD()	/**/
+ #define Atof				my_atof
+ #define IN_LOCALE_RUNTIME		0
++#define IN_LOCALE_COMPILETIME		0
+ 
+ #endif /* !USE_LOCALE_NUMERIC */
+ 
