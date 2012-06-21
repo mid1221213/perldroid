@@ -11,6 +11,8 @@ Follow these steps to build the project as it is today (2012-06-21). I made the 
 
 This works on an Ubuntu 12.04 server 64 bit just installed with only openssh-server (tested on a fresh install in a virtual machine). Please follow these steps carefully, especially for the `cd` commands because the working directory is important.
 
+If you log in to a virtual machine, do it via `ssh -X user@host` to have X forwarding because the android tool uses it.
+
   # Be sure host is up to date
 {{{
 sudo apt-get update && sudo apt-get dist-upgrade
@@ -18,7 +20,7 @@ sudo apt-get update && sudo apt-get dist-upgrade
 }}}
   # Install required packages
 {{{
-sudo apt-get --no-install-recommends install build-essential subversion
+sudo apt-get --no-install-recommends install build-essential subversion unzip openjdk-7-jdk
 }}}
   # To cross compile perl, the host should provide the same version of the executable than the one being cross compiled. As Ubuntu 12.04 provides perl 5.14.2, we need to install perl 5.16.0 from source on the host.*Note: As said, this will install perl 5.16.0 in /usr/local on your host. This is mainly why I prefered to do that in a virtual machine instead of my own host.*
 {{{
@@ -31,12 +33,21 @@ sudo make install
 cd
 mv perl-5.16.0 perl-5.16.0.host
 }}}
-  # No need for Android SDK, get only the Android NDK
+  # Get the Android SDK & NDK
 {{{
-wget http://dl.google.com/android/ndk/android-ndk-r8-linux-x86.tar.bz2
+wget -nd http://dl.google.com/android/android-sdk_r18-linux.tgz
+tar xzf android-sdk_r18-linux.tgz
+wget -nd http://dl.google.com/android/ndk/android-ndk-r8-linux-x86.tar.bz2
 tar xjf android-ndk-r8-linux-x86.tar.bz2
 ln -s android-ndk-r8 android-ndk
 export NDK=~/android-ndk
+}}}
+  # Start the `android tool` and install all preselected packages
+{{{
+android-sdk-linux/tools/android
+}}}
+  # Install now the standalone toolchain
+{{{
 $NDK/build/tools/make-standalone-toolchain.sh --platform=android-14 --install-dir=$HOME/android_toolchain
 PATH=~/android_toolchain/bin:$PATH
 }}}
