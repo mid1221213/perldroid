@@ -1,11 +1,7 @@
 #summary How to compile perl-5.16.0 for Android using the SVN version of this project
 #labels Featured
 
-----
-
-* PAGE UNDER EDITION AND TEST (2012-06-21) Please wait for this warning to be removed*
-
-----
+=How to compile perl-5.16.0 for Android=
 
 Follow these steps to build the project as it is today (2012-06-21). I made the checkout to get r241 on purpose, because following commits may change the build sequence.
 
