@@ -11,15 +11,21 @@ Follow these steps to build the project as it is today (2012-06-21). I made the 
 
 This works on an Ubuntu 12.04 server 64 bit just installed with only openssh-server (tested on a fresh install in a virtual machine). Please follow these steps carefully, especially for the `cd` commands because the working directory is important.
 
+  # Be sure host is up to date
+{{{
+sudo apt-get update && sudo apt-get dist-upgrade
+# reboot if necessary
+}}}
   # Install required packages
 {{{
 sudo apt-get --no-install-recommends install build-essential subversion
 }}}
   # To cross compile perl, the host should provide the same version of the executable than the one being cross compiled. As Ubuntu 12.04 provides perl 5.14.2, we need to install perl 5.16.0 from source on the host.*Note: As said, this will install perl 5.16.0 in /usr/local on your host. This is mainly why I prefered to do that in a virtual machine instead of my own host.*
 {{{
+wget -nd http://www.cpan.org/src/5.0/perl-5.16.0.tar.gz
 tar xzf perl-5.16.0.tar.gz
 cd perl-5.16.0/
-./Configure -des --prefix=/usr/local
+./Configure -des -Dinstallprefix=/usr/local
 make
 sudo make install
 cd
@@ -33,9 +39,8 @@ ln -s android-ndk-r8 android-ndk
 export NDK=~/android-ndk
 $NDK/build/tools/make-standalone-toolchain.sh --platform=android-14 --install-dir=$HOME/android_toolchain
 }}}
-  # Next step is to get perl source (5.16.0) and to untar it
+  # Next step is untar again perl source
 {{{
-wget -nd http://www.cpan.org/src/5.0/perl-5.16.0.tar.gz
 tar xzf perl-5.16.0.tar.gz
 }}}
   # Now get the PerlDroid source
@@ -56,7 +61,7 @@ vi prepare_perl_from_svn.sh
 cd ~/perl-5.16.0/Cross/
 make -f Makefile.android perl
 }}}
-The last step above will start the compilation. This will take some time and display a lot of messages. On my system it takes approximatively 5 minutes. The 3 last outputed lines should be:
+The last step above will start the compilation. This will take some time and display a lot of messages. On my system it takes approximatively 5 minutes. The 3 last output lines should be:
 {{{
 ...
 cd /home/mid/perl-5.16.0/Cross/.. ; sh -x Cross/warp
