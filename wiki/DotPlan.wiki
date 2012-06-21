@@ -1,4 +1,5 @@
 #summary Memo that allow to finger member's current work (please *don't* feed)
+#labels Deprecated
 
 = Introduction =
 
