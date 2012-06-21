@@ -15,11 +15,11 @@ This works on an Ubuntu 12.04 server 64 bit just installed with only openssh-ser
 {{{
 sudo apt-get --no-install-recommends install build-essential subversion
 }}}
-  # To cross compile perl, the host should provide the same version of the executable than the one being cross compiled. As Ubuntu 12.04 provides perl 5.14.2, we need to install perl 5.16.0 from source on the host.*Note: As said, this will install perl 5.16.0 in /usr/local on your host. This is mainly why I prefered to to that in a virtual machine instead of my own host.*
+  # To cross compile perl, the host should provide the same version of the executable than the one being cross compiled. As Ubuntu 12.04 provides perl 5.14.2, we need to install perl 5.16.0 from source on the host.*Note: As said, this will install perl 5.16.0 in /usr/local on your host. This is mainly why I prefered to do that in a virtual machine instead of my own host.*
 {{{
 tar xzf perl-5.16.0.tar.gz
 cd perl-5.16.0/
-./Configure -des
+./Configure -des --prefix=/usr/local
 make
 sudo make install
 cd
