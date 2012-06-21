@@ -1,5 +1,5 @@
 #summary How to build the project and the PerlDialog example in the SVN repository
-#labels Featured
+#labels Deprecated
 
 Follow these steps to build the project as it is today (2010-04-11). I made the checkout to get r179 on purpose, because following commits may change the build sequence.
 
