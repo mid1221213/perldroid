@@ -1,3 +1,4 @@
 #summary Sample name for a class
+#labels Deprecated
 
 Sample name for a class
