@@ -58,6 +58,7 @@ make -f Makefile.android perl
 }}}
 The last step above will start the compilation. This will take some time and display a lot of messages. On my system it takes approximatively 5 minutes. The 3 last outputed lines should be:
 {{{
+...
 cd /home/mid/perl-5.16.0/Cross/.. ; sh -x Cross/warp
 + find lib -name install_me_here
 + find lib -name install_me_here
