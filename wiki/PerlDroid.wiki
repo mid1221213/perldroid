@@ -2,8 +2,10 @@
 
 = Introduction =
 
-The term « PerlDroid » is the name that the application will have on the [http://code.google.com/intl/fr/android/ Android platform].
+The term « PerlDroid » is the name that the application had on the [http://code.google.com/intl/fr/android/ Android platform].
 
-= Details =
+Now that I gave up implementing bindings, this project only keeps ways to [Compiling5160 cross compile perl] for the Android platform, and is meant to provide the [http://code.google.com/p/perl-android-apk/ perl-android-apk] project with a perl executable (with all core modules \o/).
+
+= Details about the name =
 
 This name was chosen simply by concatenating the word [Perl] and [Android] and eluding the beginning of the word Android. It is simple and easy to remember. If you have lost the URL of this project, search for « perl » and « android » on Google Code Search, as they are tags of this project.
