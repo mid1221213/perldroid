@@ -1,5 +1,5 @@
 --- ../Makefile.SH	2012-05-14 21:49:21.000000000 +0200
-+++ Makefile.SH.android	2012-06-21 17:47:07.394725824 +0200
++++ Makefile.SH.android	2012-06-27 20:40:47.136023836 +0200
 @@ -140,18 +140,7 @@
  	    # INSTALL file, under "Building a shared perl library".
  	    # If there is no pre-existing $libperl, we don't need
@@ -35,7 +35,7 @@
  MINIPERL_EXE = miniperl\$(EXE_EXT)
 -MINIPERL = \$(LDLIBPTH) \$(RUN) ./miniperl\$(EXE_EXT) -Ilib
 +#MINIPERL = \$(LDLIBPTH) \$(RUN) ./miniperl\$(EXE_EXT) -Ilib
-+MINIPERL = \$(PERL_EXE) -I$ENV{HOME}/perl-5.16.0/fake_config_library -I/usr/local/lib/perl5/5.16.0 -MConfig -Ilib
++MINIPERL = \$(PERL_EXE) -I\$(HOME)/perl-5.16.0/fake_config_library -I/usr/local/lib/perl5/5.16.0 -MConfig -Ilib
  
  # Macros to invoke a copy of our fully operational perl during the build.
  PERL_EXE = perl\$(EXE_EXT)

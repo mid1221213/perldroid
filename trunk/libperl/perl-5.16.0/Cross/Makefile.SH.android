@@ -295,7 +295,7 @@ PATH_SEP = $p_
 # are built using these macros should depend on \$(MINIPERL_EXE)
 MINIPERL_EXE = miniperl\$(EXE_EXT)
 #MINIPERL = \$(LDLIBPTH) \$(RUN) ./miniperl\$(EXE_EXT) -Ilib
-MINIPERL = \$(PERL_EXE) -I$ENV{HOME}/perl-5.16.0/fake_config_library -I/usr/local/lib/perl5/5.16.0 -MConfig -Ilib
+MINIPERL = \$(PERL_EXE) -I\$(HOME)/perl-5.16.0/fake_config_library -I/usr/local/lib/perl5/5.16.0 -MConfig -Ilib
 
 # Macros to invoke a copy of our fully operational perl during the build.
 PERL_EXE = perl\$(EXE_EXT)
