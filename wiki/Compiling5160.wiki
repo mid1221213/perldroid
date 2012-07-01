@@ -70,7 +70,7 @@ cd /home/mid/perl-5.16.0/Cross/.. ; sh -x Cross/warp
 }}}
 with the username being yours. There should be no error, of course.
 
-The compiled distribution can now be found in the directory `~/perl-5.16.0/install_me_here/` and the `libperl.so` is in `~/perl-5.16.0/install_me_here/system/lib/perl5/5.16.0/linux-androideabi-thread-multi/CORE/libperl.so`.
+The compiled distribution can now be found in the directory `~/perl-5.16.0/install_me_here/` and the `libperl.so` is in `~/perl-5.16.0/install_me_here/lib/perl5/5.16.0/linux-androideabi-thread-multi/CORE/libperl.so`.
 
 More information is coming to talk about APK integration with the [http://code.google.com/p/perl-android-apk/ perl-android-apk] project, how I generated the file `config.sh-arm-linux.android` and how to customize it.
 
