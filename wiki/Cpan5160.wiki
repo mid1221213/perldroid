@@ -1,0 +1,27 @@
+#summary How to compile CPAN EUMM modules for Android using the SVN version of this project
+#labels Featured
+
+=How to compile CPAN EUMM modules for Android=
+
+Follow these steps to build CPAN EUMM modules with the project as it is today (2012-07-09). MB modules may be built too, more on this later.
+
+This procedure *needs an already cross compiled perl*. Please refer to [Compiling5160] to know how to do it.
+
+  # Change directory to Cross in SVN and prepare cross compilation
+{{{
+cd ~/perldroid/libperl/perl-5.16.0/Cross
+./prepare_perl_for_cpan.sh 
+}}}
+  # Change directory to cross compiled perl and execute the provided `cpan.android` script (example installs JSON.pm, asking if you wish to install JSON::XS too)
+{{{
+cd ~/perl-5.16.0
+./cpan.android JSON
+}}}
+
+You can pass more than one module to install, the script will resolve dependencies for you. The resulting modules are installed in `~/cpan_android/`.
+
+*N.B.:* There is no `make test` executed because, of course, host can't load built shared libraries.
+
+Have fun!
+----
+© _Mid'_, 2012 ;-)
