@@ -1,9 +1,9 @@
-#summary How to compile CPAN EUMM modules for Android using the SVN version of this project
+#summary How to compile CPAN EUMM and MB modules for Android using the SVN version of this project
 #labels Featured
 
-=How to compile CPAN EUMM modules for Android=
+=How to compile CPAN EUMM and MB modules for Android=
 
-Follow these steps to build CPAN EUMM modules with the project as it is today (2012-07-09). MB modules may be built too, more on this later.
+Follow these steps to build CPAN EUMM modules with the project as it is today (2012-07-09). MB modules can be built too.
 
 This procedure *needs an already cross compiled perl*. Please refer to [Compiling5160] to know how to do it.
 
