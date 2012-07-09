@@ -1211,17 +1211,19 @@ manicheck:	FORCE
 #
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
+MYPERL=$(HOME)/perl-5.16.0/miniperl
+
 $(DYNALOADER):	lib/buildcustomize.pl preplibrary FORCE $(nonxs_ext)
-	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS) "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig"  "ABSPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(TOPDIR)/../libperl.so
+	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS) PERL=$(MYPERL) PERLRUN=$(MYPERL) FULLPERLRUN=$(MYPERL) ABSPERLRUN=$(MYPERL) PERL_ARCHIVE=$(TOPDIR)/../libperl.so
 
 d_dummy $(dynamic_ext):	lib/buildcustomize.pl preplibrary makeppport $(DYNALOADER) FORCE $(PERLEXPORT)
-	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "ABSPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(TOPDIR)/../libperl.so
+	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic PERL=$(MYPERL) PERLRUN=$(MYPERL) FULLPERLRUN=$(MYPERL) ABSPERLRUN=$(MYPERL) PERL_ARCHIVE=$(TOPDIR)/../libperl.so
 
 s_dummy $(static_ext):	lib/buildcustomize.pl preplibrary makeppport $(DYNALOADER) FORCE
-	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS) "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "ABSPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(TOPDIR)/../libperl.so
+	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS) PERL=$(MYPERL) PERLRUN=$(MYPERL) FULLPERLRUN=$(MYPERL) ABSPERLRUN=$(MYPERL) PERL_ARCHIVE=$(TOPDIR)/../libperl.so
 
 n_dummy $(nonxs_ext):	lib/buildcustomize.pl preplibrary FORCE
-	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "ABSPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(TOPDIR)/../libperl.so
+	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) PERL=$(MYPERL) PERLRUN=$(MYPERL) FULLPERLRUN=$(MYPERL) ABSPERLRUN=$(MYPERL) PERL_ARCHIVE=$(TOPDIR)/../libperl.so
 !NO!SUBS!
 
 $spitshell >>$Makefile <<EOF

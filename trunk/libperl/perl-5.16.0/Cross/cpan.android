@@ -1,0 +1,11 @@
+#! /usr/local/bin/perl
+
+use strict;
+use warnings;
+
+BEGIN {
+    $^X = "$ENV{HOME}/perl-5.16.0/miniperl";
+    require CPAN;
+}
+
+CPAN::Shell->notest("install", @ARGV);

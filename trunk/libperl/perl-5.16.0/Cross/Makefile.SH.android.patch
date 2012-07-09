@@ -1,5 +1,5 @@
 --- ../Makefile.SH	2012-05-14 21:49:21.000000000 +0200
-+++ Makefile.SH.android	2012-06-27 20:40:47.136023836 +0200
++++ Makefile.SH.android	2012-07-09 07:51:18.480797136 +0200
 @@ -140,18 +140,7 @@
  	    # INSTALL file, under "Building a shared perl library".
  	    # If there is no pre-existing $libperl, we don't need
@@ -189,33 +189,35 @@
  
  # XXX Experimental. Hardwired values, but useful for testing.
  # Eventually Configure could ask for some of these values.
-@@ -1204,17 +1211,17 @@
+@@ -1204,17 +1211,19 @@
  #
  # DynaLoader may be needed for extensions that use Makefile.PL.
  
 -$(DYNALOADER):	$(MINIPERL_EXE) lib/buildcustomize.pl preplibrary FORCE $(nonxs_ext)
 -	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
++MYPERL=$(HOME)/perl-5.16.0/miniperl
++
 +$(DYNALOADER):	lib/buildcustomize.pl preplibrary FORCE $(nonxs_ext)
-+	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS) "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig"  "ABSPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(TOPDIR)/../libperl.so
++	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS) PERL=$(MYPERL) PERLRUN=$(MYPERL) FULLPERLRUN=$(MYPERL) ABSPERLRUN=$(MYPERL) PERL_ARCHIVE=$(TOPDIR)/../libperl.so
  
 -d_dummy $(dynamic_ext):	$(MINIPERL_EXE) lib/buildcustomize.pl preplibrary makeppport $(DYNALOADER) FORCE $(PERLEXPORT)
 -	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic
 +d_dummy $(dynamic_ext):	lib/buildcustomize.pl preplibrary makeppport $(DYNALOADER) FORCE $(PERLEXPORT)
-+	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "ABSPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(TOPDIR)/../libperl.so
++	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic PERL=$(MYPERL) PERLRUN=$(MYPERL) FULLPERLRUN=$(MYPERL) ABSPERLRUN=$(MYPERL) PERL_ARCHIVE=$(TOPDIR)/../libperl.so
  
 -s_dummy $(static_ext):	$(MINIPERL_EXE) lib/buildcustomize.pl preplibrary makeppport $(DYNALOADER) FORCE
 -	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
 +s_dummy $(static_ext):	lib/buildcustomize.pl preplibrary makeppport $(DYNALOADER) FORCE
-+	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS) "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "ABSPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(TOPDIR)/../libperl.so
++	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS) PERL=$(MYPERL) PERLRUN=$(MYPERL) FULLPERLRUN=$(MYPERL) ABSPERLRUN=$(MYPERL) PERL_ARCHIVE=$(TOPDIR)/../libperl.so
  
 -n_dummy $(nonxs_ext):	$(MINIPERL_EXE) lib/buildcustomize.pl preplibrary FORCE
 -	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 +n_dummy $(nonxs_ext):	lib/buildcustomize.pl preplibrary FORCE
-+	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "FULLPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" "ABSPERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig" PERL_ARCHIVE=$(TOPDIR)/../libperl.so
++	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) PERL=$(MYPERL) PERLRUN=$(MYPERL) FULLPERLRUN=$(MYPERL) ABSPERLRUN=$(MYPERL) PERL_ARCHIVE=$(TOPDIR)/../libperl.so
  !NO!SUBS!
  
  $spitshell >>$Makefile <<EOF
-@@ -1411,7 +1418,7 @@
+@@ -1411,7 +1420,7 @@
  
  test_prep_pre: preplibrary utilities $(nonxs_ext)
  
@@ -224,7 +226,7 @@
  	$(dynamic_ext) $(TEST_PERL_DLL) runtests x2p/s2p x2p/find2perl \
  	$(generated_pods)
  	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
-@@ -1511,7 +1518,7 @@
+@@ -1511,7 +1520,7 @@
  
  # Can't depend on lib/Config.pm because that might be where miniperl
  # is crashing.

@@ -3,5 +3,4 @@
 use strict;
 use warnings;
 
-$ENV{PATH} = '/usr/local/bin';
-system("perl", "-I$ENV{HOME}/perl-5.16.0/fake_config_library", "-I/usr/local/lib/perl5/5.16.0", "-MConfig", @ARGV);
+exec {"/usr/local/bin/perl"} "$ENV{HOME}/perl-5.16.0/miniperl", "-I$ENV{HOME}/perl-5.16.0/fake_config_library", "-I$ENV{HOME}/perl-5.16.0/install_me_here", "-I/usr/local/lib/perl5/5.16.0", "-MConfig", @ARGV;
