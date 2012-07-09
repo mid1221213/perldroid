@@ -1,36 +1,154 @@
-#!/bin/sh
-#
-# This file was produced by running the Configure script. It holds all the
-# definitions figured out by Configure. Should you modify one of these values,
-# do not forget to propagate your changes by running "Configure -der". You may
-# instead choose to run each of the .SH files by yourself, or "Configure -S".
-#
+# This file was created by configpm when Perl was built. Any changes
+# made to this file will be lost the next time perl is built.
 
-# Package name      : perl5
-# Source directory  : .
-# Configuration time: Tue Jun 19 14:47:22 CEST 2012
-# Configured by     : mid
-# Target system     : linux ubuntu 3.2.0-25-generic #40-ubuntu smp wed may 23 20:30:51 utc 2012 x86_64 x86_64 x86_64 gnulinux 
+package Config;
+use strict;
+use warnings;
+use vars '%Config';
 
-: Configure command line arguments.
-config_arg0='./Configure'
-config_args='-es -Dusecrosscompile -Dtargethost=localhost -Dtargetuser=root -Dtargetdir=/data/tmp -Dcc=arm-linux-androideabi-gcc'
-config_argc=6
-config_arg1='-es'
-config_arg2='-Dusecrosscompile'
-config_arg3='-Dtargethost=localhost'
-config_arg4='-Dtargetuser=root'
-config_arg5='-Dtargetdir=/data/tmp'
-config_arg6='-Dcc=arm-linux-androideabi-gcc'
+sub bincompat_options {
+    return split ' ', (Internals::V())[0];
+}
 
+sub non_bincompat_options {
+    return split ' ', (Internals::V())[1];
+}
+
+sub compile_date {
+    return (Internals::V())[2]
+}
+
+sub local_patches {
+    my (undef, undef, undef, @patches) = Internals::V();
+    return @patches;
+}
+
+sub _V {
+    my ($bincompat, $non_bincompat, $date, @patches) = Internals::V();
+
+    my $opts = join ' ', sort split ' ', "$bincompat $non_bincompat";
+
+    # wrap at 76 columns.
+
+    $opts =~ s/(?=.{53})(.{1,53}) /$1\n                        /mg;
+
+    print Config::myconfig();
+    if ($^O eq 'VMS') {
+        print "\nCharacteristics of this PERLSHR image: \n";
+    } else {
+        print "\nCharacteristics of this binary (from libperl): \n";
+    }
+
+    print "  Compile-time options: $opts\n";
+
+    if (@patches) {
+        print "  Locally applied patches:\n";
+        print "\t$_\n" foreach @patches;
+    }
+
+    print "  Built under $^O\n";
+
+    print "  $date\n" if defined $date;
+
+    my @env = map { "$_=\"$ENV{$_}\"" } sort grep {/^PERL/} keys %ENV;
+    push @env, "CYGWIN=\"$ENV{CYGWIN}\"" if $^O eq 'cygwin' and $ENV{CYGWIN};
+
+    if (@env) {
+        print "  \%ENV:\n";
+        print "    $_\n" foreach @env;
+    }
+    print "  \@INC:\n";
+    print "    $_\n" foreach @INC;
+}
+
+sub header_files {
+    return qw(EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h
+              dosish.h embed.h embedvar.h form.h gv.h handy.h hv.h intrpvar.h
+              iperlsys.h keywords.h mg.h nostdio.h op.h opcode.h pad.h
+              parser.h patchlevel.h perl.h perlio.h perliol.h perlsdio.h
+              perlsfio.h perlvars.h perly.h pp.h pp_proto.h proto.h regcomp.h
+              regexp.h regnodes.h scope.h sv.h thread.h time64.h unixish.h
+              utf8.h util.h);
+}
+
+#: Configure command line arguments.
+#: Variables propagated from previous config.sh file.
+
+our $summary = <<'!END!';
+Summary of my $package (revision $revision $version_patchlevel_string) configuration:
+  $git_commit_id_title $git_commit_id$git_ancestor_line
+  Platform:
+    osname=$osname, osvers=$osvers, archname=$archname
+    uname='$myuname'
+    config_args='$config_args'
+    hint=$hint, useposix=$useposix, d_sigaction=$d_sigaction
+    useithreads=$useithreads, usemultiplicity=$usemultiplicity
+    useperlio=$useperlio, d_sfio=$d_sfio, uselargefiles=$uselargefiles, usesocks=$usesocks
+    use64bitint=$use64bitint, use64bitall=$use64bitall, uselongdouble=$uselongdouble
+    usemymalloc=$usemymalloc, bincompat5005=undef
+  Compiler:
+    cc='$cc', ccflags ='$ccflags',
+    optimize='$optimize',
+    cppflags='$cppflags'
+    ccversion='$ccversion', gccversion='$gccversion', gccosandvers='$gccosandvers'
+    intsize=$intsize, longsize=$longsize, ptrsize=$ptrsize, doublesize=$doublesize, byteorder=$byteorder
+    d_longlong=$d_longlong, longlongsize=$longlongsize, d_longdbl=$d_longdbl, longdblsize=$longdblsize
+    ivtype='$ivtype', ivsize=$ivsize, nvtype='$nvtype', nvsize=$nvsize, Off_t='$lseektype', lseeksize=$lseeksize
+    alignbytes=$alignbytes, prototype=$prototype
+  Linker and Libraries:
+    ld='$ld', ldflags ='$ldflags'
+    libpth=$libpth
+    libs=$libs
+    perllibs=$perllibs
+    libc=$libc, so=$so, useshrplib=$useshrplib, libperl=$libperl
+    gnulibc_version='$gnulibc_version'
+  Dynamic Linking:
+    dlsrc=$dlsrc, dlext=$dlext, d_dlsymun=$d_dlsymun, ccdlflags='$ccdlflags'
+    cccdlflags='$cccdlflags', lddlflags='$lddlflags'
+
+!END!
+my $summary_expanded;
+
+sub myconfig {
+    return $summary_expanded if $summary_expanded;
+    ($summary_expanded = $summary) =~ s{\$(\w+)}
+		 { 
+			my $c;
+			if ($1 eq 'git_ancestor_line') {
+				if ($Config::Config{git_ancestor}) {
+					$c= "\n  Ancestor: $Config::Config{git_ancestor}";
+				} else {
+					$c= "";
+				}
+			} else {
+                     		$c = $Config::Config{$1}; 
+			}
+			defined($c) ? $c : 'undef' 
+		}ge;
+    $summary_expanded;
+}
+
+local *_ = \my $a;
+$_ = <<'!END!';
 Author=''
+CONFIG='true'
 Date='$Date'
 Header=''
 Id='$Id'
 Locker=''
 Log='$Log'
+PATCHLEVEL='16'
+PERL_API_REVISION='5'
+PERL_API_SUBVERSION='0'
+PERL_API_VERSION='16'
+PERL_CONFIG_SH='true'
+PERL_PATCHLEVEL=''
+PERL_REVISION='5'
+PERL_SUBVERSION='0'
+PERL_VERSION='16'
 RCSfile='$RCSfile'
 Revision='$Revision'
+SUBVERSION='0'
 Source=''
 State=''
 _a='.a'
@@ -45,11 +163,11 @@ api_revision='5'
 api_subversion='0'
 api_version='16'
 api_versionstring='5.16.0'
-ar='ar'
+ar="arm-linux-androideabi-ar"
 archlib='/lib/linux-androideabi-thread-multi'
 archlibexp='/lib/linux-androideabi-thread-multi'
 archname64=''
-archname='linux-androideabi-thread-multi'
+archname="arm-linux"
 archobjs=''
 asctime_r_proto='REENTRANT_PROTO_B_SB'
 awk='awk'
@@ -64,12 +182,12 @@ byteorder='ffff'
 c=''
 castflags='1'
 cat='cat'
-cc='arm-linux-androideabi-gcc'
-cccdlflags='-fpic -DPAGE_SIZE=0x400'
-ccdlflags='-DPAGE_SIZE=0x400'
-ccflags="-D_REENTRANT -D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I${HOME}/android-ndk/platforms/android-14/arch-arm/usr/include -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -nostdlib -fpic -ffunction-sections -fno-exceptions -funwind-tables -fstack-protector -fno-short-enums"
-ccflags_uselargefiles="-D_REENTRANT -D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400 -I${HOME}/android-ndk/platforms/android-14/arch-arm/usr/include -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -nostdlib -fpic -ffunction-sections -fno-exceptions -funwind-tables -fstack-protector -fno-short-enums"
-ccname='gcc'
+cc="arm-linux-androideabi-gcc"
+cccdlflags=" -fexpensive-optimizations -fomit-frame-pointer -O2"
+ccdlflags=" -fexpensive-optimizations -fomit-frame-pointer -O2"
+ccflags=" -fexpensive-optimizations -fomit-frame-pointer -O2"
+ccflags_uselargefiles=" -fexpensive-optimizations -fomit-frame-pointer -O2"
+ccname="arm-linux-androideabi-gcc"
 ccsymbols=''
 ccversion=''
 cf_by='mid'
@@ -83,17 +201,26 @@ chown=''
 clocktype='clock_t'
 comm='comm'
 compress=''
+config_arg0='./Configure'
+config_arg1='-es'
+config_arg2='-Dusecrosscompile'
+config_arg3='-Dtargethost=localhost'
+config_arg4='-Dtargetuser=root'
+config_arg5='-Dtargetdir=/data/tmp'
+config_arg6='-Dcc=arm-linux-androideabi-gcc'
+config_argc='6'
+config_args='-es -Dusecrosscompile -Dtargethost=localhost -Dtargetuser=root -Dtargetdir=/data/tmp -Dcc=arm-linux-androideabi-gcc'
 contains='grep'
 cp='cp'
 cpio=''
-cpp='cpp'
+cpp='arm-linux-cpp'
 cpp_stuff='42'
 cppccsymbols=''
-cppflags='-D_REENTRANT -D_GNU_SOURCE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPAGE_SIZE=0x400'
+cppflags='-fno-strict-aliasing'
 cpplast='-'
 cppminus='-'
-cpprun='arm-linux-androideabi-gcc -E'
-cppstdin='arm-linux-androideabi-gcc -E'
+cpprun="arm-linux-androideabi-gcc -E"
+cppstdin="arm-linux-androideabi-gcc -E"
 cppsymbols='__ANDROID__=1 __ELF__=1 _FILE_OFFSET_BITS=64 __GNUC__=4 __GNUC_MINOR__=4 _GNU_SOURCE=1 _LARGEFILE_SOURCE=1 linux=1 __linux=1 __linux__=1 __pic__=1 __PIC__=1 _REENTRANT=1 __STDC__=1 unix=1 __unix=1 __unix__=1'
 crypt_r_proto='0'
 cryptlib=''
@@ -595,7 +722,7 @@ fpossize='4'
 fpostype='fpos_t'
 freetype='void'
 from="${HOME}/perl-5.16.0/Cross/from-scp"
-full_ar='/usr/bin/ar'
+full_ar='/home/mid/android_toolchain/bin/arm-linux-androideabi-ar'
 full_csh='csh'
 full_sed='/bin/sed'
 gccansipedantic=''
@@ -778,15 +905,16 @@ ivsize='4'
 ivtype='long'
 known_extensions='arybase attributes B Compress/Raw/Bzip2 Compress/Raw/Zlib Cwd Data/Dumper DB_File Devel/Peek Devel/PPPort Digest/MD5 Digest/SHA Encode Fcntl File/Glob Filter/Util/Call GDBM_File Hash/Util Hash/Util/FieldHash I18N/Langinfo IO IPC/SysV List/Util Math/BigInt/FastCalc MIME/Base64 mro NDBM_File ODBM_File Opcode PerlIO/encoding PerlIO/mmap PerlIO/scalar PerlIO/via POSIX re SDBM_File Socket Storable Sys/Hostname Sys/Syslog Text/Soundex threads threads/shared Tie/Hash/NamedCapture Time/HiRes Time/Piece Unicode/Collate Unicode/Normalize VMS/DCLsym VMS/Stdio Win32 Win32API/File Win32CORE XS/APItest XS/Typemap '
 ksh=''
-ld='arm-linux-androideabi-gcc'
+ld="arm-linux-androideabi-ld"
 ld_can_script='undef'
-lddlflags="-shared -ldl -nostdlib --no-undefined -L${HOME}/android-ndk/platforms/android-14/arch-arm/usr/lib -L${HOME}/android-ndk/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/lib/gcc/arm-linux-androideabi/4.4.3/ -lc -lm -fstack-protector -lgcc"
-ldflags="-nostdlib --no-undefined -L${HOME}/android-ndk/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/lib/gcc/arm-linux-androideabi/4.4.3 -L${HOME}/android-ndk/platforms/android-14/arch-arm/usr/lib -lc -lm -ldl -fstack-protector -lgcc"
+lddlflags="-shared -ldl -nostdlib --no-undefined -L${HOME}/android-ndk/platforms/android-14/arch-arm/usr/lib -L${HOME}/android-ndk/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/lib/gcc/arm-linux-androideabi/4.4.3/ -lc -lm -fstack-protector ${HOME}/perl-5.16.0/libperl.so -lgcc"
+ldflags=''
 ldflags_uselargefiles=''
 ldlibpthname='LD_LIBRARY_PATH'
 less='less'
 lib_ext='.a'
 libc=''
+libdb_needs_pthread='N'
 libperl='libperl.so'
 libpth="${HOME}/android_toolchain/bin/../lib/gcc/arm-linux-androideabi/4.4.3/include-fixed ${HOME}/android_toolchain/bin/../lib/gcc/arm-linux-androideabi/4.4.3/../../../../arm-linux-androideabi/lib ${HOME}/android_toolchain/bin/../sysroot/usr/lib"
 libs=' '
@@ -837,7 +965,7 @@ modetype='mode_t'
 more='more'
 multiarch='undef'
 mv=''
-myarchname='x86_64-android'
+myarchname="arm-linux"
 mydomain='.(none)'
 myhostname='ubuntu'
 myuname='linux ubuntu 3.2.0-25-generic #40-ubuntu smp wed may 23 20:30:51 utc 2012 x86_64 x86_64 x86_64 gnulinux '
@@ -1106,13 +1234,117 @@ yacc='yacc'
 yaccflags=''
 zcat=''
 zip='zip'
-PERL_REVISION=5
-PERL_VERSION=16
-PERL_SUBVERSION=0
-PERL_API_REVISION=5
-PERL_API_VERSION=16
-PERL_API_SUBVERSION=0
-PERL_PATCHLEVEL=''
-PERL_CONFIG_SH=true
-: Variables propagated from previous config.sh file.
-libdb_needs_pthread='N'
+!END!
+
+my $i = ord(4);
+foreach my $c (3,2,1) { $i <<= 8; $i |= ord($c); }
+our $byteorder = join('', unpack('aaaa', pack('L!', $i)));
+s/(byteorder=)(['"]).*?\2/$1$2$Config::byteorder$2/m;
+
+my $config_sh_len = length $_;
+
+our $Config_SH_expanded = "\n$_" . << 'EOVIRTUAL';
+ccflags_nolargefiles=''
+ldflags_nolargefiles=''
+libs_nolargefiles=' '
+libswanted_nolargefiles='sfio socket inet nsl nm ndbm gdbm dbm db malloc dl dld ld sun m crypt sec util pthread c cposix posix ucb BSD gdbm_compat'
+EOVIRTUAL
+eval {
+	# do not have hairy conniptions if this isnt available
+	require 'Config_git.pl';
+	$Config_SH_expanded .= $Config::Git_Data;
+	1;
+} or warn "Warning: failed to load Config_git.pl, something strange about this perl...\n";
+
+# Search for it in the big string
+sub fetch_string {
+    my($self, $key) = @_;
+
+    return undef unless my ($quote_type, $value) = $Config_SH_expanded =~ /\n$key=(['"])(.*?)\1\n/s;
+
+    # If we had a double-quote, we'd better eval it so escape
+    # sequences and such can be interpolated. Since the incoming
+    # value is supposed to follow shell rules and not perl rules,
+    # we escape any perl variable markers
+
+    # Historically, since " 'support' was added in change 1409, the
+    # interpolation was done before the undef. Stick to this arguably buggy
+    # behaviour as we're refactoring.
+    if ($quote_type eq '"') {
+	$value =~ s/\$/\\\$/g;
+	$value =~ s/\@/\\\@/g;
+	eval "\$value = \"$value\"";
+    }
+
+    # So we can say "if $Config{'foo'}".
+    $self->{$key} = $value eq 'undef' ? undef : $value; # cache it
+}
+
+my $prevpos = 0;
+
+sub FIRSTKEY {
+    $prevpos = 0;
+    substr($Config_SH_expanded, 1, index($Config_SH_expanded, '=') - 1 );
+}
+
+sub NEXTKEY {
+    # Find out how the current key's quoted so we can skip to its end.
+    my $quote = substr($Config_SH_expanded,
+		       index($Config_SH_expanded, "=", $prevpos)+1, 1);
+    my $pos = index($Config_SH_expanded, qq($quote\n), $prevpos) + 2;
+    my $len = index($Config_SH_expanded, "=", $pos) - $pos;
+    $prevpos = $pos;
+    $len > 0 ? substr($Config_SH_expanded, $pos, $len) : undef;
+}
+
+sub EXISTS {
+    return 1 if exists($_[0]->{$_[1]});
+
+    return(index($Config_SH_expanded, "\n$_[1]='") != -1
+           or index($Config_SH_expanded, "\n$_[1]=\"") != -1
+          );
+}
+
+sub STORE  { die "\%Config::Config is read-only\n" }
+*DELETE = *CLEAR = \*STORE; # Typeglob aliasing uses less space
+
+sub config_sh {
+    substr $Config_SH_expanded, 1, $config_sh_len;
+}
+
+sub config_re {
+    my $re = shift;
+    return map { chomp; $_ } grep eval{ /^(?:$re)=/ }, split /^/,
+    $Config_SH_expanded;
+}
+
+sub config_vars {
+    # implements -V:cfgvar option (see perlrun -V:)
+    foreach (@_) {
+	# find optional leading, trailing colons; and query-spec
+	my ($notag,$qry,$lncont) = m/^(:)?(.*?)(:)?$/;	# flags fore and aft, 
+	# map colon-flags to print decorations
+	my $prfx = $notag ? '': "$qry=";		# tag-prefix for print
+	my $lnend = $lncont ? ' ' : ";\n";		# line ending for print
+
+	# all config-vars are by definition \w only, any \W means regex
+	if ($qry =~ /\W/) {
+	    my @matches = config_re($qry);
+	    print map "$_$lnend", @matches ? @matches : "$qry: not found"		if !$notag;
+	    print map { s/\w+=//; "$_$lnend" } @matches ? @matches : "$qry: not found"	if  $notag;
+	} else {
+	    my $v = (exists $Config::Config{$qry}) ? $Config::Config{$qry}
+						   : 'UNKNOWN';
+	    $v = 'undef' unless defined $v;
+	    print "${prfx}'${v}'$lnend";
+	}
+    }
+}
+
+# Called by the real AUTOLOAD
+sub launcher {
+    undef &AUTOLOAD;
+    goto \&$Config::AUTOLOAD;
+}
+
+1;
