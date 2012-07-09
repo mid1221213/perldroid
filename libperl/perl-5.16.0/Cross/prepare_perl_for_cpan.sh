@@ -14,6 +14,8 @@ cp MyConfig.pm ~/.cpan/CPAN/
 cd ~/perl-$VERSION/
 cp ~/perldroid/libperl/perl-$VERSION/Cross/cpan.android .
 
+mv perl perl.arm
+ln -s miniperl perl
 cp -a install_me_here/lib/* fake_config_library/
 
 echo now do:
