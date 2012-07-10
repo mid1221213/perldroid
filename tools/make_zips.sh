@@ -90,7 +90,7 @@ for type in pm so; do
     done
 
     cd $zip_dir
-    [[ $type == "pm" ]] && cp $ANDROID_PM .
+    [[ $type == "pm" ]] && cp $ANDROID_PM $src_dir
     zip -rqq $CUR_DIR/$name.zip *
     cd - >/dev/null 2>&1
 done
