@@ -2,11 +2,16 @@
 
 usage()
 {
-    echo 'Usage: make_zips.sh <PERL_CORE install_dir> "<PERL_CORE modules>" <CPAN install_dir> "<CPAN modules>"'
+    echo 'Usage: make_zips.sh <PERL_CORE_ZIPS install_dir> "<PERL_CORE modules>" <CPAN install_dir> "<CPAN modules>"'
     exit
 }
 
 CUR_DIR=`pwd`
+
+SCRIPT_PATH=`dirname $0`
+[[ ${SCRIPT_PATH#/} == $SCRIPT_PATH ]] && SCRIPT_PATH=$CUR_DIR/$SCRIPT_PATH
+
+ANDROID_PM=$SCRIPT_PATH/Android.pm
 
 PM_NAME=perl_516_sdcard
 SO_NAME=perl_516
@@ -14,16 +19,18 @@ SO_NAME=perl_516
 CORE_SRC_PATH=$1
 [[ -d $CORE_SRC_PATH ]] || usage
 [[ ${CORE_SRC_PATH#/} == $CORE_SRC_PATH ]] && CORE_SRC_PATH=$CUR_DIR/$CORE_SRC_PATH
+[[ ${CORE_SRC_PATH%/} != $CORE_SRC_PATH ]] && CORE_SRC_PATH=${CORE_SRC_PATH%/}
 
 CORE_EXTRA=$2
 
 CPAN_SRC_PATH=$3
 [[ -d $CPAN_SRC_PATH ]] || usage
 [[ ${CPAN_SRC_PATH#/} == $CPAN_SRC_PATH ]] && CPAN_SRC_PATH=$CUR_DIR/$CPAN_SRC_PATH
+[[ ${CPAN_SRC_PATH%/} != $CPAN_SRC_PATH ]] && CPAN_SRC_PATH=${CPAN_SRC_PATH%/}
 
 CPAN_EXTRA=$4
 
-CORE_MIN="attributes AutoLoader autouse B base bigint bignum bigrat blib bytes Carp Carp::Heavy charnames Config constant Data::Dumper diagnostics DynaLoader encoding Exporter Exporter::Heavy feature fields Getopt::Long if integer less lib mro open ops overload overloading re sigtrap sort strict subs threads Time::HiRes UNIVERSAL utf8 vars version warnings warnings::register XSLoader IO IO::Socket IO::Socket::INET IO::Socket::UNIX IO::Handle Symbol SelectSaver Socket Errno JSON::PP HTTP::Tiny"
+CORE_MIN="__PERL__ attributes AutoLoader autouse B base bigint bignum bigrat blib bytes Carp Carp::Heavy charnames Config constant Data::Dumper diagnostics DynaLoader encoding Exporter Exporter::Heavy feature fields Getopt::Long if integer less lib mro open ops overload overloading re sigtrap sort strict subs threads Time::HiRes UNIVERSAL utf8 vars version warnings warnings::register XSLoader IO IO::Socket IO::Socket::INET IO::Socket::UNIX IO::Handle Symbol SelectSaver Socket Errno JSON::PP HTTP::Tiny"
 CPAN_MIN="JSON JSON::XS"
 
 tmpdir=`mktemp -d`
@@ -51,7 +58,7 @@ for type in pm so; do
 	    unzip -qq $zip
 	    cd - >/dev/null 2>&1
 	else
-	    [[ $type == "pm" ]] && echo "$mod.pm not found!"
+	    [[ $type == "pm" && $mod != "__PERL__" ]] && echo "$mod.pm not found!"
 	fi
     done
 
@@ -65,9 +72,9 @@ for type in pm so; do
 
 	if [[ -e $packlist ]]; then
 	    if [[ $type == "pm" ]]; then
-		filelist=`sed -E "s,$CPAN_SRC_PATH/+perl5/+,,g" < $packlist | egrep -v '\.(so|bs)$' | fgrep -v /bin/`
+		filelist=`sed "s,$CPAN_SRC_PATH/perl5/,,g" < $packlist | egrep -v '\.(so|bs)$' | fgrep -v /bin/`
 	    else
-		filelist=`sed -E "s,$CPAN_SRC_PATH/+perl5/+,,g" < $packlist | egrep '\.(so|bs)$'`
+		filelist=`sed "s,$CPAN_SRC_PATH/perl5/,,g" < $packlist | egrep '\.(so|bs)$'`
 	    fi
 
 	    for file in $filelist; do
@@ -83,8 +90,11 @@ for type in pm so; do
     done
 
     cd $zip_dir
-    zip -r $CUR_DIR/$name.zip *
+    [[ $type == "pm" ]] && cp $ANDROID_PM .
+    zip -rqq $CUR_DIR/$name.zip *
     cd - >/dev/null 2>&1
 done
 
 rm -rf $tmpdir
+
+echo Done.
