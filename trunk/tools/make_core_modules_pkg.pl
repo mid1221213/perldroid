@@ -78,6 +78,13 @@ foreach my $core_mod (sort keys %mod_files) {
 	print "\n";
     }
 }
+
+print " => $target_so/__PERL__.zip";
+my $zip_so = Archive::Zip->new();
+$zip_so->addFile("../bin/perl", "perl") or die;
+$zip_so->addFile("linux-androideabi-thread-multi/CORE/libperl.so", "libperl.so") or die;
+$zip_so->writeToFileNamed("$target_so/__PERL__.zip") == AZ_OK or die "ZIP $target_so/__PERL__.zip write error";
+
 print "\nEnd\n";
 
 sub recurs_dir
