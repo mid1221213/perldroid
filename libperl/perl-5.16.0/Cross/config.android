@@ -18,6 +18,6 @@ ARCH = arm
 #CONFIG_TARGET_ARM_XSCALE = 1
 
 ### Target OS
-OS = linux
+OS = linux-androideabi
 #OS = solaris2.8
 
