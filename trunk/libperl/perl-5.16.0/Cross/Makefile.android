@@ -4,7 +4,7 @@ export TOPDIR=${shell pwd}
 include $(TOPDIR)/config.android
 export CFLAGS
 export SYS=$(ARCH)-$(OS)
-export CROSS=$(ARCH)-$(OS)-androideabi-
+export CROSS=$(ARCH)-$(OS)-
 export FULL_OPTIMIZATION = -fexpensive-optimizations -fomit-frame-pointer -O2
 export OPTIMIZATION = -O2
 

@@ -5,7 +5,15 @@ use warnings;
 
 BEGIN {
     $^X = "$ENV{HOME}/perl-5.16.0/miniperl";
+
     require CPAN;
+
+    $CPAN::Config = {};
+    delete $INC{'CPAN/Config.pm'};
+    eval "require '$ENV{HOME}/.cpan.android/CPAN/MyConfig.pm'" or die "Can't find my config (hint: $ENV{HOME}/.cpan.android/CPAN/MyConfig.pm)";
+    $INC{'CPAN/MyConfig.pm'} = 'fake out!';
+    $CPAN::Config_loaded = 'fake out';
+    
     $ENV{ANDROID_LIBPERL_SO} = "$ENV{HOME}/perl-5.16.0/libperl.so";
 }
 
