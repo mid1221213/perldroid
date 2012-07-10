@@ -1,4 +1,5 @@
 #summary How to generate .ZIP's for perl-android-apk using the SVN version of this project
+#labels Featured
 
 =How to generate .ZIP's=
 
