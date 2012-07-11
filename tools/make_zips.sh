@@ -31,7 +31,7 @@ CPAN_SRC_PATH=$3
 CPAN_EXTRA=$4
 
 CORE_MIN="__PERL__ attributes AutoLoader autouse B base bigint bignum bigrat blib bytes Carp Carp::Heavy charnames Config constant Data::Dumper diagnostics DynaLoader encoding Exporter Exporter::Heavy feature fields Getopt::Long if integer less lib mro open ops overload overloading re sigtrap sort strict subs threads Time::HiRes UNIVERSAL utf8 vars version warnings warnings::register XSLoader IO IO::Socket IO::Socket::INET IO::Socket::UNIX IO::Handle Symbol SelectSaver Socket Errno JSON::PP HTTP::Tiny"
-CPAN_MIN="JSON JSON::XS"
+CPAN_MIN="common::sense JSON JSON::XS"
 
 tmpdir=`mktemp -d`
 
