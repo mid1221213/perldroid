@@ -72,9 +72,9 @@ for type in pm so; do
 
 	if [[ -e $packlist ]]; then
 	    if [[ $type == "pm" ]]; then
-		filelist=`sed "s,$CPAN_SRC_PATH/perl5/,,g" < $packlist | egrep -v '\.(so|bs)$' | fgrep -v /bin/`
+		filelist=`sed "s,$CPAN_SRC_PATH/perl5/,,g" < $packlist | egrep -v '\.so$' | fgrep -v /bin/`
 	    else
-		filelist=`sed "s,$CPAN_SRC_PATH/perl5/,,g" < $packlist | egrep '\.(so|bs)$'`
+		filelist=`sed "s,$CPAN_SRC_PATH/perl5/,,g" < $packlist | egrep '\.so$'`
 	    fi
 
 	    for file in $filelist; do
