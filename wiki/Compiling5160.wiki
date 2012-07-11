@@ -3,7 +3,7 @@
 
 =How to compile perl-5.16.0 for Android=
 
-Follow these steps to build the project as it is today (2012-07-09). I made the checkout to get r274 on purpose, because following commits may change the build sequence.
+Follow these steps to build the project as it is today (2012-07-09). I made the checkout to get r278 on purpose, because following commits may change the build sequence.
 
 This works on an Ubuntu 12.04 server 64 bit just installed with only openssh-server (tested on a fresh install in a virtual machine). Please follow these steps carefully, especially for the `cd` commands because the working directory is important. This procedure takes about 40 minutes to complete on my machine.
 
@@ -45,7 +45,7 @@ tar xzf perl-5.16.0.tar.gz
 }}}
   # Now get the PerlDroid source
 {{{
-svn checkout http://perldroid.googlecode.com/svn/trunk/@274 perldroid
+svn checkout http://perldroid.googlecode.com/svn/trunk/@278 perldroid
 cd ~/perldroid/libperl/perl-5.16.0/Cross
 }}}
   # There is a script to automate the patching of the perl source tree. Edit it and comment or remove the line 7 (`exit 0`). This step is to force you to know what the script does
