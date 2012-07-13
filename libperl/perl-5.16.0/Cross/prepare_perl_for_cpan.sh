@@ -21,5 +21,5 @@ rmdir fake_config_library && ln -s install_me_here/lib/ fake_config_library
 
 echo Now do:
 echo cd ~/perl-$VERSION/
-echo PATH=\$PATH:~/perl-$VERSION/
+echo PATH=\$PATH:~/perl-$VERSION
 echo ./cpan.android MODULE::TO::INSTALL ...
