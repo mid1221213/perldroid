@@ -15,6 +15,7 @@ cd ~/perldroid/libperl/perl-5.16.0/Cross
   # Change directory to cross compiled perl and execute the provided `cpan.android` script (example installs JSON.pm, asking if you wish to install JSON::XS too)
 {{{
 cd ~/perl-5.16.0
+PATH=$PATH:~/perl-5.16.0
 ./cpan.android JSON
 }}}
 
