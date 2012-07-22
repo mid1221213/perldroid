@@ -19,7 +19,7 @@ PATH=$PATH:~/perl-5.16.0
 ./cpan.android JSON
 }}}
 
-You can pass more than one module to install, the script will resolve dependencies for you. The resulting modules are installed in `~/cpan_android/`.
+You can pass more than one module to install, the script will resolve dependencies for you. The resulting modules are installed in `~/cpan_android.<arch>-<perl-version>-<android-version>/`.
 
 *N.B.:* There is no `make test` executed because, of course, host can't load built shared libraries.
 
