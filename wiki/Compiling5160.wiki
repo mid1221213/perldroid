@@ -3,9 +3,11 @@
 
 =How to compile perl-5.16.0 for Android=
 
-Follow these steps to build the project as it is today (2012-07-09). I made the checkout to get r282 on purpose, because following commits may change the build sequence.
+Follow these steps to build the project as it is today (2012-07-22). I made the checkout to get r288 on purpose, because following commits may change the build sequence.
 
 This works on an Ubuntu 12.04 server 64 bit just installed with only openssh-server (tested on a fresh install in a virtual machine). Please follow these steps carefully, especially for the `cd` commands because the working directory is important. This procedure takes about 40 minutes to complete on my machine.
+
+*New:* No more need for a virtual machine, the procedure now installs host perl in $HOME.
 
   # Be sure host is up to date
 {{{
@@ -16,12 +18,12 @@ sudo apt-get update && sudo apt-get dist-upgrade
 {{{
 sudo apt-get --no-install-recommends install build-essential subversion ia32-libs
 }}}
-  # To cross compile perl, the host should provide the same version of the executable than the one being cross compiled. As Ubuntu 12.04 provides perl 5.14.2, we need to install perl 5.16.0 from source on the host.*Note: As said, this will install perl 5.16.0 in /usr/local on your host. This is mainly why I prefered to do that in a virtual machine instead of my own host.*
+  # To cross compile perl, the host should provide the same version of the executable than the one being cross compiled. As Ubuntu 12.04 provides perl 5.14.2, we need to install perl 5.16.0 from source on the host.
 {{{
 wget -nd http://www.cpan.org/src/5.0/perl-5.16.0.tar.gz
 tar xzf perl-5.16.0.tar.gz
 cd perl-5.16.0/
-./Configure -des -Dinstallprefix=/usr/local
+./Configure -des -Dprefix=~/hostperl-5.16.0
 make
 sudo make install
 cd
@@ -48,11 +50,7 @@ tar xzf perl-5.16.0.tar.gz
 svn checkout http://perldroid.googlecode.com/svn/trunk/@282 perldroid
 cd ~/perldroid/libperl/perl-5.16.0/Cross
 }}}
-  # There is a script to automate the patching of the perl source tree. Edit it and comment or remove the line 7 (`exit 0`). This step is to force you to know what the script does
-{{{
-vi prepare_perl_from_svn.sh
-}}}
-  # launch the script
+  # There is a script to automate the patching of the perl source tree. Launch it
 {{{
 ./prepare_perl_from_svn.sh
 }}}
