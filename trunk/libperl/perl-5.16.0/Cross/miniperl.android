@@ -1,6 +1,6 @@
-#! /usr/local/bin/perl
+#! %%%_PERL_PATH_%%%/bin/perl
 
 use strict;
 use warnings;
 
-exec {"/usr/local/bin/perl"} "$ENV{HOME}/perl-5.16.0/miniperl", "-I$ENV{HOME}/perl-5.16.0/fake_config_library", "-I$ENV{HOME}/perl-5.16.0/install_me_here", "-I/usr/local/lib/perl5/5.16.0", "-MConfig", @ARGV;
+exec {"%%%_PERL_PATH_%%%/bin/perl"} "$ENV{HOME}/perl-5.16.0/miniperl", "-I$ENV{HOME}/perl-5.16.0/fake_config_library", "-I$ENV{HOME}/perl-5.16.0/install_me_here", "-I%%%_PERL_PATH_%%%/lib/5.16.0", "-MConfig", @ARGV;
