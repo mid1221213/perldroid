@@ -12,7 +12,7 @@ cd
 rm -rf perl-$VERSION
 tar xzf perl-$VERSION.tar.gz
 cd ~/perldroid/libperl/perl-$VERSION/Cross
-./subst.pl config.android cpan.android Makefile.android Makefile.SH.android.patch miniperl.android MyConfig.pm
+./subst.pl config.android cpan.android Makefile.android Makefile.SH.android.patch miniperl.android MyConfig.pm prepare_perl_for_cpan.sh
 cp -fv perl.h.android.patch Makefile.SH.android.patch make_ext.pl.android.patch installperl.android.patch Errno_pm.PL.android.patch uudmap.h.android mg_data.h.android bitcount.h.android config.sh-arm-linux-androideabi.android config.android Makefile.android miniperl.android ~/perl-$VERSION/Cross/
 cd ~/perl-$VERSION/Cross/
 make -f Makefile.android patch

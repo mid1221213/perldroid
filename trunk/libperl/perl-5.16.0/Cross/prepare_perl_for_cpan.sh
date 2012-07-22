@@ -2,14 +2,14 @@
 
 VERSION=5.16.0
 
-if [[ ! -d ~/perl-$VERSION/install_me_here || -e ~/perl-$VERSION/fake_config_library/strict.pm || -d ~/.cpan.android ]]; then
+if [[ ! -d ~/perl-$VERSION/install_me_here || -e ~/perl-$VERSION/fake_config_library/strict.pm || -d ~/.cpan.android.%%%_DIR_PATH_%%% ]]; then
     echo "You don't want to do that. See README.android"
     cat README.android 2>/dev/null
     exit 0
 fi
 
-mkdir -p ~/.cpan.android/CPAN
-cp MyConfig.pm ~/.cpan.android/CPAN/
+mkdir -p ~/.cpan.android.%%%_DIR_PATH_%%%/CPAN
+cp MyConfig.pm ~/.cpan.android.%%%_DIR_PATH_%%%/CPAN/
 
 cd ~/perl-$VERSION/
 cp ~/perldroid/libperl/perl-$VERSION/Cross/cpan.android .
