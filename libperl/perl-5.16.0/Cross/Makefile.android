@@ -5,7 +5,6 @@ include $(TOPDIR)/config.android
 export CFLAGS
 export SYS=$(ARCH)-$(OS)
 export CROSS=$(ARCH)-$(OS)-
-export FULL_OPTIMIZATION = -fexpensive-optimizations -fomit-frame-pointer -O2
 export OPTIMIZATION = -O2
 
 export CC = $(CROSS)gcc
@@ -18,13 +17,7 @@ export RANLIB = $(CROSS)ranlib
 
 ## Optimisation work
 ifeq ($(ARCH),arm)
- ifdef CONFIG_TARGET_ARM_SA11X0
-   ifndef Architecture
-     Architecture = armv4l-strongarm
-   endif
-   FULL_OPTIMIZATION += -march=armv4 -mtune=strongarm1100 -mapcs-32
-   OPTIMIZATION += -march=armv4 -mtune=strongarm1100 -mapcs-32
- endif
+  export FULL_OPTIMIZATION = -fexpensive-optimizations -fomit-frame-pointer -O2
 endif
 
 CFLAGS+=$(FULL_OPTIMIZATION)
@@ -64,9 +57,9 @@ perl:
 	cd $(TOPDIR)/.. ; ./Configure -S ; make depend ; make ; make more
 	cd $(TOPDIR)/.. ; mkdir -p fake_config_library ; cp lib/Config.pm lib/Config_heavy.pl fake_config_library
 	cd $(TOPDIR)/.. ; make moremore
-	cd $(TOPDIR)/.. ; $(MAKE) more2 "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig"
-	cd $(TOPDIR)/.. ; $(MAKE) more3 "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig"
-	cd $(TOPDIR)/.. ; $(MAKE) more4 "PERLRUN=/usr/local/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig"
+	cd $(TOPDIR)/.. ; $(MAKE) more2 "PERLRUN=%%%_PERL_PATH_%%%/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig"
+	cd $(TOPDIR)/.. ; $(MAKE) more3 "PERLRUN=%%%_PERL_PATH_%%%/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig"
+	cd $(TOPDIR)/.. ; $(MAKE) more4 "PERLRUN=%%%_PERL_PATH_%%%/bin/perl -I$(TOPDIR)/../fake_config_library -MConfig"
 	cd $(TOPDIR)/.. ; rm -rf install_me_here
 	cd $(TOPDIR)/.. ; make install-strip DESTDIR=$(TOPDIR)/../install_me_here
 	cd $(TOPDIR)/.. ; sh -x Cross/warp

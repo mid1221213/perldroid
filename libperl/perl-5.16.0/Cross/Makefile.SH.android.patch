@@ -35,7 +35,7 @@
  MINIPERL_EXE = miniperl\$(EXE_EXT)
 -MINIPERL = \$(LDLIBPTH) \$(RUN) ./miniperl\$(EXE_EXT) -Ilib
 +#MINIPERL = \$(LDLIBPTH) \$(RUN) ./miniperl\$(EXE_EXT) -Ilib
-+MINIPERL = \$(PERL_EXE) -I\$(HOME)/perl-5.16.0/fake_config_library -I/usr/local/lib/perl5/5.16.0 -MConfig -Ilib
++MINIPERL = \$(PERL_EXE) -I\$(HOME)/perl-5.16.0/fake_config_library -I%%%_PERL_PATH_%%%/lib/5.16.0 -MConfig -Ilib
  
  # Macros to invoke a copy of our fully operational perl during the build.
  PERL_EXE = perl\$(EXE_EXT)
@@ -130,7 +130,7 @@
  	    $(mini_obj) $(libs)
 -	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 +#	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
-+	mv miniperl miniperl-arm
++	mv miniperl miniperl-target
 +	cp Cross/miniperl.android miniperl
  !NO!SUBS!
  		;;
@@ -180,7 +180,7 @@
 -	-@test ! -s extras.lst || $(MAKE) extras.install
 +#	$(RUN_PERL) installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
 +#	-@test ! -s extras.lst || $(MAKE) extras.install
-+	/usr/local/bin/perl -Ifake_config_library -MConfig installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
++	%%%_PERL_PATH_%%%/bin/perl -Ifake_config_library -MConfig installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
  
 -install.man:	all installman
 -	$(RUN_PERL) installman --destdir=$(DESTDIR) $(INSTALLFLAGS)
