@@ -25,7 +25,7 @@ tar xzf perl-5.16.0.tar.gz
 cd perl-5.16.0/
 ./Configure -des -Dprefix=~/hostperl-5.16.0
 make
-sudo make install
+make install
 cd
 mv perl-5.16.0 perl-5.16.0.host
 }}}
