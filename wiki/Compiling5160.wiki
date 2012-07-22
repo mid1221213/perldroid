@@ -28,6 +28,7 @@ make
 make install
 cd
 mv perl-5.16.0 perl-5.16.0.host
+PATH=~/hostperl-5.16.0/bin:$PATH
 }}}
   # Get the Android NDK (SDK not necessary)
 {{{
