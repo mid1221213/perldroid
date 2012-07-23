@@ -42,16 +42,12 @@ export NDK=~/android-ndk
 $NDK/build/tools/make-standalone-toolchain.sh --platform=android-14 --install-dir=$HOME/android_toolchain
 PATH=~/android_toolchain/bin:$PATH
 }}}
-  # Next step is untar again perl source
-{{{
-tar xzf perl-5.16.0.tar.gz
-}}}
   # Now get the PerlDroid source
 {{{
 svn checkout http://perldroid.googlecode.com/svn/trunk/@295 perldroid
 cd ~/perldroid/libperl/perl-5.16.0/Cross
 }}}
-  # There is a script to automate the patching of the perl source tree. Launch it
+  # There is a script to automate the patching of the perl source tree. It will expect a perl source as downloaded above and will untar it at the same place as before. Launch it
 {{{
 ./prepare_perl_from_svn.sh
 }}}
