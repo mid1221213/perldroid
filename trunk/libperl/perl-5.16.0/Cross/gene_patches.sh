@@ -3,7 +3,6 @@
 VERSION=5.16.0
 
 echo "You don't want to do that. See README.android:"
-cat README.android 2>/dev/null
 exit 0
 
 cd

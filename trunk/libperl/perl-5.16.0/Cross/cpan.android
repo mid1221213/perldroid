@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 BEGIN {
-    $^X = "$ENV{HOME}/perl-%%%_PERL_VERSION_%%%/miniperl";
+    $^X = "%%%_XPERL_PATH_%%%/miniperl";
 
     require CPAN;
 
@@ -14,7 +14,7 @@ BEGIN {
     $INC{'CPAN/MyConfig.pm'} = 'fake out!';
     $CPAN::Config_loaded = 'fake out';
     
-    $ENV{ANDROID_LIBPERL_SO} = "$ENV{HOME}/perl-%%%_PERL_VERSION_%%%/libperl.so";
+    $ENV{ANDROID_LIBPERL_SO} = "%%%_XPERL_PATH_%%%/libperl.so";
 }
 
 CPAN::Shell->notest("install", @ARGV);

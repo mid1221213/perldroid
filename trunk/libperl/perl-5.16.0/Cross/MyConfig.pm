@@ -31,7 +31,7 @@ $CPAN::Config = {
   'make_arg' => q[],
   'make_install_arg' => q[],
   'make_install_make_command' => q[],
-  'makepl_arg' => qq[PREFIX=~/cpan_android.%%%_DIR_PATH_%%% PERLRUN="/usr/local/bin/perl -I$ENV{HOME}/perl-5.16.0/fake_config_library -MConfig"],
+  'makepl_arg' => qq[PREFIX=~/cpan_android.%%%_DIR_PATH_%%% PERLRUN="/usr/local/bin/perl -I%%%_XPERL_PATH_%%%/fake_config_library -MConfig"],
   'mbuild_arg' => q[--install_base ~/cpan_android.%%%_DIR_PATH_%%%],
   'mbuild_install_arg' => q[--install_base ~/cpan_android.%%%_DIR_PATH_%%%],
   'mbuild_install_build_command' => q[./Build],

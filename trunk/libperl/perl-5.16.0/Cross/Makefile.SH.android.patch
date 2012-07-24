@@ -35,7 +35,7 @@
  MINIPERL_EXE = miniperl\$(EXE_EXT)
 -MINIPERL = \$(LDLIBPTH) \$(RUN) ./miniperl\$(EXE_EXT) -Ilib
 +#MINIPERL = \$(LDLIBPTH) \$(RUN) ./miniperl\$(EXE_EXT) -Ilib
-+MINIPERL = \$(PERL_EXE) -I\$(HOME)/perl-5.16.0/fake_config_library -I%%%_PERL_PATH_%%%/lib/5.16.0 -MConfig -Ilib
++MINIPERL = \$(PERL_EXE) -I%%%_XPERL_PATH_%%%/fake_config_library -I%%%_PERL_PATH_%%%/lib/5.16.0 -MConfig -Ilib
  
  # Macros to invoke a copy of our fully operational perl during the build.
  PERL_EXE = perl\$(EXE_EXT)
@@ -195,7 +195,7 @@
  
 -$(DYNALOADER):	$(MINIPERL_EXE) lib/buildcustomize.pl preplibrary FORCE $(nonxs_ext)
 -	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
-+MYPERL=$(HOME)/perl-5.16.0/miniperl
++MYPERL=%%%_XPERL_PATH_%%%/miniperl
 +
 +$(DYNALOADER):	lib/buildcustomize.pl preplibrary FORCE $(nonxs_ext)
 +	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS) PERL=$(MYPERL) PERLRUN=$(MYPERL) FULLPERLRUN=$(MYPERL) ABSPERLRUN=$(MYPERL) PERL_ARCHIVE=$(TOPDIR)/../libperl.so
