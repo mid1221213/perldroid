@@ -1,6 +1,8 @@
 #summary How to generate .ZIP's for perl-android-apk using the SVN version of this project
 #labels Featured
 
+*This page is a bit outdated. It will be updated when some work on this procedure will be done.*
+
 =How to generate .ZIP's=
 
 Follow these steps to generate .ZIP's files containing all necessary files to use with [http://code.google.com/p/perl-android-apk/ perl-android-apk].
