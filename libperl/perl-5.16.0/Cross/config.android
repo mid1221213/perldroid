@@ -5,9 +5,10 @@ ARCH = arm
 
 PERL_VERSION = 5.16.0
 
-# ANDROID_VERSION: API version of Android OS
-ANDROID_VERSION = 15
+# ANDROID_VERSION: API version of Android OS (can be one of 3, 4, 5, 8, 9 or 14)
+ANDROID_VERSION = 14
 
 DIR_PATH = $(ARCH)-$(PERL_VERSION)-$(ANDROID_VERSION)
 
 PERL_PATH = $(HOME)/hostperl-$(PERL_VERSION)
+XPERL_PATH = $(HOME)/perl-$(DIR_PATH)
