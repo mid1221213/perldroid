@@ -1,0 +1,1 @@
+Sample name for a class
